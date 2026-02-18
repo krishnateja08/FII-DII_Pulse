@@ -1031,10 +1031,10 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
         sec_buy   = sum(1 for s in sec_stocks if s["overall"] == "BUY")
         sec_sell  = sum(1 for s in sec_stocks if s["overall"] in ("SELL","BOTH SELL"))
 
-        # Sector header row (spans all columns)
+        # Sector header row — colspan=5 (Stock, Price, RSI, Levels, Signal)
         rows += f"""
     <tr class="sec-hdr">
-      <td colspan="8">
+      <td colspan="5">
         <div class="sec-hdr-inner">
           <span class="sec-icon">{icon}</span>
           <span class="sec-name">{sector_name}</span>
@@ -1051,14 +1051,8 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
       </td>
     </tr>"""
 
-        # Stock rows within this sector
+        # Stock rows — 5 columns: Stock | Price | RSI | Levels | Signal
         for s in sec_stocks:
-            fc  = "bf" if s["fii_cash"] == "buy" else ("bx" if s["fii_cash"] == "sell" else "bn")
-            dc  = "bd" if s["dii_cash"] == "buy" else ("bx" if s["dii_cash"] == "sell" else "bn")
-            fa  = "▲ BUY" if s["fii_cash"] == "buy" else ("▼ SELL" if s["fii_cash"] == "sell" else "— N/A")
-            da  = "▲ BUY" if s["dii_cash"] == "buy" else ("▼ SELL" if s["dii_cash"] == "sell" else "— N/A")
-            mc2 = "up" if s["macd_hist"] > 0 else "dn"
-            ec  = "up" if s["ema_cross"] == "bullish" else "dn"
             spk = spark_svg(s.get("sparkline", []))
             pr  = fmt(s["last_price"]) if s["last_price"] > 0 else s.get("price_str","N/A")
 
@@ -1072,20 +1066,9 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
         <div class="pv">{pr}</div>
         <div class="sp">{spk}</div>
       </td>
-      <td data-label="FII Cash"><span class="b {fc}">{fa}</span></td>
-      <td data-label="DII Cash"><span class="b {dc}">{da}</span></td>
       <td data-label="RSI(14)" class="{rsicls(s['rsi'])}">
         <div class="rv {'up' if s['rsi']<55 else 'dn'}">{s['rsi']}</div>
         <div class="rb2"><div class="rf2" style="width:{min(s['rsi'],100):.0f}%"></div></div>
-      </td>
-      <td data-label="Indicators">
-        <div class="im"><span class="il">MACD</span>
-          <span class="{mc2}">{'+' if s['macd_hist']>0 else ''}{s['macd_hist']}</span></div>
-        <div class="im"><span class="il">EMA</span>
-          <span class="{ec}">{'↑ Bull' if s['ema_cross']=='bullish' else '↓ Bear'}</span></div>
-        <div class="im"><span class="il">ADX</span><span>{s['adx']}</span></div>
-        <div class="im"><span class="il">BB</span><span>{s['bb_label']}</span></div>
-        <div class="im"><span class="il">StRSI</span><span>{s['stoch_rsi']}</span></div>
       </td>
       <td data-label="Levels">
         <div class="sr"><span class="sr-r">R1</span> {fmt(s['resist1'])}</div>
@@ -1335,10 +1318,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
     <thead><tr>
       <th>Stock</th>
       <th>Price / Trend</th>
-      <th>FII Cash</th>
-      <th>DII Cash</th>
       <th>RSI(14)</th>
-      <th>MACD · EMA · ADX · BB · StRSI</th>
       <th>Support / Resistance (6M)</th>
       <th>Signal</th>
     </tr></thead>
@@ -1382,68 +1362,40 @@ def send_email(html_path: Path, date_str: str, source: str,
         return
 
     to_list = [r.strip() for r in rcpts.split(",") if r.strip()]
-    log.info(f"📧 Sending to: {to_list}")
+    log.info(f"📧 Sending full HTML dashboard to: {to_list}")
 
-    msg            = MIMEMultipart("mixed")
-    msg["Subject"] = f"📊 FII/DII Intelligence Report — {date_str}"
+    # Read the full generated HTML dashboard
+    full_html = html_path.read_text(encoding="utf-8")
+
+    # Gmail / most email clients strip <style> blocks from <head>.
+    # We inline a lightweight compatibility wrapper so the email
+    # renders cleanly in Gmail, Outlook, and mobile clients.
+    # The full CSS is already embedded inside the HTML — we just
+    # send the whole file as the email body.
+    msg            = MIMEMultipart("alternative")
+    msg["Subject"] = f"📊 FII/DII Pulse — Sector-wise Report — {date_str}"
     msg["From"]    = f"FII/DII Pulse <{user}>"
     msg["To"]      = ", ".join(to_list)
 
-    fname = html_path.name
-    body  = f"""<html><body style="font-family:Arial,sans-serif;background:#050c14;
-color:#e2eaf4;padding:30px;max-width:600px;margin:0 auto;">
-<div style="border:1px solid #1a3050;border-radius:12px;overflow:hidden;">
-  <div style="background:linear-gradient(135deg,#0a1930,#0f2040);padding:24px;
-              border-bottom:1px solid #1a3050;text-align:center;">
-    <div style="font-size:32px;margin-bottom:8px;">📊</div>
-    <h1 style="color:#00d4aa;margin:0;font-size:22px;letter-spacing:1px;">FII/DII PULSE</h1>
-    <p style="color:#5a7a99;margin:6px 0 0;font-size:12px;">INSTITUTIONAL INTELLIGENCE REPORT</p>
-  </div>
-  <div style="background:#0b1623;padding:14px 24px;border-bottom:1px solid #1a3050;font-size:12px;">
-    <span style="color:#5a7a99;">📅 {date_str}</span> &nbsp;|&nbsp;
-    <span style="color:#f0c060;">🗓 {date_range_label}</span> &nbsp;|&nbsp;
-    <span style="color:#a78bfa;">📡 {source}</span>
-  </div>
-  <div style="background:#0f1e2e;padding:20px 24px;border-bottom:1px solid #1a3050;">
-    <p style="color:#e2eaf4;font-size:14px;margin:0 0 10px;">
-      Tracked <strong style="color:#00d4aa;">{count} stocks</strong>
-      with FII/DII institutional activity.</p>
-    <p style="color:#5a7a99;font-size:12px;margin:0;">
-      Full interactive dashboard attached as HTML file.
-    </p>
-  </div>
-  <div style="background:#0b1623;padding:16px 24px;border-bottom:1px solid #1a3050;">
-    <p style="color:#f0c060;font-size:12px;font-weight:bold;margin:0 0 8px;">
-      📎 How to open:</p>
-    <ol style="color:#5a7a99;font-size:12px;margin:0;padding-left:18px;line-height:1.8;">
-      <li>Save: <code style="color:#00d4aa;">{fname}</code></li>
-      <li>Double-click → opens in any browser</li>
-    </ol>
-  </div>
-  <div style="background:#050c14;padding:14px 24px;text-align:center;">
-    <p style="color:#3a5a78;font-size:10px;margin:0;">
-      ⚠️ Not financial advice. Educational purposes only. Always DYOR.<br>
-      Auto-generated by FII/DII Pulse v8
-    </p>
-  </div>
-</div></body></html>"""
+    # Plain text fallback
+    plain = (
+        f"FII/DII Pulse — {date_str}\n"
+        f"Source: {source}\n"
+        f"Date range: {date_range_label}\n"
+        f"Stocks tracked: {count}\n\n"
+        f"Please open this email in an HTML-capable client to view the full dashboard.\n"
+        f"Not financial advice. Educational purposes only."
+    )
+    msg.attach(MIMEText(plain, "plain", "utf-8"))
 
-    msg.attach(MIMEText(body, "html", "utf-8"))
-
-    with open(html_path, "rb") as f:
-        data = f.read()
-    att = MIMEBase("application", "octet-stream")
-    att.set_payload(data)
-    encoders.encode_base64(att)
-    att.add_header("Content-Disposition", "attachment", filename=html_path.name)
-    att.add_header("Content-Type", f'text/html; name="{html_path.name}"')
-    msg.attach(att)
+    # Full HTML dashboard as the email body
+    msg.attach(MIMEText(full_html, "html", "utf-8"))
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as srv:
             srv.login(user, pwd)
             srv.sendmail(user, to_list, msg.as_string())
-        log.info(f"  ✅ Email sent to {to_list}")
+        log.info(f"  ✅ Full HTML dashboard emailed to {to_list}")
     except smtplib.SMTPAuthenticationError:
         log.error("  ❌ Gmail auth failed — use App Password")
         raise
