@@ -814,6 +814,180 @@ def fmt(v):
 #  GENERATE HTML
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ── Sector map: symbol prefix / known tickers → sector ───────────────────────
+SECTOR_MAP = {
+    # Banking & Finance
+    "HDFCBANK":"Banking & Finance","ICICIBANK":"Banking & Finance",
+    "SBIN":"Banking & Finance","AXISBANK":"Banking & Finance",
+    "KOTAKBANK":"Banking & Finance","INDUSINDBK":"Banking & Finance",
+    "BANDHANBNK":"Banking & Finance","FEDERALBNK":"Banking & Finance",
+    "IDFCFIRSTB":"Banking & Finance","PNB":"Banking & Finance",
+    "BANKBARODA":"Banking & Finance","CANARABANK":"Banking & Finance",
+    "AUBANK":"Banking & Finance","RBLBANK":"Banking & Finance",
+    "YESBANK":"Banking & Finance","UJJIVANSFB":"Banking & Finance",
+    "EQUITASBNK":"Banking & Finance","ESAFSFB":"Banking & Finance",
+    # NBFC & Fintech
+    "BAJFINANCE":"NBFC & Fintech","BAJAJFINSV":"NBFC & Fintech",
+    "CHOLAFIN":"NBFC & Fintech","MUTHOOTFIN":"NBFC & Fintech",
+    "MANAPPURAM":"NBFC & Fintech","SBICARD":"NBFC & Fintech",
+    "ANGELONE":"NBFC & Fintech","POLICYBZR":"NBFC & Fintech",
+    "CAMS":"NBFC & Fintech","KFINTECH":"NBFC & Fintech",
+    "NUVAMA":"NBFC & Fintech","360ONE":"NBFC & Fintech",
+    "IIFL":"NBFC & Fintech","MOTHERSON":"Auto & Auto Ancillaries",
+    # IT & Technology
+    "TCS":"IT & Technology","INFY":"IT & Technology",
+    "WIPRO":"IT & Technology","HCLTECH":"IT & Technology",
+    "TECHM":"IT & Technology","LTIM":"IT & Technology",
+    "MPHASIS":"IT & Technology","COFORGE":"IT & Technology",
+    "PERSISTENT":"IT & Technology","OFSS":"IT & Technology",
+    "LTTS":"IT & Technology","HEXAWARE":"IT & Technology",
+    "KPITTECH":"IT & Technology","TATAELXSI":"IT & Technology",
+    # Pharma & Healthcare
+    "SUNPHARMA":"Pharma & Healthcare","DRREDDY":"Pharma & Healthcare",
+    "CIPLA":"Pharma & Healthcare","DIVISLAB":"Pharma & Healthcare",
+    "TORNTPHARM":"Pharma & Healthcare","AUROPHARMA":"Pharma & Healthcare",
+    "LUPIN":"Pharma & Healthcare","ALKEM":"Pharma & Healthcare",
+    "IPCALAB":"Pharma & Healthcare","GLAND":"Pharma & Healthcare",
+    "FORTIS":"Pharma & Healthcare","APOLLOHOSP":"Pharma & Healthcare",
+    "MAXHEALTH":"Pharma & Healthcare","KIMS":"Pharma & Healthcare",
+    "MEDANTA":"Pharma & Healthcare","NARAYANA":"Pharma & Healthcare",
+    # Oil, Gas & Energy
+    "RELIANCE":"Oil, Gas & Energy","ONGC":"Oil, Gas & Energy",
+    "IOC":"Oil, Gas & Energy","BPCL":"Oil, Gas & Energy",
+    "HINDPETRO":"Oil, Gas & Energy","GAIL":"Oil, Gas & Energy",
+    "OIL":"Oil, Gas & Energy","MGL":"Oil, Gas & Energy",
+    "IGL":"Oil, Gas & Energy","PETRONET":"Oil, Gas & Energy",
+    "GUJGASLTD":"Oil, Gas & Energy","ATGL":"Oil, Gas & Energy",
+    # Power & Utilities
+    "NTPC":"Power & Utilities","POWERGRID":"Power & Utilities",
+    "ADANIPOWER":"Power & Utilities","TATAPOWER":"Power & Utilities",
+    "JSWENERGY":"Power & Utilities","TORNTPOWER":"Power & Utilities",
+    "CESC":"Power & Utilities","NHPC":"Power & Utilities",
+    "SJVN":"Power & Utilities","IREDA":"Power & Utilities",
+    "PFC":"Power & Utilities","RECLTD":"Power & Utilities",
+    # Metals & Mining
+    "TATASTEEL":"Metals & Mining","JSWSTEEL":"Metals & Mining",
+    "HINDALCO":"Metals & Mining","VEDL":"Metals & Mining",
+    "SAIL":"Metals & Mining","NMDC":"Metals & Mining",
+    "NATIONALUM":"Metals & Mining","WELCORP":"Metals & Mining",
+    "APLAPOLLO":"Metals & Mining","JINDALSTEL":"Metals & Mining",
+    "MOIL":"Metals & Mining","RATNAMANI":"Metals & Mining",
+    # Auto & Auto Ancillaries
+    "MARUTI":"Auto & Auto Ancillaries","TATAMOTORS":"Auto & Auto Ancillaries",
+    "M&M":"Auto & Auto Ancillaries","BAJAJ-AUTO":"Auto & Auto Ancillaries",
+    "HEROMOTOCO":"Auto & Auto Ancillaries","EICHERMOT":"Auto & Auto Ancillaries",
+    "TVSMOTORS":"Auto & Auto Ancillaries","ASHOKLEY":"Auto & Auto Ancillaries",
+    "ESCORTS":"Auto & Auto Ancillaries","BOSCHLTD":"Auto & Auto Ancillaries",
+    "BHARATFORG":"Auto & Auto Ancillaries","EXIDEIND":"Auto & Auto Ancillaries",
+    "AMARAJABAT":"Auto & Auto Ancillaries","BALKRISIND":"Auto & Auto Ancillaries",
+    "TIINDIA":"Auto & Auto Ancillaries","APOLLOTYRE":"Auto & Auto Ancillaries",
+    # FMCG & Consumer
+    "HINDUNILVR":"FMCG & Consumer","ITC":"FMCG & Consumer",
+    "NESTLEIND":"FMCG & Consumer","BRITANNIA":"FMCG & Consumer",
+    "DABUR":"FMCG & Consumer","MARICO":"FMCG & Consumer",
+    "COLPAL":"FMCG & Consumer","GODREJCP":"FMCG & Consumer",
+    "EMAMILTD":"FMCG & Consumer","TATACONSUM":"FMCG & Consumer",
+    "VARUN":"FMCG & Consumer","RADICO":"FMCG & Consumer",
+    "UBL":"FMCG & Consumer","MCDOWELL-N":"FMCG & Consumer",
+    # Cement & Construction
+    "ULTRACEMCO":"Cement & Construction","AMBUJACEM":"Cement & Construction",
+    "ACC":"Cement & Construction","SHREECEM":"Cement & Construction",
+    "DALMIACEMENTBHARAT":"Cement & Construction","RAMCOCEM":"Cement & Construction",
+    "JKCEMENT":"Cement & Construction","HEIDELBERG":"Cement & Construction",
+    "LT":"Cement & Construction","NCC":"Cement & Construction",
+    "KNRCON":"Cement & Construction","PNCINFRA":"Cement & Construction",
+    "RVNL":"Cement & Construction","IRCON":"Cement & Construction",
+    # Real Estate
+    "DLF":"Real Estate","GODREJPROP":"Real Estate",
+    "OBEROIRLTY":"Real Estate","PRESTIGE":"Real Estate",
+    "PHOENIXLTD":"Real Estate","BRIGADE":"Real Estate",
+    "SOBHA":"Real Estate","MAHLIFE":"Real Estate",
+    "LODHA":"Real Estate","SUNTECK":"Real Estate",
+    # Capital Goods & Industrials
+    "SIEMENS":"Capital Goods & Industrials","ABB":"Capital Goods & Industrials",
+    "HAVELLS":"Capital Goods & Industrials","BHEL":"Capital Goods & Industrials",
+    "BEL":"Capital Goods & Industrials","HAL":"Capital Goods & Industrials",
+    "COCHINSHIP":"Capital Goods & Industrials","MAZDOCK":"Capital Goods & Industrials",
+    "GRINDWELL":"Capital Goods & Industrials","THERMAX":"Capital Goods & Industrials",
+    "CUMMINSIND":"Capital Goods & Industrials","KALYANKJIL":"Capital Goods & Industrials",
+    # Telecom & Media
+    "BHARTIARTL":"Telecom & Media","IDEA":"Telecom & Media",
+    "INDUSTOWER":"Telecom & Media","TATACOMM":"Telecom & Media",
+    "ZEEL":"Telecom & Media","SUNTV":"Telecom & Media",
+    "PVRINOX":"Telecom & Media",
+    # Chemicals & Specialty
+    "PIDILITIND":"Chemicals & Specialty","ASIANPAINT":"Chemicals & Specialty",
+    "BERGEPAINT":"Chemicals & Specialty","ATUL":"Chemicals & Specialty",
+    "NAVINFLUOR":"Chemicals & Specialty","SOLARINDS":"Chemicals & Specialty",
+    "FINEORG":"Chemicals & Specialty","CLEAN":"Chemicals & Specialty",
+    "DEEPAKNITR":"Chemicals & Specialty","ALKYLAMINE":"Chemicals & Specialty",
+    # Insurance
+    "SBILIFE":"Insurance","HDFCLIFE":"Insurance",
+    "ICICIPRULI":"Insurance","MAXFINSERV":"Insurance",
+    "GICRE":"Insurance","NIACL":"Insurance",
+    "STARHEALTH":"Insurance","GODIGIT":"Insurance",
+    # Exchange & Capital Markets
+    "BSE":"Exchange & Capital Markets","MCX":"Exchange & Capital Markets",
+    "CDSL":"Exchange & Capital Markets","NSDL":"Exchange & Capital Markets",
+    "CRISIL":"Exchange & Capital Markets","ICRA":"Exchange & Capital Markets",
+    # Aviation & Logistics
+    "INDIGO":"Aviation & Logistics","SPICEJET":"Aviation & Logistics",
+    "GMRAIRPORT":"Aviation & Logistics","ADANIPORTS":"Aviation & Logistics",
+    "CONCOR":"Aviation & Logistics","BLUEDART":"Aviation & Logistics",
+    "DELHIVERY":"Aviation & Logistics","MAHINDRA LOG":"Aviation & Logistics",
+    # Retail & E-Commerce
+    "DMART":"Retail & E-Commerce","TRENT":"Retail & E-Commerce",
+    "NYKAA":"Retail & E-Commerce","ZOMATO":"Retail & E-Commerce",
+    "CARTRADE":"Retail & E-Commerce","SHOPERSTOP":"Retail & E-Commerce",
+    # Agri & Fertilisers
+    "UPL":"Agri & Fertilisers","COROMANDEL":"Agri & Fertilisers",
+    "CHAMBLFERT":"Agri & Fertilisers","GNFC":"Agri & Fertilisers",
+    "GSFC":"Agri & Fertilisers","NFL":"Agri & Fertilisers",
+    "RALLIS":"Agri & Fertilisers","BAYER":"Agri & Fertilisers",
+}
+
+SECTOR_ICONS = {
+    "Banking & Finance":        "🏦",
+    "NBFC & Fintech":           "💳",
+    "IT & Technology":          "💻",
+    "Pharma & Healthcare":      "💊",
+    "Oil, Gas & Energy":        "⛽",
+    "Power & Utilities":        "⚡",
+    "Metals & Mining":          "⚙️",
+    "Auto & Auto Ancillaries":  "🚗",
+    "FMCG & Consumer":          "🛒",
+    "Cement & Construction":    "🏗️",
+    "Real Estate":              "🏢",
+    "Capital Goods & Industrials": "🏭",
+    "Telecom & Media":          "📡",
+    "Chemicals & Specialty":    "🧪",
+    "Insurance":                "🛡️",
+    "Exchange & Capital Markets":"📈",
+    "Aviation & Logistics":     "✈️",
+    "Retail & E-Commerce":      "🛍️",
+    "Agri & Fertilisers":       "🌾",
+    "Others":                   "🔷",
+}
+
+# Signal sort priority: Strong Buy first, Sell last
+SIGNAL_ORDER = {
+    "STRONG BUY": 0,
+    "BUY":        1,
+    "NEUTRAL":    2,
+    "CAUTION":    3,
+    "BULK/BLOCK": 4,
+    "N/A":        5,
+    "SELL":       6,
+    "BOTH SELL":  7,
+}
+
+
+def get_sector(symbol: str) -> str:
+    """Return sector for a given NSE symbol (strips .NS suffix)."""
+    sym = symbol.replace(".NS", "").strip().upper()
+    return SECTOR_MAP.get(sym, "Others")
+
+
 def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
     nc = "up" if market["nifty_chg"]  >= 0 else "dn"
     xc = "up" if market["sensex_chg"] >= 0 else "dn"
@@ -824,50 +998,104 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
     bb = sum(1 for s in stocks if s["both_buy"])
     st = sum(1 for s in stocks if s["overall"] == "STRONG BUY")
 
-    rows = ""
-    for i, s in enumerate(stocks):
-        fc  = "bf" if s["fii_cash"] == "buy" else ("bx" if s["fii_cash"] == "sell" else "bn")
-        dc  = "bd" if s["dii_cash"] == "buy" else ("bx" if s["dii_cash"] == "sell" else "bn")
-        fa  = "▲ BUY" if s["fii_cash"] == "buy" else ("▼ SELL" if s["fii_cash"] == "sell" else "— N/A")
-        da  = "▲ BUY" if s["dii_cash"] == "buy" else ("▼ SELL" if s["dii_cash"] == "sell" else "— N/A")
-        mc2 = "up" if s["macd_hist"] > 0 else "dn"
-        ec  = "up" if s["ema_cross"] == "bullish" else "dn"
-        spk = spark_svg(s.get("sparkline", []))
-        pr  = fmt(s["last_price"]) if s["last_price"] > 0 else s.get("price_str","N/A")
+    # ── Assign sector to every stock ──────────────────────────────────────
+    for s in stocks:
+        s["sector"] = get_sector(s["symbol"])
 
+    # ── Group by sector ───────────────────────────────────────────────────
+    from collections import defaultdict
+    sector_groups = defaultdict(list)
+    for s in stocks:
+        sector_groups[s["sector"]].append(s)
+
+    # ── Sort each sector internally: Strong Buy → Buy → Neutral → Sell ───
+    def signal_sort_key(s):
+        return SIGNAL_ORDER.get(s.get("overall", "N/A"), 5)
+
+    for sec in sector_groups:
+        sector_groups[sec].sort(key=signal_sort_key)
+
+    # ── Sort sectors by their best signal score (best sector first) ───────
+    def sector_best(items):
+        return min(SIGNAL_ORDER.get(s.get("overall","N/A"), 5) for s in items)
+
+    sorted_sectors = sorted(sector_groups.items(), key=lambda kv: sector_best(kv[1]))
+
+    # ── Build table rows with sector header rows ──────────────────────────
+    rows = ""
+    row_idx = 0
+    for sector_name, sec_stocks in sorted_sectors:
+        icon      = SECTOR_ICONS.get(sector_name, "🔷")
+        sec_count = len(sec_stocks)
+        sec_sb    = sum(1 for s in sec_stocks if s["overall"] == "STRONG BUY")
+        sec_buy   = sum(1 for s in sec_stocks if s["overall"] == "BUY")
+        sec_sell  = sum(1 for s in sec_stocks if s["overall"] in ("SELL","BOTH SELL"))
+
+        # Sector header row (spans all columns)
         rows += f"""
-      <tr style="animation-delay:{i*0.05:.2f}s">
-        <td data-label="Stock">
-          <div class="sn">{s['name']}</div>
-          <div class="sy">{s['symbol'].replace('.NS','')}</div>
-        </td>
-        <td data-label="Price">
-          <div class="pv">{pr}</div>
-          <div class="sp">{spk}</div>
-        </td>
-        <td data-label="FII Cash"><span class="b {fc}">{fa}</span></td>
-        <td data-label="DII Cash"><span class="b {dc}">{da}</span></td>
-        <td data-label="RSI(14)" class="{rsicls(s['rsi'])}">
-          <div class="rv {'up' if s['rsi']<55 else 'dn'}">{s['rsi']}</div>
-          <div class="rb2"><div class="rf2" style="width:{min(s['rsi'],100):.0f}%"></div></div>
-        </td>
-        <td data-label="Indicators">
-          <div class="im"><span class="il">MACD</span>
-            <span class="{mc2}">{'+' if s['macd_hist']>0 else ''}{s['macd_hist']}</span></div>
-          <div class="im"><span class="il">EMA</span>
-            <span class="{ec}">{'↑ Bull' if s['ema_cross']=='bullish' else '↓ Bear'}</span></div>
-          <div class="im"><span class="il">ADX</span><span>{s['adx']}</span></div>
-          <div class="im"><span class="il">BB</span><span>{s['bb_label']}</span></div>
-          <div class="im"><span class="il">StRSI</span><span>{s['stoch_rsi']}</span></div>
-        </td>
-        <td data-label="Levels">
-          <div class="sr"><span class="sr-r">R1</span> {fmt(s['resist1'])}</div>
-          <div class="sr"><span class="sr-s">S1</span> {fmt(s['support1'])}</div>
-          <div class="sr"><span class="sr-r">6mH</span> {fmt(s['swing_high'])}</div>
-          <div class="sr"><span class="sr-s">6mL</span> {fmt(s['swing_low'])}</div>
-        </td>
-        <td data-label="Signal"><span class="sig {sigcls(s['overall'])}">{s['overall']}</span></td>
-      </tr>"""
+    <tr class="sec-hdr">
+      <td colspan="8">
+        <div class="sec-hdr-inner">
+          <span class="sec-icon">{icon}</span>
+          <span class="sec-name">{sector_name}</span>
+          <span class="sec-count">{sec_count} stocks</span>
+          <span class="sec-pills">"""
+        if sec_sb:
+            rows += f'<span class="sec-pill sbs">⚡ {sec_sb} STRONG BUY</span>'
+        if sec_buy:
+            rows += f'<span class="sec-pill sbuy">▲ {sec_buy} BUY</span>'
+        if sec_sell:
+            rows += f'<span class="sec-pill sse">▼ {sec_sell} SELL</span>'
+        rows += """</span>
+        </div>
+      </td>
+    </tr>"""
+
+        # Stock rows within this sector
+        for s in sec_stocks:
+            fc  = "bf" if s["fii_cash"] == "buy" else ("bx" if s["fii_cash"] == "sell" else "bn")
+            dc  = "bd" if s["dii_cash"] == "buy" else ("bx" if s["dii_cash"] == "sell" else "bn")
+            fa  = "▲ BUY" if s["fii_cash"] == "buy" else ("▼ SELL" if s["fii_cash"] == "sell" else "— N/A")
+            da  = "▲ BUY" if s["dii_cash"] == "buy" else ("▼ SELL" if s["dii_cash"] == "sell" else "— N/A")
+            mc2 = "up" if s["macd_hist"] > 0 else "dn"
+            ec  = "up" if s["ema_cross"] == "bullish" else "dn"
+            spk = spark_svg(s.get("sparkline", []))
+            pr  = fmt(s["last_price"]) if s["last_price"] > 0 else s.get("price_str","N/A")
+
+            rows += f"""
+    <tr style="animation-delay:{row_idx*0.04:.2f}s">
+      <td data-label="Stock">
+        <div class="sn">{s['name']}</div>
+        <div class="sy">{s['symbol'].replace('.NS','')}</div>
+      </td>
+      <td data-label="Price">
+        <div class="pv">{pr}</div>
+        <div class="sp">{spk}</div>
+      </td>
+      <td data-label="FII Cash"><span class="b {fc}">{fa}</span></td>
+      <td data-label="DII Cash"><span class="b {dc}">{da}</span></td>
+      <td data-label="RSI(14)" class="{rsicls(s['rsi'])}">
+        <div class="rv {'up' if s['rsi']<55 else 'dn'}">{s['rsi']}</div>
+        <div class="rb2"><div class="rf2" style="width:{min(s['rsi'],100):.0f}%"></div></div>
+      </td>
+      <td data-label="Indicators">
+        <div class="im"><span class="il">MACD</span>
+          <span class="{mc2}">{'+' if s['macd_hist']>0 else ''}{s['macd_hist']}</span></div>
+        <div class="im"><span class="il">EMA</span>
+          <span class="{ec}">{'↑ Bull' if s['ema_cross']=='bullish' else '↓ Bear'}</span></div>
+        <div class="im"><span class="il">ADX</span><span>{s['adx']}</span></div>
+        <div class="im"><span class="il">BB</span><span>{s['bb_label']}</span></div>
+        <div class="im"><span class="il">StRSI</span><span>{s['stoch_rsi']}</span></div>
+      </td>
+      <td data-label="Levels">
+        <div class="sr"><span class="sr-r">R1</span> {fmt(s['resist1'])}</div>
+        <div class="sr"><span class="sr-s">S1</span> {fmt(s['support1'])}</div>
+        <div class="sr"><span class="sr-r">6mH</span> {fmt(s['swing_high'])}</div>
+        <div class="sr"><span class="sr-s">6mL</span> {fmt(s['swing_low'])}</div>
+      </td>
+      <td data-label="Signal"><span class="sig {sigcls(s['overall'])}">{s['overall']}</span></td>
+    </tr>"""
+            row_idx += 1
 
     css = """
 :root{
@@ -890,8 +1118,7 @@ header{
   background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
   border-bottom:1px solid var(--bdr);padding:14px 20px;
   display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:10px;
-  position:sticky;top:0;z-index:99;backdrop-filter:blur(8px);
+  flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:99;backdrop-filter:blur(8px);
 }
 .lg{display:flex;align-items:center;gap:12px}
 .logo-icon{
@@ -904,12 +1131,9 @@ header{
 .lt span{color:var(--fi)}
 .ls2{font-size:9px;color:var(--mu);letter-spacing:1px;margin-top:2px}
 .hm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.lv{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);
-  padding:4px 10px;border-radius:20px;
-  font-size:10px;font-weight:700;color:var(--fi);letter-spacing:1px;
-}
+.lv{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.1);
+  border:1px solid rgba(0,212,170,.3);padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;color:var(--fi);letter-spacing:1px;}
 .led{width:7px;height:7px;border-radius:50%;background:var(--fi);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 .src{font-size:10px;color:var(--bo);background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);padding:4px 10px;border-radius:12px;}
@@ -923,22 +1147,42 @@ header{
 .up{color:var(--fi)}.dn{color:var(--se)}
 .cfi{color:var(--fi)}.cdi{color:var(--di)}.cbo{color:var(--bo)}.cgo{color:var(--go)}
 .tw{padding:16px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tt{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.tt{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);
+  margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .tt::before{content:'';width:3px;height:14px;background:var(--fi);border-radius:2px;flex-shrink:0}
+
+/* ── SECTOR HEADER ROW ── */
+tr.sec-hdr td{
+  background:linear-gradient(90deg,rgba(0,212,170,.08),rgba(167,139,250,.06),transparent);
+  border-top:2px solid rgba(0,212,170,.2);
+  border-bottom:1px solid rgba(0,212,170,.15);
+  padding:10px 12px;
+}
+.sec-hdr-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sec-icon{font-size:16px}
+.sec-name{font-size:13px;font-weight:800;letter-spacing:.5px;color:var(--tx)}
+.sec-count{font-size:10px;color:var(--mu);background:rgba(90,122,153,.15);
+  padding:2px 8px;border-radius:10px;border:1px solid rgba(90,122,153,.3);}
+.sec-pills{display:flex;gap:6px;flex-wrap:wrap;margin-left:4px}
+.sec-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.3px}
+
 table{width:100%;border-collapse:collapse;min-width:860px}
 thead tr{border-bottom:2px solid var(--bdr)}
-th{padding:9px 10px;text-align:left;font-size:9px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;font-weight:600;white-space:nowrap;}
+th{padding:9px 10px;text-align:left;font-size:9px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;font-weight:600;white-space:nowrap;}
 th:not(:first-child){text-align:center}
-tbody tr{border-bottom:1px solid rgba(26,48,80,.4);animation:si .4s ease both;opacity:0;transition:background .15s;}
+tbody tr:not(.sec-hdr){border-bottom:1px solid rgba(26,48,80,.4);
+  animation:si .4s ease both;opacity:0;transition:background .15s;}
 @keyframes si{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
-tbody tr:hover{background:rgba(0,212,170,.03)}
+tbody tr:not(.sec-hdr):hover{background:rgba(0,212,170,.03)}
 td{padding:10px;font-size:12px;vertical-align:middle;text-align:center}
 td:first-child{text-align:left}
 .sn{font-weight:700;font-size:13px;line-height:1.3}
 .sy{font-size:9px;color:var(--mu);font-family:'Space Mono',monospace;margin-top:2px}
 .pv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .sp{margin-top:4px}
-.b{display:inline-block;padding:4px 9px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px;white-space:nowrap;}
+.b{display:inline-block;padding:4px 9px;border-radius:5px;font-size:10px;
+  font-weight:800;letter-spacing:.5px;white-space:nowrap;}
 .bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
 .bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
 .bx{background:rgba(255,77,109,.1);color:var(--se);border:1px solid rgba(255,77,109,.25)}
@@ -949,11 +1193,16 @@ td:first-child{text-align:left}
 .ro .rf2{background:var(--se)}.rn2 .rf2{background:var(--go)}.rs2 .rf2{background:var(--fi)}
 .im{display:flex;justify-content:center;gap:5px;font-size:10px;margin-bottom:2px}
 .il{color:var(--mu);font-size:9px;min-width:30px;text-align:right}
-.sr{font-size:10px;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:4px;justify-content:center;margin-bottom:2px;}
-.sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;background:rgba(255,77,109,.2);color:var(--se)}
-.sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;background:rgba(0,212,170,.15);color:var(--fi)}
-.sig{display:inline-block;padding:4px 10px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;}
-.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);box-shadow:0 0 8px rgba(0,212,170,.2)}
+.sr{font-size:10px;font-family:'Space Mono',monospace;display:flex;align-items:center;
+  gap:4px;justify-content:center;margin-bottom:2px;}
+.sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(255,77,109,.2);color:var(--se)}
+.sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(0,212,170,.15);color:var(--fi)}
+.sig{display:inline-block;padding:4px 10px;border-radius:5px;
+  font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;}
+.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);
+  box-shadow:0 0 8px rgba(0,212,170,.2)}
 .sbuy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
 .sdii{background:rgba(255,140,66,.15);color:var(--di);border:1px solid rgba(255,140,66,.4)}
 .sblk{background:rgba(90,122,153,.15);color:#8ab4d4;border:1px solid rgba(90,122,153,.3)}
@@ -963,26 +1212,52 @@ td:first-child{text-align:left}
 .leg{padding:0 20px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
 .ld2{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;display:flex;justify-content:space-between;font-size:10px;color:var(--mu);flex-wrap:wrap;gap:8px;}
-@media(max-width:900px){.sum{grid-template-columns:repeat(2,1fr)}.sv{font-size:16px}.lt{font-size:14px}.ls2{display:none}}
+footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
+  display:flex;justify-content:space-between;font-size:10px;color:var(--mu);flex-wrap:wrap;gap:8px;}
+
+@media(max-width:900px){
+  .sum{grid-template-columns:repeat(2,1fr)}.sv{font-size:16px}
+  .lt{font-size:14px}.ls2{display:none}
+}
 @media(max-width:600px){
-  header{padding:10px 14px}.lt{font-size:13px}.lv,.src{font-size:9px;padding:3px 8px}.dt{display:none}.ls2{display:none}
-  .sum{grid-template-columns:repeat(2,1fr)}.sc2{padding:10px 12px}.sv{font-size:15px}.sl{font-size:8px}.sb2{font-size:9px}
+  header{padding:10px 14px}.lt{font-size:13px}
+  .lv,.src{font-size:9px;padding:3px 8px}.dt{display:none}.ls2{display:none}
+  .sum{grid-template-columns:repeat(2,1fr)}.sc2{padding:10px 12px}
+  .sv{font-size:15px}.sl{font-size:8px}.sb2{font-size:9px}
   .tw{padding:10px;overflow-x:visible}
-  table,thead,tbody,th,td,tr{display:block}thead{display:none}
-  tbody tr{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;margin-bottom:10px;padding:12px;animation:si .4s ease both;}
-  tbody tr:hover{background:rgba(0,212,170,.04)}
-  td{text-align:left;padding:5px 0;border:none;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;}
-  td:first-child{flex-direction:column;align-items:flex-start;margin-bottom:6px;border-bottom:1px solid var(--bdr);padding-bottom:8px;}
-  td::before{content:attr(data-label);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);flex-shrink:0;min-width:80px;}
+  table,thead,tbody,th,td,tr{display:block}
+  thead{display:none}
+  tr.sec-hdr{display:block;margin-top:14px}
+  tr.sec-hdr td{border-radius:8px;padding:8px 10px}
+  .sec-hdr-inner{gap:6px}
+  .sec-name{font-size:12px}
+  tbody tr:not(.sec-hdr){background:var(--sur);border:1px solid var(--bdr);
+    border-radius:10px;margin-bottom:8px;padding:12px;
+    animation:si .4s ease both;}
+  tbody tr:not(.sec-hdr):hover{background:rgba(0,212,170,.04)}
+  td{text-align:left;padding:5px 0;border:none;display:flex;
+    align-items:center;justify-content:space-between;gap:8px;font-size:12px;}
+  td:first-child{flex-direction:column;align-items:flex-start;
+    margin-bottom:6px;border-bottom:1px solid var(--bdr);padding-bottom:8px;}
+  td::before{content:attr(data-label);font-size:9px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--mu);flex-shrink:0;min-width:80px;}
   td:first-child::before{display:none}
   .rb2{margin:4px 0 0}.im,.sr{justify-content:flex-end}
-  .leg{padding:0 10px 12px;gap:8px}.li2{font-size:10px}footer{padding:10px 14px;font-size:9px}.tt{font-size:9px}.drb{font-size:9px;padding:3px 8px}
+  .leg{padding:0 10px 12px;gap:8px}.li2{font-size:10px}
+  footer{padding:10px 14px;font-size:9px}
+  .tt{font-size:9px}.drb{font-size:9px;padding:3px 8px}
 }
 """
 
     drb_html = (f'<div class="drb">🗓 {date_range_label}</div>'
                 if date_range_label else "")
+
+    # Build sector quick-nav links
+    sector_nav = ""
+    for sector_name, _ in sorted_sectors:
+        icon = SECTOR_ICONS.get(sector_name, "🔷")
+        anchor = sector_name.replace(" ","_").replace("&","and")
+        sector_nav += f'<a href="#{anchor}" class="snav-link">{icon} {sector_name}</a>'
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -991,7 +1266,18 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;d
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FII/DII Pulse — {date_str}</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>{css}</style>
+<style>
+{css}
+/* sector nav bar */
+.snav{{padding:8px 20px;display:flex;gap:8px;flex-wrap:wrap;
+  background:rgba(11,22,35,.8);border-bottom:1px solid var(--bdr);
+  position:sticky;top:68px;z-index:90;backdrop-filter:blur(6px);overflow-x:auto;}}
+.snav-link{{font-size:10px;color:var(--mu);text-decoration:none;
+  padding:4px 10px;border-radius:12px;border:1px solid var(--bdr);
+  white-space:nowrap;transition:all .2s;}}
+.snav-link:hover{{color:var(--fi);border-color:rgba(0,212,170,.4);
+  background:rgba(0,212,170,.08);}}
+</style>
 </head>
 <body>
 <div class="w">
@@ -1001,7 +1287,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;d
     <div class="logo-icon">📊</div>
     <div>
       <div class="lt">FII<span>/DII</span> PULSE</div>
-      <div class="ls2">INSTITUTIONAL INTELLIGENCE DASHBOARD · AUTO-GENERATED</div>
+      <div class="ls2">INSTITUTIONAL INTELLIGENCE · SECTOR-WISE · AUTO-GENERATED</div>
     </div>
   </div>
   <div class="hm">
@@ -1011,6 +1297,9 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;d
     <div class="dt">{date_str}</div>
   </div>
 </header>
+
+<!-- Sector Quick Nav -->
+<div class="snav">{sector_nav}</div>
 
 <div class="sum">
   <div class="sc2">
@@ -1037,7 +1326,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;d
 
 <div class="tw">
   <div class="tt">
-    Institutional Activity · Technical Analysis ·
+    Sector-wise Institutional Activity · Sorted: Strong Buy → Buy → Neutral → Sell ·
     <span style="color:var(--go);font-family:'Space Mono',monospace">
       {date_range_label or date_str}
     </span>
@@ -1064,12 +1353,12 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;d
   <div class="li2"><div class="ld2" style="background:var(--se)"></div>Selling</div>
   <div class="li2"><div class="ld2" style="background:#8ab4d4"></div>Bulk/Block (Unclassified)</div>
   <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;">
-    RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend
+    Sorted: Strong Buy → Buy → Neutral → Sell within each sector
   </div>
 </div>
 
 <footer>
-  <div>🤖 FII/DII Pulse v8 · {source} · yfinance · {date_str}</div>
+  <div>🤖 FII/DII Pulse v8 · Sector-Wise · {source} · yfinance · {date_str}</div>
   <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
 </footer>
 
