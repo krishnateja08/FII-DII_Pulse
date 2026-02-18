@@ -217,37 +217,83 @@ def get_date_range() -> tuple:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_from_nse() -> list:
-    log.info("📡 [Source 1] NSE Bulk-Block-Short Deals API...")
+    """
+    Fetch NSE bulk deals.
+    METHOD A: curl_cffi  - impersonates Chrome TLS fingerprint, bypasses Akamai.
+    METHOD B: requests   - standard cookie seeding, fallback if A unavailable.
+    """
+    log.info("[Source 1] NSE Bulk-Block-Short Deals API...")
     try:
         from_date, to_date, date_range_label = get_date_range()
         from_str = fmt_nse_date(from_date)
         to_str   = fmt_nse_date(to_date)
-        log.info(f"  → Querying: {from_str} to {to_str}")
+        log.info(f"  -> Range: {from_str} to {to_str}")
 
-        session = requests.Session()
-
-        log.info("  → Seeding NSE cookies...")
-        session.get("https://www.nseindia.com/", headers=NSE_HEADERS, timeout=12)
-        time.sleep(2)
-        session.get(
-            "https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
-            headers=NSE_HEADERS, timeout=12
-        )
-        time.sleep(1.5)
-
-        url = (
+        api_url = (
             "https://www.nseindia.com/api/historicalOR/bulk-block-short-deals"
             f"?optionType=bulk_deals&from={from_str}&to={to_str}"
         )
-        log.info(f"  → GET {url}")
-        resp = session.get(url, headers=NSE_HEADERS, timeout=25)
-        log.info(f"  → HTTP {resp.status_code} | {resp.headers.get('Content-Type','')}")
 
-        if resp.status_code != 200:
-            log.warning(f"  ❌ HTTP {resp.status_code}")
+        raw = None
+
+        # ── METHOD A: curl_cffi Chrome TLS impersonation ──────────────────
+        try:
+            from curl_cffi import requests as cffi_req
+            log.info("  -> Method A: curl_cffi Chrome120 impersonation")
+            with cffi_req.Session(impersonate="chrome120") as s:
+                r1 = s.get("https://www.nseindia.com/", timeout=15)
+                log.info(f"  -> Homepage HTTP {r1.status_code} cookies={list(s.cookies.keys())}")
+                time.sleep(2)
+                s.get("https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
+                      timeout=15)
+                time.sleep(2)
+                resp = s.get(api_url, timeout=30)
+                body = resp.content
+                preview = body[:300].decode("utf-8", errors="replace")
+                log.info(f"  -> HTTP {resp.status_code} | {len(body)} bytes | {preview[:80]!r}")
+                if resp.status_code == 200 and len(body) > 10 and not preview.lstrip().startswith("<"):
+                    raw = resp.json()
+                    log.info("  OK curl_cffi success")
+                else:
+                    log.warning(f"  !! curl_cffi bad response ({len(body)}b)")
+        except ImportError:
+            log.warning("  -> curl_cffi not installed, trying Method B")
+        except Exception as e:
+            log.warning(f"  -> curl_cffi error: {e}, trying Method B")
+
+        # ── METHOD B: requests + cookie seeding ───────────────────────────
+        if raw is None:
+            log.info("  -> Method B: requests cookie seeding (3 attempts)")
+            for attempt in range(1, 4):
+                log.info(f"  -> Attempt {attempt}/3")
+                try:
+                    s2 = requests.Session()
+                    r = s2.get("https://www.nseindia.com/", headers=NSE_HEADERS, timeout=15)
+                    log.info(f"  -> Home HTTP {r.status_code} cookies={list(s2.cookies.keys())}")
+                    time.sleep(2.5)
+                    s2.get("https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
+                           headers=NSE_HEADERS, timeout=15)
+                    time.sleep(2)
+                    resp = s2.get(api_url, headers=NSE_HEADERS, timeout=30)
+                    body = resp.content
+                    preview = body[:300].decode("utf-8", errors="replace")
+                    log.info(f"  -> HTTP {resp.status_code} | {len(body)} bytes | {preview[:80]!r}")
+                    if len(body) == 0:
+                        log.warning("  !! Empty body — Akamai blocked"); time.sleep(4); continue
+                    if preview.lstrip().startswith("<"):
+                        log.warning("  !! HTML response — bot block"); time.sleep(4); continue
+                    if resp.status_code != 200:
+                        log.warning(f"  !! HTTP {resp.status_code}"); time.sleep(3); continue
+                    raw = resp.json()
+                    log.info("  OK requests success")
+                    break
+                except Exception as e:
+                    log.warning(f"  !! Attempt {attempt} failed: {e}")
+                    time.sleep(3)
+
+        if raw is None:
+            log.warning("  !! All methods failed — falling back")
             return []
-
-        raw = resp.json()
 
         # ── Debug structure ────────────────────────────────────────────────
         if isinstance(raw, dict):
