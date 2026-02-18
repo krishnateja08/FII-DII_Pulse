@@ -1,13 +1,14 @@
 """
-FII/DII Intelligence Dashboard — v6
+FII/DII Intelligence Dashboard — v7
 =====================================
 NSE API: https://www.nseindia.com/api/historicalOR/bulk-block-short-deals
          ?optionType=bulk_deals&from=DD-MM-YYYY&to=DD-MM-YYYY
 
 Date Logic:
-  - Runs after 12 AM IST daily
-  - Automatically picks last trading day (skips weekends + NSE holidays)
-  - from_date = last trading day, to_date = last trading day
+  - Block Deal window closes at 06:30 PM IST daily
+  - If current IST time > 18:30 → to_date = TODAY, from_date = today - 7 trading days
+  - If current IST time ≤ 18:30 → to_date = YESTERDAY (last trading day), from_date = 7 trading days before that
+  - Skips weekends + NSE holidays automatically
 """
 
 import os, smtplib, logging, time, re
@@ -37,11 +38,11 @@ log = logging.getLogger(__name__)
 OUTPUT_DIR = Path("docs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# ── NSE INDIA HOLIDAYS (NSE official list — update yearly) ────────────────────
+# ── NSE INDIA HOLIDAYS ────────────────────────────────────────────────────────
 NSE_HOLIDAYS_2025 = {
     "2025-01-26","2025-02-26","2025-03-14","2025-03-31",
     "2025-04-10","2025-04-14","2025-04-18","2025-05-01",
-    "2025-08-15","2025-08-27","2025-10-02","2025-10-02",
+    "2025-08-15","2025-08-27","2025-10-02",
     "2025-10-21","2025-10-22","2025-11-05","2025-12-25",
 }
 NSE_HOLIDAYS_2026 = {
@@ -106,7 +107,7 @@ DII_KW = [
     "BAJAJ ALLIANZ","HDFC ERGO","ICICI LOMBARD","STAR HEALTH",
 ]
 
-# ── FALLBACK stocks (always shown if all APIs fail) ───────────────────────────
+# ── FALLBACK stocks ───────────────────────────────────────────────────────────
 FALLBACK_STOCKS = [
     {"symbol":"GMRAIRPORT.NS", "name":"GMR Airports",       "fii_cash":"buy",  "dii_cash":"buy"},
     {"symbol":"TORNTPHARM.NS", "name":"Torrent Pharma",     "fii_cash":"buy",  "dii_cash":"buy"},
@@ -132,38 +133,76 @@ FALLBACK_STOCKS = [
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  DATE UTILITIES
+#  DATE UTILITIES  (FIXED)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def is_trading_day(dt: datetime) -> bool:
     """Return True if dt is a weekday and not an NSE holiday."""
-    if dt.weekday() >= 5:           # Saturday=5, Sunday=6
+    if dt.weekday() >= 5:  # Saturday=5, Sunday=6
         return False
     key = dt.strftime("%Y-%m-%d")
     return key not in NSE_HOLIDAYS
 
 
-def last_trading_day() -> datetime:
+def prev_trading_day(dt: datetime, n: int = 1) -> datetime:
+    """Walk backwards n trading days from dt (dt itself not counted)."""
+    candidate = dt - timedelta(days=1)
+    steps = 0
+    while steps < n:
+        if is_trading_day(candidate):
+            steps += 1
+            if steps == n:
+                return candidate
+        candidate -= timedelta(days=1)
+        if (dt - candidate).days > 60:
+            raise RuntimeError("Could not find trading day in last 60 days")
+    return candidate
+
+
+def get_date_range() -> tuple[datetime, datetime, str]:
     """
-    Return the last completed NSE trading day as of current IST time.
-    If it's before market close (15:30 IST) we use yesterday's trading day.
+    Returns (from_date, to_date, label) based on NSE Block Deal cutoff.
+
+    Block Deal window closes at 06:30 PM IST.
+    - After 18:30 IST  → today's deals are final → to_date = today (if trading day)
+    - Before 18:30 IST → today not yet finalised → to_date = last trading day before today
+
+    from_date = 7 trading days before to_date (inclusive week window)
     """
     IST = pytz.timezone("Asia/Kolkata")
     now_ist = datetime.now(IST)
+    today = now_ist.replace(tzinfo=None).replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # Use today if market has closed (after 15:30), else use previous day
-    if now_ist.hour > 15 or (now_ist.hour == 15 and now_ist.minute >= 30):
-        candidate = now_ist.replace(tzinfo=None)
+    # Determine to_date based on 18:30 IST cutoff
+    past_cutoff = now_ist.hour > 18 or (now_ist.hour == 18 and now_ist.minute >= 30)
+
+    if past_cutoff and is_trading_day(today):
+        to_date = today
+        log.info(f"  → Past 18:30 IST cutoff — using TODAY as to_date")
     else:
-        candidate = (now_ist - timedelta(days=1)).replace(tzinfo=None)
+        # Walk back to find last completed trading day
+        to_date = today
+        for _ in range(10):
+            to_date -= timedelta(days=1)
+            if is_trading_day(to_date):
+                break
+        log.info(f"  → Before 18:30 IST cutoff — using YESTERDAY's trading day as to_date")
 
-    # Walk backwards until we find a trading day
-    for _ in range(10):
+    # from_date = 7 trading days before to_date
+    from_date = to_date
+    steps = 0
+    candidate = to_date - timedelta(days=1)
+    while steps < 6:  # 6 more days back = 7 total including to_date
         if is_trading_day(candidate):
-            return candidate
+            steps += 1
+            from_date = candidate
         candidate -= timedelta(days=1)
+        if (to_date - candidate).days > 30:
+            break
 
-    raise RuntimeError("Could not find a trading day in last 10 days")
+    label = f"{fmt_nse_date(from_date)} → {fmt_nse_date(to_date)}"
+    log.info(f"  → Date range: {label}")
+    return from_date, to_date, label
 
 
 def fmt_nse_date(dt: datetime) -> str:
@@ -172,16 +211,18 @@ def fmt_nse_date(dt: datetime) -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  SOURCE 1 — NSE Correct Bulk Deals API
+#  SOURCE 1 — NSE Bulk Deals API  (FIXED date range)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_from_nse() -> list[dict]:
     log.info("📡 [Source 1] NSE Bulk-Block-Short Deals API...")
 
     try:
-        trade_day   = last_trading_day()
-        date_str    = fmt_nse_date(trade_day)
-        log.info(f"  → Last trading day: {date_str}")
+        from_date, to_date, date_range_label = get_date_range()
+        from_str = fmt_nse_date(from_date)
+        to_str   = fmt_nse_date(to_date)
+
+        log.info(f"  → Querying range: {from_str} to {to_str}")
 
         session = requests.Session()
 
@@ -197,11 +238,11 @@ def fetch_from_nse() -> list[dict]:
         )
         time.sleep(1.5)
 
-        # Step 3 — call the CORRECT API with proper dates
+        # Step 3 — call the API with FROM and TO dates (weekly range)
         url = (
             "https://www.nseindia.com/api/historicalOR/"
             "bulk-block-short-deals"
-            f"?optionType=bulk_deals&from={date_str}&to={date_str}"
+            f"?optionType=bulk_deals&from={from_str}&to={to_str}"
         )
         log.info(f"  → GET {url}")
         resp = session.get(url, headers=NSE_HEADERS, timeout=25)
@@ -215,48 +256,40 @@ def fetch_from_nse() -> list[dict]:
         # ── Parse response ─────────────────────────────────────────────────
         raw = resp.json()
 
-        # Log top-level structure for debugging
         if isinstance(raw, dict):
             log.info(f"  → Top-level keys: {list(raw.keys())}")
-            for k, v in raw.items():
-                log.info(f"     '{k}': {type(v).__name__}"
-                         f"{' len='+str(len(v)) if isinstance(v,(list,dict)) else ' = '+str(v)[:60]}")
         elif isinstance(raw, list):
             log.info(f"  → Direct list with {len(raw)} items")
             if raw:
-                log.info(f"  → First item type: {type(raw[0])}, sample: {str(raw[0])[:120]}")
+                log.info(f"  → First item sample: {str(raw[0])[:120]}")
 
-        # ── Convert to DataFrame regardless of shape ───────────────────────
+        # ── Convert to DataFrame ───────────────────────────────────────────
         df = None
 
         if isinstance(raw, list) and raw:
-            # Direct list of dicts  OR  list of lists
             if isinstance(raw[0], dict):
                 df = pd.DataFrame(raw)
             else:
-                df = pd.DataFrame(raw)   # will create col 0,1,2...
+                df = pd.DataFrame(raw)
 
         elif isinstance(raw, dict):
-            # Try common wrapper keys
             for key in ["data","Data","results","bulkDeals","deals","bulkDealData","records"]:
                 val = raw.get(key)
                 if isinstance(val, list) and val:
                     if isinstance(val[0], dict):
                         df = pd.DataFrame(val)
                     else:
-                        # list-of-lists with separate columns key
                         cols = raw.get("columns", raw.get("Columns", None))
                         df   = pd.DataFrame(val, columns=cols) if cols else pd.DataFrame(val)
                     log.info(f"  → Used key='{key}', shape={df.shape}")
                     break
 
-            # If still None try columns+data pattern
             if df is None and "columns" in raw and "data" in raw:
                 df = pd.DataFrame(raw["data"], columns=raw["columns"])
                 log.info(f"  → columns+data pattern, shape={df.shape}")
 
         if df is None or df.empty:
-            log.warning("  ⚠️  DataFrame empty — market holiday or no bulk deals today")
+            log.warning("  ⚠️  DataFrame empty — no bulk deals in this range or market holiday")
             return []
 
         log.info(f"  → DataFrame shape: {df.shape}")
@@ -269,7 +302,7 @@ def fetch_from_nse() -> list[dict]:
         rename = {}
         for c in df.columns:
             cu = c.upper()
-            if "SYMBOL"   in cu:                          rename[c] = "SYMBOL"
+            if "SYMBOL"   in cu:                                     rename[c] = "SYMBOL"
             elif any(x in cu for x in ["COMP","SCRIP_NAME","COMPANY","NAME"]): rename[c] = "COMPANY"
             elif any(x in cu for x in ["CLIENT","PARTY","BUYER","SELLER"]):    rename[c] = "CLIENT"
             elif any(x in cu for x in ["BUY","SELL","BS","TYPE"]):             rename[c] = "BUYSELL"
@@ -287,10 +320,10 @@ def fetch_from_nse() -> list[dict]:
         stocks = {}
         matched = 0
         for _, row in df.iterrows():
-            sym     = str(row.get("SYMBOL",  "")).strip().upper()
-            name    = str(row.get("COMPANY", sym)).strip()
-            client  = str(row.get("CLIENT",  "")).strip().upper()
-            bs      = str(row.get("BUYSELL", "")).strip().upper()
+            sym    = str(row.get("SYMBOL",  "")).strip().upper()
+            name   = str(row.get("COMPANY", sym)).strip()
+            client = str(row.get("CLIENT",  "")).strip().upper()
+            bs     = str(row.get("BUYSELL", "")).strip().upper()
 
             if not sym or not client:
                 continue
@@ -312,7 +345,7 @@ def fetch_from_nse() -> list[dict]:
         result = [v for v in stocks.values()
                   if v["fii_cash"] != "neutral" or v["dii_cash"] != "neutral"]
 
-        log.info(f"  → Scanned {len(df)} rows, matched {matched} FII/DII rows → {len(result)} unique stocks")
+        log.info(f"  → Scanned {len(df)} rows, matched {matched} FII/DII → {len(result)} unique stocks")
 
         if not result and "CLIENT" in df.columns:
             sample = df["CLIENT"].dropna().unique()[:10].tolist()
@@ -540,7 +573,7 @@ def spark_svg(prices):
 
 def sigcls(s):
     return {"STRONG BUY":"sbs","BUY":"sbuy","NEUTRAL":"sn",
-            "CAUTION":"sca","SELL":"sse","N/A":"sn"}.get(s,"sn")
+            "CAUTION":"sca","SELL":"sse","N/A":"sna"}.get(s,"sna")
 
 def rsicls(v):
     return "ro" if v>70 else ("rs2" if v<40 else "rn2")
@@ -550,10 +583,10 @@ def fmt(v):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  GENERATE HTML
+#  GENERATE HTML  (RESPONSIVE)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def generate_html(stocks, market, date_str, source) -> str:
+def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
     nc  = "up" if market["nifty_chg"]  >=0 else "dn"
     xc  = "up" if market["sensex_chg"] >=0 else "dn"
     na  = "▲"  if market["nifty_chg"]  >=0 else "▼"
@@ -576,16 +609,21 @@ def generate_html(stocks, market, date_str, source) -> str:
 
         rows += f"""
       <tr style="animation-delay:{i*0.05:.2f}s">
-        <td><div class="sn">{s['name']}</div>
-            <div class="sy">{s['symbol'].replace('.NS','')}</div></td>
-        <td><div class="pv">{pr}</div><div class="sp">{spk}</div></td>
-        <td><span class="b {fc}">{fa}</span></td>
-        <td><span class="b {dc}">{da}</span></td>
-        <td class="{rsicls(s['rsi'])}">
+        <td data-label="Stock">
+          <div class="sn">{s['name']}</div>
+          <div class="sy">{s['symbol'].replace('.NS','')}</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">{pr}</div>
+          <div class="sp">{spk}</div>
+        </td>
+        <td data-label="FII Cash"><span class="b {fc}">{fa}</span></td>
+        <td data-label="DII Cash"><span class="b {dc}">{da}</span></td>
+        <td data-label="RSI(14)" class="{rsicls(s['rsi'])}">
           <div class="rv {'up' if s['rsi']<55 else 'dn'}">{s['rsi']}</div>
           <div class="rb2"><div class="rf2" style="width:{min(s['rsi'],100):.0f}%"></div></div>
         </td>
-        <td>
+        <td data-label="Indicators">
           <div class="im"><span class="il">MACD</span>
             <span class="{mc2}">{'+' if s['macd_hist']>0 else ''}{s['macd_hist']}</span></div>
           <div class="im"><span class="il">EMA</span>
@@ -594,100 +632,250 @@ def generate_html(stocks, market, date_str, source) -> str:
           <div class="im"><span class="il">BB</span><span>{s['bb_label']}</span></div>
           <div class="im"><span class="il">StRSI</span><span>{s['stoch_rsi']}</span></div>
         </td>
-        <td>
+        <td data-label="Levels">
           <div class="sr"><span class="sr-r">R1</span> {fmt(s['resist1'])}</div>
           <div class="sr"><span class="sr-s">S1</span> {fmt(s['support1'])}</div>
           <div class="sr"><span class="sr-r">6mH</span> {fmt(s['swing_high'])}</div>
           <div class="sr"><span class="sr-s">6mL</span> {fmt(s['swing_low'])}</div>
         </td>
-        <td><span class="sig {sigcls(s['overall'])}">{s['overall']}</span></td>
+        <td data-label="Signal"><span class="sig {sigcls(s['overall'])}">{s['overall']}</span></td>
       </tr>"""
 
     css = """
-:root{--bg:#050c14;--sur:#0b1623;--bdr:#1a3050;--fi:#00d4aa;--di:#ff8c42;
-  --bo:#a78bfa;--se:#ff4d6d;--tx:#e2eaf4;--mu:#5a7a99;--go:#f0c060}
+:root{
+  --bg:#050c14;--sur:#0b1623;--bdr:#1a3050;--fi:#00d4aa;--di:#ff8c42;
+  --bo:#a78bfa;--se:#ff4d6d;--tx:#e2eaf4;--mu:#5a7a99;--go:#f0c060;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:'Syne',sans-serif;min-height:100vh;
+}
+body::before{
+  content:'';position:fixed;inset:0;
   background:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
-  background-size:40px 40px;pointer-events:none;z-index:0}
+  background-size:40px 40px;pointer-events:none;z-index:0;
+}
 .w{position:relative;z-index:1}
-header{background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
-  border-bottom:1px solid var(--bdr);padding:16px 26px;
+
+/* ── HEADER ── */
+header{
+  background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
+  border-bottom:1px solid var(--bdr);padding:14px 20px;
   display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:99;backdrop-filter:blur(8px)}
+  flex-wrap:wrap;gap:10px;
+  position:sticky;top:0;z-index:99;backdrop-filter:blur(8px);
+}
 .lg{display:flex;align-items:center;gap:12px}
-.li{width:40px;height:40px;background:linear-gradient(135deg,var(--fi),var(--bo));
+.li{
+  width:40px;height:40px;min-width:40px;
+  background:linear-gradient(135deg,var(--fi),var(--bo));
   border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:18px;box-shadow:0 0 18px rgba(0,212,170,.4)}
-.lt{font-size:18px;font-weight:800;letter-spacing:1px}
+  font-size:18px;box-shadow:0 0 18px rgba(0,212,170,.4);
+}
+.lt{font-size:16px;font-weight:800;letter-spacing:1px}
 .lt span{color:var(--fi)}
 .ls2{font-size:9px;color:var(--mu);letter-spacing:1px;margin-top:2px}
-.hm{display:flex;align-items:center;gap:12px}
-.lv{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.1);
-  border:1px solid rgba(0,212,170,.3);padding:5px 12px;border-radius:20px;
-  font-size:11px;font-weight:700;color:var(--fi);letter-spacing:1px}
-.ld{width:7px;height:7px;border-radius:50%;background:var(--fi);animation:pulse 1.5s infinite}
+.hm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lv{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);
+  padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;color:var(--fi);letter-spacing:1px;
+}
+.ld{
+  width:7px;height:7px;border-radius:50%;background:var(--fi);
+  animation:pulse 1.5s infinite;
+}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
-.src{font-size:10px;color:var(--bo);background:rgba(167,139,250,.1);
-  border:1px solid rgba(167,139,250,.25);padding:4px 10px;border-radius:12px}
-.dt{font-family:'Space Mono',monospace;font-size:11px;color:var(--mu)}
-.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
-  background:var(--bdr);border-bottom:1px solid var(--bdr)}
-.sc2{background:var(--sur);padding:14px 20px}
-.sl{font-size:10px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px}
-.sv{font-family:'Space Mono',monospace;font-size:20px;font-weight:700}
-.sb2{font-size:11px;color:var(--mu);margin-top:3px}
+.src{
+  font-size:10px;color:var(--bo);
+  background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);
+  padding:4px 10px;border-radius:12px;
+}
+.dt{font-family:'Space Mono',monospace;font-size:10px;color:var(--mu)}
+
+/* ── SUMMARY GRID ── */
+.sum{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr);
+}
+.sc2{background:var(--sur);padding:14px 16px}
+.sl{font-size:9px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px}
+.sv{font-family:'Space Mono',monospace;font-size:18px;font-weight:700}
+.sb2{font-size:10px;color:var(--mu);margin-top:3px}
+
 .up{color:var(--fi)} .dn{color:var(--se)}
 .cfi{color:var(--fi)} .cdi{color:var(--di)} .cbo{color:var(--bo)} .cgo{color:var(--go)}
-.tw{padding:20px 26px;overflow-x:auto}
-.tt{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);
-  margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.tt::before{content:'';width:3px;height:14px;background:var(--fi);border-radius:2px}
-table{width:100%;border-collapse:collapse;min-width:920px}
+
+/* ── TABLE WRAPPER ── */
+.tw{padding:16px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tt{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mu);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.tt::before{content:'';width:3px;height:14px;background:var(--fi);border-radius:2px;flex-shrink:0}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;min-width:860px}
 thead tr{border-bottom:2px solid var(--bdr)}
-th{padding:9px 10px;text-align:left;font-size:9px;letter-spacing:1.5px;
-  color:var(--mu);text-transform:uppercase;font-weight:600}
+th{
+  padding:9px 10px;text-align:left;
+  font-size:9px;letter-spacing:1.5px;color:var(--mu);
+  text-transform:uppercase;font-weight:600;white-space:nowrap;
+}
 th:not(:first-child){text-align:center}
-tbody tr{border-bottom:1px solid rgba(26,48,80,.4);
-  animation:si .4s ease both;opacity:0;transition:background .15s}
+tbody tr{
+  border-bottom:1px solid rgba(26,48,80,.4);
+  animation:si .4s ease both;opacity:0;transition:background .15s;
+}
 @keyframes si{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 tbody tr:hover{background:rgba(0,212,170,.03)}
-td{padding:11px 10px;font-size:12px;vertical-align:middle;text-align:center}
+td{
+  padding:10px 10px;font-size:12px;
+  vertical-align:middle;text-align:center;
+}
 td:first-child{text-align:left}
-.sn{font-weight:700;font-size:13px}
+
+.sn{font-weight:700;font-size:13px;line-height:1.3}
 .sy{font-size:9px;color:var(--mu);font-family:'Space Mono',monospace;margin-top:2px}
 .pv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .sp{margin-top:4px}
-.b{display:inline-block;padding:4px 9px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px}
+
+.b{
+  display:inline-block;padding:4px 9px;
+  border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px;
+  white-space:nowrap;
+}
 .bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
 .bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
 .bx{background:rgba(255,77,109,.1);color:var(--se);border:1px solid rgba(255,77,109,.25)}
+
 .rv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .rb2{width:78px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
 .rf2{height:100%;border-radius:2px}
 .ro .rf2{background:var(--se)} .rn2 .rf2{background:var(--go)} .rs2 .rf2{background:var(--fi)}
+
 .im{display:flex;justify-content:center;gap:5px;font-size:10px;margin-bottom:2px}
 .il{color:var(--mu);font-size:9px;min-width:30px;text-align:right}
-.sr{font-size:10px;font-family:'Space Mono',monospace;display:flex;align-items:center;
-  gap:4px;justify-content:center;margin-bottom:2px}
-.sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
-  background:rgba(255,77,109,.2);color:var(--se)}
-.sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
-  background:rgba(0,212,170,.15);color:var(--fi)}
-.sig{display:inline-block;padding:4px 10px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.5px}
-.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);
-  box-shadow:0 0 8px rgba(0,212,170,.2)}
+
+.sr{
+  font-size:10px;font-family:'Space Mono',monospace;
+  display:flex;align-items:center;gap:4px;justify-content:center;margin-bottom:2px;
+}
+.sr-r{
+  font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(255,77,109,.2);color:var(--se);
+}
+.sr-s{
+  font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(0,212,170,.15);color:var(--fi);
+}
+
+.sig{
+  display:inline-block;padding:4px 10px;border-radius:5px;
+  font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;
+}
+.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);box-shadow:0 0 8px rgba(0,212,170,.2)}
 .sbuy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
-.sn{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
+.sna{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
 .sca{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
 .sse{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
-.leg{padding:0 26px 18px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+
+/* ── LEGEND ── */
+.leg{padding:0 20px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
-.ld2{width:9px;height:9px;border-radius:50%}
-footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
-  display:flex;justify-content:space-between;font-size:11px;color:var(--mu);flex-wrap:wrap;gap:8px}
+.ld2{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--sur);border-top:1px solid var(--bdr);
+  padding:12px 20px;display:flex;justify-content:space-between;
+  font-size:10px;color:var(--mu);flex-wrap:wrap;gap:8px;
+}
+
+/* ── DATE RANGE BADGE ── */
+.drb{
+  font-size:10px;color:var(--go);
+  background:rgba(240,192,96,.1);border:1px solid rgba(240,192,96,.25);
+  padding:3px 10px;border-radius:10px;font-family:'Space Mono',monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET  (max 900px)
+══════════════════════════════════════════════════════════════ */
+@media(max-width:900px){
+  .sum{grid-template-columns:repeat(2,1fr)}
+  .sv{font-size:16px}
+  .lt{font-size:14px}
+  .ls2{display:none}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE  (max 600px)
+   Cards layout replaces table on small screens
+══════════════════════════════════════════════════════════════ */
+@media(max-width:600px){
+
+  /* Header */
+  header{padding:10px 14px}
+  .lt{font-size:13px}
+  .lv{font-size:9px;padding:3px 8px}
+  .src{font-size:9px;padding:3px 8px}
+  .dt{display:none}
+
+  /* Summary */
+  .sum{grid-template-columns:repeat(2,1fr)}
+  .sc2{padding:10px 12px}
+  .sv{font-size:15px}
+  .sl{font-size:8px}
+  .sb2{font-size:9px}
+
+  /* Table → card layout */
+  .tw{padding:10px 10px;overflow-x:visible}
+  table,thead,tbody,th,td,tr{display:block}
+  thead{display:none} /* hide headers — labels from data-label */
+
+  tbody tr{
+    background:var(--sur);border:1px solid var(--bdr);
+    border-radius:10px;margin-bottom:10px;padding:12px;
+    animation:si .4s ease both;
+  }
+  tbody tr:hover{background:rgba(0,212,170,.04)}
+
+  td{
+    text-align:left;padding:5px 0;
+    border:none;display:flex;align-items:center;
+    justify-content:space-between;gap:8px;
+    font-size:12px;
+  }
+  td:first-child{
+    flex-direction:column;align-items:flex-start;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--bdr);padding-bottom:8px;
+  }
+  td::before{
+    content:attr(data-label);
+    font-size:9px;letter-spacing:1px;text-transform:uppercase;
+    color:var(--mu);flex-shrink:0;min-width:70px;
+  }
+  td:first-child::before{display:none}
+
+  .rb2{margin:4px 0 0}
+  .im{justify-content:flex-end}
+  .sr{justify-content:flex-end}
+
+  /* Legend */
+  .leg{padding:0 10px 12px;gap:10px}
+  .li2{font-size:10px}
+
+  footer{padding:10px 14px;font-size:9px}
+  .tt{font-size:9px}
+}
 """
 
     return f"""<!DOCTYPE html>
@@ -701,6 +889,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
 </head>
 <body>
 <div class="w">
+
 <header>
   <div class="lg">
     <div class="li">📊</div>
@@ -710,34 +899,51 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
     </div>
   </div>
   <div class="hm">
+    {f'<div class="drb">📅 {date_range_label}</div>' if date_range_label else ''}
     <div class="src">📡 {source}</div>
-    <div class="lv"><div class="ld"></div>LIVE DATA</div>
-    <div class="dt">📅 {date_str}</div>
+    <div class="lv"><div class="ld"></div>LIVE</div>
+    <div class="dt">{date_str}</div>
   </div>
 </header>
 
 <div class="sum">
-  <div class="sc2"><div class="sl">Nifty 50</div>
+  <div class="sc2">
+    <div class="sl">Nifty 50</div>
     <div class="sv cfi">₹{market['nifty_price']:,.2f}</div>
-    <div class="sb2 {nc}">{na} {market['nifty_chg']}%</div></div>
-  <div class="sc2"><div class="sl">Sensex</div>
+    <div class="sb2 {nc}">{na} {market['nifty_chg']}%</div>
+  </div>
+  <div class="sc2">
+    <div class="sl">Sensex</div>
     <div class="sv cdi">₹{market['sensex_price']:,.2f}</div>
-    <div class="sb2 {xc}">{xa} {market['sensex_chg']}%</div></div>
-  <div class="sc2"><div class="sl">Stocks Tracked</div>
+    <div class="sb2 {xc}">{xa} {market['sensex_chg']}%</div>
+  </div>
+  <div class="sc2">
+    <div class="sl">Stocks Tracked</div>
     <div class="sv cbo">{len(stocks)}</div>
-    <div class="sb2">FII Buys: {fb} · DII Buys: {db} · Both: {bb}</div></div>
-  <div class="sc2"><div class="sl">Strong Buy Signals</div>
+    <div class="sb2">FII Buys: {fb} · DII Buys: {db} · Both: {bb}</div>
+  </div>
+  <div class="sc2">
+    <div class="sl">Strong Buy Signals</div>
     <div class="sv cgo">{st}</div>
-    <div class="sb2">Stocks with STRONG BUY</div></div>
+    <div class="sb2">Stocks with STRONG BUY</div>
+  </div>
 </div>
 
 <div class="tw">
-  <div class="tt">Institutional Activity · Technical Analysis · {date_str}</div>
+  <div class="tt">
+    Institutional Activity · Technical Analysis ·
+    <span style="color:var(--go);font-family:'Space Mono',monospace">{date_range_label or date_str}</span>
+  </div>
   <table>
     <thead><tr>
-      <th>Stock</th><th>Price / Trend</th><th>FII Cash</th><th>DII Cash</th>
-      <th>RSI(14)</th><th>MACD · EMA · ADX · BB · StRSI</th>
-      <th>Support / Resistance (6M)</th><th>Signal</th>
+      <th>Stock</th>
+      <th>Price / Trend</th>
+      <th>FII Cash</th>
+      <th>DII Cash</th>
+      <th>RSI(14)</th>
+      <th>MACD · EMA · ADX · BB · StRSI</th>
+      <th>Support / Resistance (6M)</th>
+      <th>Signal</th>
     </tr></thead>
     <tbody>{rows}</tbody>
   </table>
@@ -748,22 +954,26 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
   <div class="li2"><div class="ld2" style="background:var(--di)"></div>DII Buying</div>
   <div class="li2"><div class="ld2" style="background:var(--bo)"></div>Both Buying</div>
   <div class="li2"><div class="ld2" style="background:var(--se)"></div>Selling</div>
-  <div class="li2" style="margin-left:auto;font-size:10px;">
-    RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend</div>
+  <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;">
+    RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend
+  </div>
 </div>
 
 <footer>
-  <div>🤖 FII/DII Pulse v6 · Source: {source} · Technicals: yfinance+pandas · {date_str}</div>
+  <div>🤖 FII/DII Pulse v7 · {source} · yfinance · {date_str}</div>
   <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
 </footer>
-</div></body></html>"""
+
+</div>
+</body>
+</html>"""
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  EMAIL  — proper HTML file attachment
+#  EMAIL
 # ─────────────────────────────────────────────────────────────────────────────
 
-def send_email(html_path: Path, date_str: str, source: str, count: int):
+def send_email(html_path: Path, date_str: str, source: str, count: int, date_range_label: str = ""):
     user  = os.getenv("GMAIL_USER","").strip()
     pwd   = os.getenv("GMAIL_PASS","").strip()
     rcpts = os.getenv("RECIPIENT_EMAIL", user).strip()
@@ -780,7 +990,6 @@ def send_email(html_path: Path, date_str: str, source: str, count: int):
     msg["From"]    = f"FII/DII Pulse <{user}>"
     msg["To"]      = ", ".join(to_list)
 
-    # ── Email body HTML ────────────────────────────────────────────────────
     fname = html_path.name
     body  = f"""<html><body style="font-family:Arial,sans-serif;background:#050c14;
 color:#e2eaf4;padding:30px;max-width:600px;margin:0 auto;">
@@ -792,9 +1001,11 @@ color:#e2eaf4;padding:30px;max-width:600px;margin:0 auto;">
     <p style="color:#5a7a99;margin:6px 0 0;font-size:12px;letter-spacing:1px;">
       INSTITUTIONAL INTELLIGENCE REPORT</p>
   </div>
-  <div style="background:#0b1623;padding:14px 24px;border-bottom:1px solid #1a3050;
-              font-size:12px;display:flex;justify-content:space-between;">
+  <div style="background:#0b1623;padding:14px 24px;border-bottom:1px solid #1a3050;font-size:12px;">
     <span style="color:#5a7a99;">📅 {date_str}</span>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <span style="color:#f0c060;">🗓 Range: {date_range_label}</span>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
     <span style="color:#a78bfa;">📡 {source}</span>
   </div>
   <div style="background:#0f1e2e;padding:20px 24px;border-bottom:1px solid #1a3050;">
@@ -817,14 +1028,13 @@ color:#e2eaf4;padding:30px;max-width:600px;margin:0 auto;">
   <div style="background:#050c14;padding:14px 24px;text-align:center;">
     <p style="color:#3a5a78;font-size:10px;margin:0;">
       ⚠️ Not financial advice. Educational purposes only. Always DYOR.<br>
-      Auto-generated by FII/DII Pulse v6
+      Auto-generated by FII/DII Pulse v7
     </p>
   </div>
 </div></body></html>"""
 
     msg.attach(MIMEText(body, "html", "utf-8"))
 
-    # ── Attach HTML file (proper MIME encoding) ────────────────────────────
     with open(html_path, "rb") as f:
         data = f.read()
 
@@ -835,14 +1045,13 @@ color:#e2eaf4;padding:30px;max-width:600px;margin:0 auto;">
     att.add_header("Content-Type", f'text/html; name="{html_path.name}"')
     msg.attach(att)
 
-    # ── Send ───────────────────────────────────────────────────────────────
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as srv:
             srv.login(user, pwd)
             srv.sendmail(user, to_list, msg.as_string())
         log.info(f"  ✅ Email sent to {to_list}")
     except smtplib.SMTPAuthenticationError:
-        log.error("  ❌ Gmail auth failed — use App Password, not your main password")
+        log.error("  ❌ Gmail auth failed — use App Password")
         raise
     except Exception as e:
         log.error(f"  ❌ Email error: {e}")
@@ -860,13 +1069,19 @@ def main():
     date_file= now_ist.strftime("%Y-%m-%d")
 
     log.info("=" * 65)
-    log.info(f"  🚀 FII/DII Pulse v6 — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
+    log.info(f"  🚀 FII/DII Pulse v7 — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
     log.info("=" * 65)
+
+    # Pre-compute the date range label for HTML/email
+    try:
+        from_date, to_date, date_range_label = get_date_range()
+    except Exception:
+        date_range_label = ""
 
     stocks, market, source = build_dataset()
     log.info(f"📊 Stocks enriched: {len(stocks)}")
 
-    html = generate_html(stocks, market, date_str, source)
+    html = generate_html(stocks, market, date_str, source, date_range_label)
 
     index_path = OUTPUT_DIR / "index.html"
     dated_path = OUTPUT_DIR / f"report_{date_file}.html"
@@ -874,7 +1089,7 @@ def main():
         p.write_text(html, encoding="utf-8")
         log.info(f"💾 Saved: {p}")
 
-    send_email(dated_path, date_str, source, len(stocks))
+    send_email(dated_path, date_str, source, len(stocks), date_range_label)
 
     log.info("=" * 65)
     log.info("  ✅ Complete!")
