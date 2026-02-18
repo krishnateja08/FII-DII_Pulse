@@ -328,20 +328,52 @@ def fetch_from_nse() -> list:
         log.info(f"  → Shape: {df.shape}  Columns: {list(df.columns)}")
         if len(df): log.info(f"  → Row0: {df.iloc[0].to_dict()}")
 
-        # ── Normalise columns ──────────────────────────────────────────────
+        # -- Normalise columns: use exact NSE BD_ names first, then fuzzy
         df.columns = [str(c).strip() for c in df.columns]
+        log.info(f"  -> Raw columns from NSE: {list(df.columns)}")
+
+        # Exact NSE API column names (observed from live response)
+        NSE_EXACT = {
+            "BD_SYMBOL":      "SYMBOL",
+            "BD_SCRIP_NAME":  "COMPANY",
+            "BD_CLIENT_NAME": "CLIENT",
+            "BD_BUY_SELL":    "BUYSELL",
+            "BD_QTY_TRD":     "QTY",
+            "BD_DT_DATE":     "DATE",
+            "BD_DT_ORDER":    "ORDER_DATE",
+            "BD_TP_WATP":     "PRICE",
+            "BD_REMARKS":     "REMARKS",
+            # alternate / block-deal variants
+            "SYMBOL":         "SYMBOL",
+            "SCRIP_NAME":     "COMPANY",
+            "CLIENT_NAME":    "CLIENT",
+            "BUY_SELL":       "BUYSELL",
+            "QTY_TRD":        "QTY",
+            "TRADE_DATE":     "DATE",
+            "TRADE_PRICE":    "PRICE",
+        }
+
         rename = {}
+        mapped = set()  # track which target columns are already mapped
         for c in df.columns:
-            cu = c.upper()
-            if   "SYMBOL" in cu:                                             rename[c] = "SYMBOL"
-            elif any(x in cu for x in ["COMP","SCRIP_NAME","COMPANY","NAME"]): rename[c] = "COMPANY"
-            elif any(x in cu for x in ["CLIENT","PARTY","BUYER","SELLER"]):     rename[c] = "CLIENT"
-            elif any(x in cu for x in ["BUY","SELL","BS","TYPE"]):              rename[c] = "BUYSELL"
-            elif any(x in cu for x in ["QTY","QUANTITY","SHARES"]):             rename[c] = "QTY"
-            elif any(x in cu for x in ["DATE","DT"]):                           rename[c] = "DATE"
-            elif any(x in cu for x in ["PRICE","RATE","VALUE"]):                rename[c] = "PRICE"
+            cu = c.strip().upper()
+            if cu in NSE_EXACT:
+                target = NSE_EXACT[cu]
+                if target not in mapped:
+                    rename[c] = target
+                    mapped.add(target)
+            # Fuzzy fallback — CLIENT checked BEFORE NAME to avoid BD_CLIENT_NAME -> COMPANY
+            elif "CLIENT" in cu and "CLIENT" not in mapped:   rename[c] = "CLIENT";  mapped.add("CLIENT")
+            elif "PARTY"  in cu and "CLIENT" not in mapped:   rename[c] = "CLIENT";  mapped.add("CLIENT")
+            elif "SYMBOL" in cu and "SYMBOL" not in mapped:   rename[c] = "SYMBOL";  mapped.add("SYMBOL")
+            elif "SCRIP_NAME" in cu and "COMPANY" not in mapped: rename[c] = "COMPANY"; mapped.add("COMPANY")
+            elif "COMP"   in cu and "COMPANY" not in mapped:  rename[c] = "COMPANY"; mapped.add("COMPANY")
+            elif "BUY_SELL" in cu and "BUYSELL" not in mapped: rename[c] = "BUYSELL"; mapped.add("BUYSELL")
+            elif "QTY"    in cu and "QTY" not in mapped:      rename[c] = "QTY";     mapped.add("QTY")
+            elif "PRICE"  in cu and "PRICE" not in mapped:    rename[c] = "PRICE";   mapped.add("PRICE")
+
         df = df.rename(columns=rename)
-        log.info(f"  → Normalised: {list(df.columns)}")
+        log.info(f"  -> Normalised columns: {list(df.columns)}")
 
         if "CLIENT" not in df.columns:
             log.warning("  ❌ CLIENT column missing")
