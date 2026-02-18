@@ -1,14 +1,9 @@
 name: FII/DII Intelligence Dashboard
 
 on:
-  # ── Automatic schedule ─────────────────────────────────────────────────────
-  # Runs at 07:00 PM IST = 13:30 UTC (after Block Deal window closes at 18:30 IST)
-  # Also runs at 09:30 AM IST = 04:00 UTC (morning summary using previous day)
   schedule:
-    - cron: "30 13 * * 1-5"   # 07:00 PM IST  Mon–Fri  (post Block Deal cutoff)
-    - cron: "0 4 * * 2-6"     # 09:30 AM IST  Tue–Sat  (morning run, prev day)
-
-  # ── Manual trigger ─────────────────────────────────────────────────────────
+    - cron: "30 13 * * 1-5"   # 07:00 PM IST Mon-Fri (after 18:30 block deal cutoff)
+    - cron: "0 4 * * 2-6"     # 09:30 AM IST Tue-Sat (morning run, prev day data)
   workflow_dispatch:
     inputs:
       reason:
@@ -16,7 +11,6 @@ on:
         required: false
         default: "Manual trigger"
 
-# ── Permissions for GitHub Pages deployment ───────────────────────────────────
 permissions:
   contents: write
   pages: write
@@ -28,20 +22,17 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # ── 1. Checkout repo ──────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 2. Set up Python ──────────────────────────────────────────────────
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # ── 3. Install dependencies ───────────────────────────────────────────
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install \
@@ -52,28 +43,25 @@ jobs:
             beautifulsoup4 \
             lxml \
             pytz \
-            python-dotenv
+            python-dotenv \
+            curl_cffi
 
-      # ── 4. Run the dashboard script ───────────────────────────────────────
       - name: Generate FII/DII Dashboard
         env:
           GMAIL_USER:       ${{ secrets.GMAIL_USER }}
           GMAIL_PASS:       ${{ secrets.GMAIL_PASS }}
           RECIPIENT_EMAIL:  ${{ secrets.RECIPIENT_EMAIL }}
         run: |
-          python "FII&DII_stock_act.py"
+          python FII_DII_stock_act.py
 
-      # ── 5. Commit & push the generated HTML ──────────────────────────────
       - name: Commit generated report
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name  "github-actions[bot]"
           git add docs/
-          # Only commit if there are changes
-          git diff --staged --quiet || git commit -m "📊 Auto-update FII/DII report $(date +'%Y-%m-%d %H:%M IST' --date='TZ=Asia/Kolkata now')"
+          git diff --staged --quiet || git commit -m "📊 Auto-update FII/DII report $(TZ='Asia/Kolkata' date +'%Y-%m-%d %H:%M IST')"
           git push
 
-      # ── 6. Upload dashboard log as artifact (for debugging) ──────────────
       - name: Upload run log
         if: always()
         uses: actions/upload-artifact@v4
