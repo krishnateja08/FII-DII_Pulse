@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FII/DII Pulse — 18 Feb 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#050c14; --surface:#0b1623; --card:#0f1e2e;
+    --border:#1a3050; --fii:#00d4aa; --dii:#ff8c42;
+    --both:#a78bfa; --sell:#ff4d6d; --text:#e2eaf4;
+    --muted:#5a7a99; --gold:#f0c060; --green:#00d4aa;
+    --red:#ff4d6d; --neon:#00f5d4;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif;
+          min-height:100vh; }
+  body::before { content:''; position:fixed; inset:0;
+    background-image:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
+    background-size:40px 40px; pointer-events:none; z-index:0; }
+  .wrap { position:relative; z-index:1; }
+
+  /* HEADER */
+  header { background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
+    border-bottom:1px solid var(--border); padding:18px 32px;
+    display:flex; align-items:center; justify-content:space-between; }
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-icon { width:42px; height:42px;
+    background:linear-gradient(135deg,var(--fii),var(--both));
+    border-radius:10px; display:flex; align-items:center;
+    justify-content:center; font-size:20px;
+    box-shadow:0 0 20px rgba(0,212,170,.4); }
+  .logo-title { font-size:20px; font-weight:800; letter-spacing:1px; }
+  .logo-title span { color:var(--fii); }
+  .logo-sub { font-size:10px; color:var(--muted); letter-spacing:1px; margin-top:2px; }
+  .live-badge { display:flex; align-items:center; gap:6px;
+    background:rgba(0,212,170,.1); border:1px solid rgba(0,212,170,.3);
+    padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700;
+    color:var(--fii); letter-spacing:1px; }
+  .live-dot { width:7px; height:7px; border-radius:50%;
+    background:var(--fii); animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+  .date-tag { font-family:'Space Mono',monospace; font-size:12px; color:var(--muted); }
+
+  /* SUMMARY */
+  .summary { display:grid; grid-template-columns:repeat(4,1fr);
+    background:var(--border); gap:1px; border-bottom:1px solid var(--border); }
+  .s-card { background:var(--surface); padding:18px 24px; }
+  .s-label { font-size:10px; letter-spacing:2px; color:var(--muted);
+    text-transform:uppercase; margin-bottom:6px; }
+  .s-val { font-family:'Space Mono',monospace; font-size:22px; font-weight:700; }
+  .s-sub { font-size:11px; color:var(--muted); margin-top:4px; }
+  .c-fii{color:var(--fii)} .c-dii{color:var(--dii)} .c-both{color:var(--both)} .c-gold{color:var(--gold)}
+  .up{color:var(--green)} .down{color:var(--red)}
+
+  /* TABLE */
+  .table-wrap { padding:24px 32px; overflow-x:auto; }
+  .sec-title { font-size:12px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--muted); margin-bottom:18px;
+    display:flex; align-items:center; gap:10px; }
+  .sec-title::before { content:''; width:3px; height:16px;
+    background:var(--fii); border-radius:2px; }
+  table { width:100%; border-collapse:collapse; min-width:900px; }
+  thead tr { border-bottom:2px solid var(--border); }
+  th { padding:10px 12px; text-align:left; font-size:10px;
+    letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; }
+  th:not(:first-child) { text-align:center; }
+  tbody tr { border-bottom:1px solid rgba(26,48,80,.4);
+    transition:background .15s; animation:slideIn .4s ease forwards; opacity:0; }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+  tbody tr:nth-child(1){animation-delay:.05s} tbody tr:nth-child(2){animation-delay:.1s}
+  tbody tr:nth-child(3){animation-delay:.15s} tbody tr:nth-child(4){animation-delay:.2s}
+  tbody tr:nth-child(5){animation-delay:.25s} tbody tr:nth-child(6){animation-delay:.3s}
+  tbody tr:nth-child(7){animation-delay:.35s} tbody tr:nth-child(8){animation-delay:.4s}
+  tbody tr:nth-child(9){animation-delay:.45s} tbody tr:nth-child(10){animation-delay:.5s}
+  tbody tr:hover { background:rgba(0,212,170,.03); }
+  td { padding:13px 12px; font-size:13px; vertical-align:middle; text-align:center; }
+  td:first-child { text-align:left; }
+
+  .stock-name { font-weight:700; font-size:14px; }
+  .stock-sym { font-size:10px; color:var(--muted); font-family:'Space Mono',monospace;
+    letter-spacing:.5px; margin-top:2px; }
+
+  .price-cell { text-align:center; }
+  .price-main { font-family:'Space Mono',monospace; font-size:13px; font-weight:700; }
+  .spark { margin-top:4px; }
+
+  .badge { display:inline-block; padding:4px 9px; border-radius:5px;
+    font-size:10px; font-weight:800; letter-spacing:.5px; }
+  .badge-fii { background:rgba(0,212,170,.12); color:var(--fii); border:1px solid rgba(0,212,170,.25); }
+  .badge-dii { background:rgba(255,140,66,.12); color:var(--dii); border:1px solid rgba(255,140,66,.25); }
+  .badge-both { background:rgba(167,139,250,.15); color:var(--both); border:1px solid rgba(167,139,250,.3); }
+  .badge-sell { background:rgba(255,77,109,.1); color:var(--sell); border:1px solid rgba(255,77,109,.25); }
+
+  .rsi-num { font-family:'Space Mono',monospace; font-size:13px; font-weight:700; }
+  .rsi-bar-bg { width:80px; height:4px; background:var(--border);
+    border-radius:2px; margin:5px auto 0; overflow:hidden; }
+  .rsi-bar-fill { height:100%; border-radius:2px; }
+  .rsi-overbought .rsi-bar-fill { background:var(--red); }
+  .rsi-neutral    .rsi-bar-fill { background:var(--gold); }
+  .rsi-oversold   .rsi-bar-fill { background:var(--green); }
+
+  .ind-mini { display:flex; justify-content:center; gap:5px;
+    font-size:11px; margin-bottom:3px; }
+  .ind-lbl { color:var(--muted); font-size:10px; }
+
+  .sr-row { font-size:10px; font-family:'Space Mono',monospace;
+    display:flex; align-items:center; gap:4px; justify-content:center;
+    margin-bottom:2px; }
+  .sr-r { font-size:9px; padding:1px 5px; border-radius:3px; font-weight:700;
+    background:rgba(255,77,109,.2); color:var(--red); }
+  .sr-s { font-size:9px; padding:1px 5px; border-radius:3px; font-weight:700;
+    background:rgba(0,212,170,.15); color:var(--green); }
+
+  .signal { display:inline-block; padding:5px 12px; border-radius:5px;
+    font-size:10px; font-weight:800; letter-spacing:.5px; }
+  .signal-strong-buy { background:rgba(0,212,170,.2); color:var(--green);
+    border:1px solid rgba(0,212,170,.5); box-shadow:0 0 10px rgba(0,212,170,.2); }
+  .signal-buy     { background:rgba(0,245,212,.1); color:#4ad9c8; border:1px solid rgba(0,245,212,.25); }
+  .signal-neutral { background:rgba(240,192,96,.1); color:var(--gold); border:1px solid rgba(240,192,96,.25); }
+  .signal-caution { background:rgba(255,140,66,.1); color:var(--dii); border:1px solid rgba(255,140,66,.3); }
+  .signal-sell    { background:rgba(255,77,109,.12); color:var(--red); border:1px solid rgba(255,77,109,.3); }
+
+  /* LEGEND */
+  .legend { padding:0 32px 24px; display:flex; gap:16px; flex-wrap:wrap; }
+  .leg-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); }
+  .leg-dot { width:10px; height:10px; border-radius:50%; }
+
+  /* FOOTER */
+  footer { background:var(--surface); border-top:1px solid var(--border);
+    padding:14px 32px; display:flex; justify-content:space-between;
+    font-size:11px; color:var(--muted); flex-wrap:wrap; gap:8px; }
+  .disclaimer { font-style:italic; font-size:10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <div>
+      <div class="logo-title">FII<span>/DII</span> PULSE</div>
+      <div class="logo-sub">INSTITUTIONAL INTELLIGENCE DASHBOARD · AUTO-GENERATED</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="live-badge"><div class="live-dot"></div> LIVE DATA</div>
+    <div class="date-tag">📅 18 Feb 2026</div>
+  </div>
+</header>
+
+<div class="summary">
+  <div class="s-card">
+    <div class="s-label">Nifty 50</div>
+    <div class="s-val c-fii">₹25,752.65</div>
+    <div class="s-sub up">▲ 0.11%</div>
+  </div>
+  <div class="s-card">
+    <div class="s-label">Sensex</div>
+    <div class="s-val c-dii">₹83,450.96</div>
+    <div class="s-sub up">▲ 0.21%</div>
+  </div>
+  <div class="s-card">
+    <div class="s-label">Stocks Tracked</div>
+    <div class="s-val c-both">0</div>
+    <div class="s-sub">FII Buys: 0 · DII Buys: 0 · Both: 0</div>
+  </div>
+  <div class="s-card">
+    <div class="s-label">Strong Buy Signals</div>
+    <div class="s-val c-gold">0</div>
+    <div class="s-sub">Stocks with STRONG BUY rating</div>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <div class="sec-title">Institutional Stock Activity with Technical Analysis · 18 Feb 2026</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Stock</th>
+        <th>Price / Trend</th>
+        <th>FII Cash</th>
+        <th>DII Cash</th>
+        <th>RSI (14)</th>
+        <th>MACD · EMA · ADX</th>
+        <th>Support / Resistance (6M)</th>
+        <th>Signal</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:var(--fii)"></div> FII Buying</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--dii)"></div> DII Buying</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--both)"></div> Both Buying</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div> Selling</div>
+  <div class="leg-item" style="margin-left:auto;font-size:10px;">RSI: &lt;40 Oversold · &gt;70 Overbought · MACD: + Bullish · ADX: &gt;25 Strong Trend</div>
+</div>
+
+<footer>
+  <div>🤖 Auto-generated by FII/DII Pulse · Data: NSE/MunafaSutra · Technicals: yfinance + pandas</div>
+  <div class="disclaimer">⚠️ Not financial advice. For educational purposes only. Always DYOR.</div>
+</footer>
+</div>
+</body>
+</html>
