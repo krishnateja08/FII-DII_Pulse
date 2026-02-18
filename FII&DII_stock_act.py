@@ -504,7 +504,10 @@ def fetch_from_nse() -> list:
             log.info(f"  -> All columns present: {list(df.columns)}")
             return []
 
-        # ── FII / DII classification ───────────────────────────────────────
+        # ── Option 1: Include ALL stocks from CSV ─────────────────────────
+        # Every stock in the bulk/block deal CSV is shown.
+        # FII / DII tags are applied where client name matches keywords.
+        # Stocks with no keyword match appear with "neutral" (untagged).
         stocks, matched = {}, 0
         for _, row in df.iterrows():
             sym    = str(row.get("SYMBOL",  "")).strip().upper()
@@ -512,42 +515,38 @@ def fetch_from_nse() -> list:
             client = str(row.get("CLIENT",  "")).strip().upper()
             bs     = str(row.get("BUYSELL", "")).strip().upper()
 
-            if not sym or not client or sym in ("NAN", ""):
+            # Skip completely empty / invalid rows
+            if not sym or sym in ("NAN", "") or not client or client == "NAN":
                 continue
 
             is_fii = any(k in client for k in FII_KW)
             is_dii = any(k in client for k in DII_KW)
-            if not (is_fii or is_dii):
-                continue
-
-            matched += 1
             action = "buy" if bs.startswith("B") else "sell"
 
             if sym not in stocks:
                 stocks[sym] = {
-                    "symbol":   sym + ".NS",
-                    "name":     name,
-                    "fii_cash": "neutral",
-                    "dii_cash": "neutral",
+                    "symbol":      sym + ".NS",
+                    "name":        name,
+                    "fii_cash":    "neutral",
+                    "dii_cash":    "neutral",
+                    "client_name": client,   # keep raw client for display
                 }
+
+            # Tag FII / DII where matched; multiple rows per symbol are merged
             if is_fii:
                 stocks[sym]["fii_cash"] = action
+                matched += 1
             if is_dii:
                 stocks[sym]["dii_cash"] = action
+                matched += 1
 
-        result = [
-            v for v in stocks.values()
-            if v["fii_cash"] != "neutral" or v["dii_cash"] != "neutral"
-        ]
+        # Return ALL stocks (no neutral filter) — full CSV coverage
+        result = list(stocks.values())
 
         log.info(
             f"  → Total rows={len(df)} | FII/DII matched={matched} | "
-            f"unique stocks={len(result)}"
+            f"unique stocks={len(result)} (ALL included)"
         )
-        if not result and "CLIENT" in df.columns:
-            log.info(
-                f"  → Sample CLIENTs: {df['CLIENT'].dropna().unique()[:15].tolist()}"
-            )
         return result
 
     except Exception as e:
@@ -754,12 +753,16 @@ def build_dataset():
     enriched = []
     for s in raw:
         tech     = compute_technicals(s["symbol"])
-        both_buy = s["fii_cash"] == "buy" and s["dii_cash"] == "buy"
-        fii_only = s["fii_cash"] == "buy" and s["dii_cash"] != "buy"
-        dii_only = s["dii_cash"] == "buy" and s["fii_cash"] != "buy"
-        inst_sig = ("BOTH BUY" if both_buy else
-                    "FII BUY"  if fii_only  else
-                    "DII BUY"  if dii_only  else "SELL")
+        both_buy = s["fii_cash"] == "buy"  and s["dii_cash"] == "buy"
+        fii_only = s["fii_cash"] == "buy"  and s["dii_cash"] != "buy"
+        dii_only = s["dii_cash"] == "buy"  and s["fii_cash"] != "buy"
+        both_sel = s["fii_cash"] == "sell" and s["dii_cash"] == "sell"
+        neither  = s["fii_cash"] == "neutral" and s["dii_cash"] == "neutral"
+        inst_sig = ("BOTH BUY"   if both_buy else
+                    "FII BUY"    if fii_only  else
+                    "DII BUY"    if dii_only  else
+                    "BOTH SELL"  if both_sel  else
+                    "BULK/BLOCK" if neither   else "SELL")
         enriched.append({**s, **tech,
                          "inst_signal": inst_sig,
                          "both_buy":    both_buy,
@@ -794,7 +797,9 @@ def spark_svg(prices):
 
 def sigcls(s):
     return {"STRONG BUY":"sbs","BUY":"sbuy","NEUTRAL":"sna",
-            "CAUTION":"sca","SELL":"sse","N/A":"sna"}.get(s, "sna")
+            "CAUTION":"sca","SELL":"sse","N/A":"sna",
+            "BOTH BUY":"sbs","FII BUY":"sbuy","DII BUY":"sdii",
+            "BOTH SELL":"sse","BULK/BLOCK":"sblk"}.get(s, "sna")
 
 
 def rsicls(v):
@@ -821,10 +826,10 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
 
     rows = ""
     for i, s in enumerate(stocks):
-        fc  = "bf" if s["fii_cash"] == "buy" else "bx"
-        dc  = "bd" if s["dii_cash"] == "buy" else "bx"
-        fa  = "▲ BUY"  if s["fii_cash"] == "buy" else "▼ SELL"
-        da  = "▲ BUY"  if s["dii_cash"] == "buy" else "▼ SELL"
+        fc  = "bf" if s["fii_cash"] == "buy" else ("bx" if s["fii_cash"] == "sell" else "bn")
+        dc  = "bd" if s["dii_cash"] == "buy" else ("bx" if s["dii_cash"] == "sell" else "bn")
+        fa  = "▲ BUY" if s["fii_cash"] == "buy" else ("▼ SELL" if s["fii_cash"] == "sell" else "— N/A")
+        da  = "▲ BUY" if s["dii_cash"] == "buy" else ("▼ SELL" if s["dii_cash"] == "sell" else "— N/A")
         mc2 = "up" if s["macd_hist"] > 0 else "dn"
         ec  = "up" if s["ema_cross"] == "bullish" else "dn"
         spk = spark_svg(s.get("sparkline", []))
@@ -937,6 +942,7 @@ td:first-child{text-align:left}
 .bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
 .bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
 .bx{background:rgba(255,77,109,.1);color:var(--se);border:1px solid rgba(255,77,109,.25)}
+.bn{background:rgba(90,122,153,.1);color:#5a7a99;border:1px solid rgba(90,122,153,.2)}
 .rv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .rb2{width:78px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
 .rf2{height:100%;border-radius:2px}
@@ -949,6 +955,8 @@ td:first-child{text-align:left}
 .sig{display:inline-block;padding:4px 10px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;}
 .sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);box-shadow:0 0 8px rgba(0,212,170,.2)}
 .sbuy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
+.sdii{background:rgba(255,140,66,.15);color:var(--di);border:1px solid rgba(255,140,66,.4)}
+.sblk{background:rgba(90,122,153,.15);color:#8ab4d4;border:1px solid rgba(90,122,153,.3)}
 .sna{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
 .sca{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
 .sse{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
@@ -1054,6 +1062,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;d
   <div class="li2"><div class="ld2" style="background:var(--di)"></div>DII Buying</div>
   <div class="li2"><div class="ld2" style="background:var(--bo)"></div>Both Buying</div>
   <div class="li2"><div class="ld2" style="background:var(--se)"></div>Selling</div>
+  <div class="li2"><div class="ld2" style="background:#8ab4d4"></div>Bulk/Block (Unclassified)</div>
   <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;">
     RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend
   </div>
