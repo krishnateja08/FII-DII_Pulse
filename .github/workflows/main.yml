@@ -45,7 +45,7 @@ jobs:
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml yfinance pandas numpy python-dotenv
+          pip install requests beautifulsoup4 lxml yfinance pandas numpy python-dotenv pytz
 
       # 5. Run your script using the CORRECT filename
       - name: 🚀 Generate FII/DII Dashboard
