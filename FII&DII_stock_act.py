@@ -1,14 +1,16 @@
 """
-FII/DII Intelligence Dashboard — v7
+FII/DII Intelligence Dashboard — v8
 =====================================
 NSE API: https://www.nseindia.com/api/historicalOR/bulk-block-short-deals
          ?optionType=bulk_deals&from=DD-MM-YYYY&to=DD-MM-YYYY
 
-Date Logic:
+Date Logic (VERIFIED):
   - Block Deal window closes at 06:30 PM IST daily
-  - If current IST time > 18:30 → to_date = TODAY, from_date = today - 7 trading days
-  - If current IST time ≤ 18:30 → to_date = YESTERDAY (last trading day), from_date = 7 trading days before that
-  - Skips weekends + NSE holidays automatically
+  - After  18:30 IST → to_date = TODAY  (deals are final)
+  - Before 18:30 IST → to_date = last completed trading day
+  - from_date = 5 trading days BEFORE to_date
+    → to_date is day-1, from_date is day-6 = 6 trading days total
+    → Matches NSE website window: e.g. 10-02-2026 → 17-02-2026
 """
 
 import os, smtplib, logging, time, re
@@ -53,7 +55,7 @@ NSE_HOLIDAYS_2026 = {
 }
 NSE_HOLIDAYS = NSE_HOLIDAYS_2025 | NSE_HOLIDAYS_2026
 
-# ── Headers ───────────────────────────────────────────────────────────────────
+# ── Browser / NSE Headers ─────────────────────────────────────────────────────
 BROWSER_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -133,76 +135,14 @@ FALLBACK_STOCKS = [
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  DATE UTILITIES  (FIXED)
+#  DATE UTILITIES  — v8 FIXED
 # ─────────────────────────────────────────────────────────────────────────────
 
 def is_trading_day(dt: datetime) -> bool:
-    """Return True if dt is a weekday and not an NSE holiday."""
-    if dt.weekday() >= 5:  # Saturday=5, Sunday=6
+    """True if dt is a weekday and not an NSE holiday."""
+    if dt.weekday() >= 5:
         return False
-    key = dt.strftime("%Y-%m-%d")
-    return key not in NSE_HOLIDAYS
-
-
-def prev_trading_day(dt: datetime, n: int = 1) -> datetime:
-    """Walk backwards n trading days from dt (dt itself not counted)."""
-    candidate = dt - timedelta(days=1)
-    steps = 0
-    while steps < n:
-        if is_trading_day(candidate):
-            steps += 1
-            if steps == n:
-                return candidate
-        candidate -= timedelta(days=1)
-        if (dt - candidate).days > 60:
-            raise RuntimeError("Could not find trading day in last 60 days")
-    return candidate
-
-
-def get_date_range() -> tuple[datetime, datetime, str]:
-    """
-    Returns (from_date, to_date, label) based on NSE Block Deal cutoff.
-
-    Block Deal window closes at 06:30 PM IST.
-    - After 18:30 IST  → today's deals are final → to_date = today (if trading day)
-    - Before 18:30 IST → today not yet finalised → to_date = last trading day before today
-
-    from_date = 7 trading days before to_date (inclusive week window)
-    """
-    IST = pytz.timezone("Asia/Kolkata")
-    now_ist = datetime.now(IST)
-    today = now_ist.replace(tzinfo=None).replace(hour=0, minute=0, second=0, microsecond=0)
-
-    # Determine to_date based on 18:30 IST cutoff
-    past_cutoff = now_ist.hour > 18 or (now_ist.hour == 18 and now_ist.minute >= 30)
-
-    if past_cutoff and is_trading_day(today):
-        to_date = today
-        log.info(f"  → Past 18:30 IST cutoff — using TODAY as to_date")
-    else:
-        # Walk back to find last completed trading day
-        to_date = today
-        for _ in range(10):
-            to_date -= timedelta(days=1)
-            if is_trading_day(to_date):
-                break
-        log.info(f"  → Before 18:30 IST cutoff — using YESTERDAY's trading day as to_date")
-
-    # from_date = 7 trading days before to_date
-    from_date = to_date
-    steps = 0
-    candidate = to_date - timedelta(days=1)
-    while steps < 6:  # 6 more days back = 7 total including to_date
-        if is_trading_day(candidate):
-            steps += 1
-            from_date = candidate
-        candidate -= timedelta(days=1)
-        if (to_date - candidate).days > 30:
-            break
-
-    label = f"{fmt_nse_date(from_date)} → {fmt_nse_date(to_date)}"
-    log.info(f"  → Date range: {label}")
-    return from_date, to_date, label
+    return dt.strftime("%Y-%m-%d") not in NSE_HOLIDAYS
 
 
 def fmt_nse_date(dt: datetime) -> str:
@@ -210,130 +150,170 @@ def fmt_nse_date(dt: datetime) -> str:
     return dt.strftime("%d-%m-%Y")
 
 
+def get_date_range() -> tuple:
+    """
+    Returns (from_date, to_date, label).
+
+    Block Deal window closes at 18:30 IST.
+
+    to_date:
+      - After  18:30 IST → today (if trading day), else last trading day
+      - Before 18:30 IST → last completed trading day
+
+    from_date:
+      - Walk back exactly 5 trading days before to_date.
+      - This gives a 6-trading-day window (to_date is day-1, from_date is day-6).
+      - Matches NSE website display: e.g. 10-Feb → 17-Feb (6 trading days).
+
+    Verified:
+      to_date = 17-Feb-2026 (Tue)
+      Walking 5 trading days back: 16(Mon), 13(Fri), 12(Thu), 11(Wed), 10(Tue)
+      → from_date = 10-Feb-2026  ✅  matches website "10-02-2026 to 17-02-2026"
+    """
+    IST = pytz.timezone("Asia/Kolkata")
+    now_ist = datetime.now(IST)
+    today = now_ist.replace(tzinfo=None).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    # ── Determine to_date ─────────────────────────────────────────────────
+    past_cutoff = now_ist.hour > 18 or (now_ist.hour == 18 and now_ist.minute >= 30)
+
+    if past_cutoff and is_trading_day(today):
+        to_date = today
+        log.info("  → Past 18:30 IST — TODAY is to_date")
+    else:
+        # Walk back to find last completed trading day
+        to_date = today - timedelta(days=1)
+        for _ in range(10):
+            if is_trading_day(to_date):
+                break
+            to_date -= timedelta(days=1)
+        log.info("  → Before 18:30 IST — last trading day is to_date")
+
+    # ── Determine from_date: 5 trading days before to_date ───────────────
+    # to_date = day-1 in window, from_date = day-6 → 6 trading days total
+    from_date = to_date
+    steps = 0
+    candidate = to_date - timedelta(days=1)
+    while True:
+        if (to_date - candidate).days > 30:
+            log.warning("  ⚠️  Could not find 5 trading days back in 30 days")
+            break
+        if is_trading_day(candidate):
+            steps += 1
+            from_date = candidate
+            if steps == 5:          # ← stop at exactly 5 steps back
+                break
+        candidate -= timedelta(days=1)
+
+    label = f"{fmt_nse_date(from_date)} → {fmt_nse_date(to_date)}"
+    log.info(f"  → Date range: {label}  ({steps+1} trading days)")
+    return from_date, to_date, label
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-#  SOURCE 1 — NSE Bulk Deals API  (FIXED date range)
+#  SOURCE 1 — NSE Bulk Deals API
 # ─────────────────────────────────────────────────────────────────────────────
 
-def fetch_from_nse() -> list[dict]:
+def fetch_from_nse() -> list:
     log.info("📡 [Source 1] NSE Bulk-Block-Short Deals API...")
-
     try:
         from_date, to_date, date_range_label = get_date_range()
         from_str = fmt_nse_date(from_date)
         to_str   = fmt_nse_date(to_date)
-
-        log.info(f"  → Querying range: {from_str} to {to_str}")
+        log.info(f"  → Querying: {from_str} to {to_str}")
 
         session = requests.Session()
 
-        # Step 1 — seed cookies
-        log.info("  → Seeding NSE cookies (homepage)...")
+        log.info("  → Seeding NSE cookies...")
         session.get("https://www.nseindia.com/", headers=NSE_HEADERS, timeout=12)
         time.sleep(2)
-
-        # Step 2 — visit the reports page
         session.get(
             "https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
             headers=NSE_HEADERS, timeout=12
         )
         time.sleep(1.5)
 
-        # Step 3 — call the API with FROM and TO dates (weekly range)
         url = (
-            "https://www.nseindia.com/api/historicalOR/"
-            "bulk-block-short-deals"
+            "https://www.nseindia.com/api/historicalOR/bulk-block-short-deals"
             f"?optionType=bulk_deals&from={from_str}&to={to_str}"
         )
         log.info(f"  → GET {url}")
         resp = session.get(url, headers=NSE_HEADERS, timeout=25)
-        log.info(f"  → HTTP {resp.status_code}")
-        log.info(f"  → Content-Type: {resp.headers.get('Content-Type','')}")
+        log.info(f"  → HTTP {resp.status_code} | {resp.headers.get('Content-Type','')}")
 
         if resp.status_code != 200:
-            log.warning(f"  ❌ NSE returned HTTP {resp.status_code}")
+            log.warning(f"  ❌ HTTP {resp.status_code}")
             return []
 
-        # ── Parse response ─────────────────────────────────────────────────
         raw = resp.json()
 
+        # ── Debug structure ────────────────────────────────────────────────
         if isinstance(raw, dict):
             log.info(f"  → Top-level keys: {list(raw.keys())}")
+            for k, v in raw.items():
+                log.info(f"     '{k}': {type(v).__name__}"
+                         f"{' len='+str(len(v)) if isinstance(v,(list,dict)) else ' = '+str(v)[:80]}")
         elif isinstance(raw, list):
-            log.info(f"  → Direct list with {len(raw)} items")
-            if raw:
-                log.info(f"  → First item sample: {str(raw[0])[:120]}")
+            log.info(f"  → Direct list len={len(raw)}")
+            if raw: log.info(f"  → Sample: {str(raw[0])[:120]}")
 
-        # ── Convert to DataFrame ───────────────────────────────────────────
+        # ── Parse to DataFrame ─────────────────────────────────────────────
         df = None
-
         if isinstance(raw, list) and raw:
-            if isinstance(raw[0], dict):
-                df = pd.DataFrame(raw)
-            else:
-                df = pd.DataFrame(raw)
-
+            df = pd.DataFrame(raw)
         elif isinstance(raw, dict):
             for key in ["data","Data","results","bulkDeals","deals","bulkDealData","records"]:
                 val = raw.get(key)
                 if isinstance(val, list) and val:
-                    if isinstance(val[0], dict):
-                        df = pd.DataFrame(val)
-                    else:
-                        cols = raw.get("columns", raw.get("Columns", None))
-                        df   = pd.DataFrame(val, columns=cols) if cols else pd.DataFrame(val)
-                    log.info(f"  → Used key='{key}', shape={df.shape}")
+                    cols = raw.get("columns", raw.get("Columns"))
+                    df = pd.DataFrame(val, columns=cols) if (cols and not isinstance(val[0], dict)) \
+                         else pd.DataFrame(val)
+                    log.info(f"  → key='{key}' shape={df.shape}")
                     break
-
             if df is None and "columns" in raw and "data" in raw:
                 df = pd.DataFrame(raw["data"], columns=raw["columns"])
-                log.info(f"  → columns+data pattern, shape={df.shape}")
 
         if df is None or df.empty:
-            log.warning("  ⚠️  DataFrame empty — no bulk deals in this range or market holiday")
+            log.warning("  ⚠️  Empty DataFrame — no bulk deals in range")
             return []
 
-        log.info(f"  → DataFrame shape: {df.shape}")
-        log.info(f"  → Columns: {list(df.columns)}")
-        if len(df):
-            log.info(f"  → Sample row: {df.iloc[0].to_dict()}")
+        log.info(f"  → Shape: {df.shape}  Columns: {list(df.columns)}")
+        if len(df): log.info(f"  → Row0: {df.iloc[0].to_dict()}")
 
-        # ── Normalise column names ─────────────────────────────────────────
+        # ── Normalise columns ──────────────────────────────────────────────
         df.columns = [str(c).strip() for c in df.columns]
         rename = {}
         for c in df.columns:
             cu = c.upper()
-            if "SYMBOL"   in cu:                                     rename[c] = "SYMBOL"
+            if   "SYMBOL" in cu:                                             rename[c] = "SYMBOL"
             elif any(x in cu for x in ["COMP","SCRIP_NAME","COMPANY","NAME"]): rename[c] = "COMPANY"
-            elif any(x in cu for x in ["CLIENT","PARTY","BUYER","SELLER"]):    rename[c] = "CLIENT"
-            elif any(x in cu for x in ["BUY","SELL","BS","TYPE"]):             rename[c] = "BUYSELL"
-            elif any(x in cu for x in ["QTY","QUANTITY","SHARES"]):            rename[c] = "QTY"
-            elif any(x in cu for x in ["DATE","DT"]):                          rename[c] = "DATE"
-            elif any(x in cu for x in ["PRICE","RATE","VALUE"]):               rename[c] = "PRICE"
+            elif any(x in cu for x in ["CLIENT","PARTY","BUYER","SELLER"]):     rename[c] = "CLIENT"
+            elif any(x in cu for x in ["BUY","SELL","BS","TYPE"]):              rename[c] = "BUYSELL"
+            elif any(x in cu for x in ["QTY","QUANTITY","SHARES"]):             rename[c] = "QTY"
+            elif any(x in cu for x in ["DATE","DT"]):                           rename[c] = "DATE"
+            elif any(x in cu for x in ["PRICE","RATE","VALUE"]):                rename[c] = "PRICE"
         df = df.rename(columns=rename)
-        log.info(f"  → Normalised columns: {list(df.columns)}")
+        log.info(f"  → Normalised: {list(df.columns)}")
 
         if "CLIENT" not in df.columns:
-            log.warning("  ❌ CLIENT column missing — cannot classify FII/DII")
+            log.warning("  ❌ CLIENT column missing")
             return []
 
         # ── Classify FII / DII ─────────────────────────────────────────────
-        stocks = {}
-        matched = 0
+        stocks, matched = {}, 0
         for _, row in df.iterrows():
             sym    = str(row.get("SYMBOL",  "")).strip().upper()
             name   = str(row.get("COMPANY", sym)).strip()
             client = str(row.get("CLIENT",  "")).strip().upper()
             bs     = str(row.get("BUYSELL", "")).strip().upper()
-
             if not sym or not client:
                 continue
-
             is_fii = any(k in client for k in FII_KW)
             is_dii = any(k in client for k in DII_KW)
-
             if not (is_fii or is_dii):
                 continue
-
             matched += 1
             action = "buy" if bs.startswith("B") else "sell"
             if sym not in stocks:
@@ -344,25 +324,21 @@ def fetch_from_nse() -> list[dict]:
 
         result = [v for v in stocks.values()
                   if v["fii_cash"] != "neutral" or v["dii_cash"] != "neutral"]
-
-        log.info(f"  → Scanned {len(df)} rows, matched {matched} FII/DII → {len(result)} unique stocks")
-
+        log.info(f"  → Rows={len(df)} matched={matched} unique={len(result)}")
         if not result and "CLIENT" in df.columns:
-            sample = df["CLIENT"].dropna().unique()[:10].tolist()
-            log.info(f"  → Sample CLIENTs (not matching): {sample}")
-
+            log.info(f"  → Sample CLIENTs: {df['CLIENT'].dropna().unique()[:10].tolist()}")
         return result
 
     except Exception as e:
-        log.warning(f"  ❌ NSE fetch error: {e}")
+        log.warning(f"  ❌ NSE error: {e}")
         return []
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  SOURCE 2 — MunafaSutra
+#  SOURCE 2 — MunafaSutra fallback
 # ─────────────────────────────────────────────────────────────────────────────
 
-def fetch_from_munafasutra() -> list[dict]:
+def fetch_from_munafasutra() -> list:
     log.info("📡 [Source 2] MunafaSutra scraper...")
     try:
         resp = requests.get("https://munafasutra.com/nse/FIIDII/",
@@ -379,8 +355,9 @@ def fetch_from_munafasutra() -> list[dict]:
             tr = a.find_parent("tr")
             if not tr:
                 continue
-            tds      = tr.find_all("td")
-            row_text = " ".join(t.get_text(" ",strip=True).lower() for t in tds)
+            row_text = " ".join(
+                t.get_text(" ", strip=True).lower() for t in tr.find_all("td")
+            )
             fii = "buy" if "bought" in row_text else "sell"
             dii = "buy" if "bought" in row_text else "sell"
             stocks.append({"symbol": symbol+".NS", "name": name,
@@ -392,11 +369,7 @@ def fetch_from_munafasutra() -> list[dict]:
         return []
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  SOURCE 3 — Fallback
-# ─────────────────────────────────────────────────────────────────────────────
-
-def fetch_fallback() -> list[dict]:
+def fetch_fallback() -> list:
     log.warning("📡 [Source 3] Hardcoded fallback stocks")
     return FALLBACK_STOCKS.copy()
 
@@ -414,7 +387,6 @@ def fetch_fii_dii_stocks():
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fix_df(df):
-    """Flatten MultiIndex columns from yfinance."""
     if isinstance(df.columns, pd.MultiIndex):
         df = df.copy()
         df.columns = df.columns.get_level_values(0)
@@ -446,64 +418,78 @@ def compute_technicals(symbol: str) -> dict:
 
         # RSI(14)
         dlt  = c.diff()
-        gain = dlt.clip(lower=0);  loss = (-dlt).clip(lower=0)
-        ag   = gain.ewm(com=13,adjust=False).mean()
-        al   = loss.ewm(com=13,adjust=False).mean()
-        rsi_s= 100 - (100/(1 + ag/al.replace(0,np.nan)))
-        rsi  = round(float(rsi_s.iloc[-1]),1)
+        gain = dlt.clip(lower=0)
+        loss = (-dlt).clip(lower=0)
+        ag   = gain.ewm(com=13, adjust=False).mean()
+        al   = loss.ewm(com=13, adjust=False).mean()
+        rsi_s= 100 - (100 / (1 + ag / al.replace(0, np.nan)))
+        rsi  = round(float(rsi_s.iloc[-1]), 1)
 
         # MACD(12,26,9)
-        macd  = c.ewm(span=12,adjust=False).mean() - c.ewm(span=26,adjust=False).mean()
-        mhist = round(float((macd - macd.ewm(span=9,adjust=False).mean()).iloc[-1]),2)
+        macd  = (c.ewm(span=12, adjust=False).mean()
+                 - c.ewm(span=26, adjust=False).mean())
+        mhist = round(float(
+            (macd - macd.ewm(span=9, adjust=False).mean()).iloc[-1]
+        ), 2)
 
         # EMA 20/50
-        ema20 = c.ewm(span=20,adjust=False).mean()
-        ema50 = c.ewm(span=50,adjust=False).mean()
-        ecross= "bullish" if float(ema20.iloc[-1])>float(ema50.iloc[-1]) else "bearish"
+        ema20  = c.ewm(span=20, adjust=False).mean()
+        ema50  = c.ewm(span=50, adjust=False).mean()
+        ecross = "bullish" if float(ema20.iloc[-1]) > float(ema50.iloc[-1]) else "bearish"
 
         # Bollinger Bands
-        bm  = c.rolling(20).mean(); bs = c.rolling(20).std()
-        bu  = float((bm+2*bs).iloc[-1]); bl2= float((bm-2*bs).iloc[-1])
-        bp  = (lc-bl2)/((bu-bl2) or 1)
-        bbl = "Overbought" if bp>0.8 else ("Oversold" if bp<0.2 else "Mid")
+        bm  = c.rolling(20).mean()
+        bsd = c.rolling(20).std()
+        bu  = float((bm + 2*bsd).iloc[-1])
+        bl2 = float((bm - 2*bsd).iloc[-1])
+        bp  = (lc - bl2) / ((bu - bl2) or 1)
+        bbl = "Overbought" if bp > 0.8 else ("Oversold" if bp < 0.2 else "Mid")
 
         # ADX(14)
-        pdm = h.diff().clip(lower=0); mdm = (-lo.diff()).clip(lower=0)
-        tr  = pd.concat([h-lo,(h-c.shift()).abs(),(lo-c.shift()).abs()],axis=1).max(axis=1)
-        atr = tr.ewm(com=13,adjust=False).mean()
-        pdi = 100*pdm.ewm(com=13,adjust=False).mean()/atr
-        mdi = 100*mdm.ewm(com=13,adjust=False).mean()/atr
-        dx  = 100*(pdi-mdi).abs()/(pdi+mdi).replace(0,np.nan)
-        adx = round(float(dx.ewm(com=13,adjust=False).mean().iloc[-1]),1)
+        pdm = h.diff().clip(lower=0)
+        mdm = (-lo.diff()).clip(lower=0)
+        tr  = pd.concat(
+            [h-lo, (h-c.shift()).abs(), (lo-c.shift()).abs()], axis=1
+        ).max(axis=1)
+        atr = tr.ewm(com=13, adjust=False).mean()
+        pdi = 100 * pdm.ewm(com=13, adjust=False).mean() / atr
+        mdi = 100 * mdm.ewm(com=13, adjust=False).mean() / atr
+        dx  = 100 * (pdi-mdi).abs() / (pdi+mdi).replace(0, np.nan)
+        adx = round(float(dx.ewm(com=13, adjust=False).mean().iloc[-1]), 1)
 
         # Stoch RSI
-        srsi = (rsi_s-rsi_s.rolling(14).min()) / \
-               (rsi_s.rolling(14).max()-rsi_s.rolling(14).min()).replace(0,np.nan)
-        sv   = float(srsi.iloc[-1]); sv = 0.5 if np.isnan(sv) else round(sv,2)
+        srsi = ((rsi_s - rsi_s.rolling(14).min()) /
+                (rsi_s.rolling(14).max() - rsi_s.rolling(14).min())
+                .replace(0, np.nan))
+        sv = float(srsi.iloc[-1])
+        sv = 0.5 if np.isnan(sv) else round(sv, 2)
 
-        # Support/Resistance
-        n  = min(120,len(h))
-        pv = (float(h.iloc[-1])+float(lo.iloc[-1])+lc)/3
-        r1 = round(2*pv - float(lo.iloc[-1]),2)
-        s1 = round(2*pv - float(h.iloc[-1]),2)
-        sh = round(float(h.rolling(n).max().iloc[-1]),2)
-        sl = round(float(lo.rolling(n).min().iloc[-1]),2)
+        # Pivot S/R
+        n  = min(120, len(h))
+        pv = (float(h.iloc[-1]) + float(lo.iloc[-1]) + lc) / 3
+        r1 = round(2*pv - float(lo.iloc[-1]), 2)
+        s1 = round(2*pv - float(h.iloc[-1]),  2)
+        sh = round(float(h.rolling(n).max().iloc[-1]),  2)
+        sl = round(float(lo.rolling(n).min().iloc[-1]), 2)
 
         # Signal score
         sc = 0
-        sc += 2 if rsi<40 else (1 if rsi<55 else (-2 if rsi>70 else 0))
-        sc += 2 if mhist>0 else 0
-        sc += 2 if ecross=="bullish" else 0
-        sc += 1 if adx>25 else 0
-        sc += 1 if sv<0.3 else (-1 if sv>0.8 else 0)
-        ov  = ("STRONG BUY" if sc>=5 else "BUY" if sc>=3
-               else "NEUTRAL" if sc>=0 else "CAUTION" if sc>=-2 else "SELL")
+        sc += 2 if rsi < 40    else (1 if rsi < 55 else (-2 if rsi > 70 else 0))
+        sc += 2 if mhist > 0   else 0
+        sc += 2 if ecross == "bullish" else 0
+        sc += 1 if adx > 25    else 0
+        sc += 1 if sv < 0.3    else (-1 if sv > 0.8 else 0)
+        ov = ("STRONG BUY" if sc >= 5
+              else "BUY"     if sc >= 3
+              else "NEUTRAL" if sc >= 0
+              else "CAUTION" if sc >= -2
+              else "SELL")
 
-        spark = [round(float(x),2) for x in c.iloc[-7:].tolist()]
-        return dict(rsi=rsi,macd_hist=mhist,ema_cross=ecross,bb_label=bbl,
-                    adx=adx,stoch_rsi=sv,resist1=r1,support1=s1,
-                    swing_high=sh,swing_low=sl,last_price=round(lc,2),
-                    overall=ov,score=sc,sparkline=spark,data_ok=True)
+        spark = [round(float(x), 2) for x in c.iloc[-7:].tolist()]
+        return dict(rsi=rsi, macd_hist=mhist, ema_cross=ecross, bb_label=bbl,
+                    adx=adx, stoch_rsi=sv, resist1=r1, support1=s1,
+                    swing_high=sh, swing_low=sl, last_price=round(lc, 2),
+                    overall=ov, score=sc, sparkline=spark, data_ok=True)
     except Exception as e:
         log.warning(f"    ⚠️  {symbol}: {e}")
         return empty
@@ -520,14 +506,18 @@ def fetch_market_summary() -> dict:
             df = yf.download(sym, period="5d", progress=False, auto_adjust=True)
             df = fix_df(df)
             c  = df["Close"].dropna().astype(float)
-            return (round(float(c.iloc[-1]),2),
-                    round(float((c.iloc[-1]-c.iloc[-2])/c.iloc[-2]*100),2) if len(c)>=2 else 0.0)
+            return (
+                round(float(c.iloc[-1]), 2),
+                round(float((c.iloc[-1]-c.iloc[-2])/c.iloc[-2]*100), 2)
+                if len(c) >= 2 else 0.0
+            )
         np_, nc = load("^NSEI")
         sp_, sc = load("^BSESN")
-        return dict(nifty_price=np_,nifty_chg=nc,sensex_price=sp_,sensex_chg=sc)
+        return dict(nifty_price=np_, nifty_chg=nc,
+                    sensex_price=sp_, sensex_chg=sc)
     except Exception as e:
         log.warning(f"Market summary failed: {e}")
-        return dict(nifty_price=0,nifty_chg=0,sensex_price=0,sensex_chg=0)
+        return dict(nifty_price=0, nifty_chg=0, sensex_price=0, sensex_chg=0)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -541,17 +531,17 @@ def build_dataset():
     enriched = []
     for s in raw:
         tech     = compute_technicals(s["symbol"])
-        both_buy = s["fii_cash"]=="buy" and s["dii_cash"]=="buy"
-        fii_only = s["fii_cash"]=="buy" and s["dii_cash"]!="buy"
-        dii_only = s["dii_cash"]=="buy" and s["fii_cash"]!="buy"
+        both_buy = s["fii_cash"] == "buy" and s["dii_cash"] == "buy"
+        fii_only = s["fii_cash"] == "buy" and s["dii_cash"] != "buy"
+        dii_only = s["dii_cash"] == "buy" and s["fii_cash"] != "buy"
         inst_sig = ("BOTH BUY" if both_buy else
                     "FII BUY"  if fii_only  else
                     "DII BUY"  if dii_only  else "SELL")
         enriched.append({**s, **tech,
-                         "inst_signal":inst_sig,
-                         "both_buy":both_buy,
-                         "fii_only":fii_only,
-                         "dii_only":dii_only})
+                         "inst_signal": inst_sig,
+                         "both_buy":    both_buy,
+                         "fii_only":    fii_only,
+                         "dii_only":    dii_only})
         time.sleep(0.4)
     return enriched, market, source
 
@@ -561,51 +551,61 @@ def build_dataset():
 # ─────────────────────────────────────────────────────────────────────────────
 
 def spark_svg(prices):
-    if len(prices)<2: return ""
-    mn,mx = min(prices),max(prices); rng=mx-mn or 1
-    w,h   = 70,26
-    pts   = [f"{round(i*w/(len(prices)-1),1)},{round(h-(p-mn)/rng*h,1)}"
-             for i,p in enumerate(prices)]
-    col   = "#00d4aa" if prices[-1]>=prices[0] else "#ff4d6d"
-    return (f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
-            f'xmlns="http://www.w3.org/2000/svg"><polyline points="{" ".join(pts)}" '
-            f'fill="none" stroke="{col}" stroke-width="1.8" stroke-linejoin="round"/></svg>')
+    if len(prices) < 2:
+        return ""
+    mn, mx = min(prices), max(prices)
+    rng = mx - mn or 1
+    w, h = 70, 26
+    pts = [
+        f"{round(i*w/(len(prices)-1),1)},{round(h-(p-mn)/rng*h,1)}"
+        for i, p in enumerate(prices)
+    ]
+    col = "#00d4aa" if prices[-1] >= prices[0] else "#ff4d6d"
+    return (
+        f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+        f'xmlns="http://www.w3.org/2000/svg">'
+        f'<polyline points="{" ".join(pts)}" fill="none" stroke="{col}" '
+        f'stroke-width="1.8" stroke-linejoin="round"/></svg>'
+    )
+
 
 def sigcls(s):
-    return {"STRONG BUY":"sbs","BUY":"sbuy","NEUTRAL":"sn",
-            "CAUTION":"sca","SELL":"sse","N/A":"sna"}.get(s,"sna")
+    return {"STRONG BUY":"sbs","BUY":"sbuy","NEUTRAL":"sna",
+            "CAUTION":"sca","SELL":"sse","N/A":"sna"}.get(s, "sna")
+
 
 def rsicls(v):
-    return "ro" if v>70 else ("rs2" if v<40 else "rn2")
+    return "ro" if v > 70 else ("rs2" if v < 40 else "rn2")
+
 
 def fmt(v):
     return f"₹{v:,.2f}" if v else "N/A"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  GENERATE HTML  (RESPONSIVE)
+#  GENERATE HTML — RESPONSIVE
 # ─────────────────────────────────────────────────────────────────────────────
 
 def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
-    nc  = "up" if market["nifty_chg"]  >=0 else "dn"
-    xc  = "up" if market["sensex_chg"] >=0 else "dn"
-    na  = "▲"  if market["nifty_chg"]  >=0 else "▼"
-    xa  = "▲"  if market["sensex_chg"] >=0 else "▼"
-    fb  = sum(1 for s in stocks if s["fii_cash"]=="buy")
-    db  = sum(1 for s in stocks if s["dii_cash"]=="buy")
-    bb  = sum(1 for s in stocks if s["both_buy"])
-    st  = sum(1 for s in stocks if s["overall"]=="STRONG BUY")
+    nc = "up" if market["nifty_chg"]  >= 0 else "dn"
+    xc = "up" if market["sensex_chg"] >= 0 else "dn"
+    na = "▲"  if market["nifty_chg"]  >= 0 else "▼"
+    xa = "▲"  if market["sensex_chg"] >= 0 else "▼"
+    fb = sum(1 for s in stocks if s["fii_cash"] == "buy")
+    db = sum(1 for s in stocks if s["dii_cash"] == "buy")
+    bb = sum(1 for s in stocks if s["both_buy"])
+    st = sum(1 for s in stocks if s["overall"] == "STRONG BUY")
 
     rows = ""
     for i, s in enumerate(stocks):
-        fc  = "bf" if s["fii_cash"]=="buy"  else "bx"
-        dc  = "bd" if s["dii_cash"]=="buy"  else "bx"
-        fa  = "▲ BUY"  if s["fii_cash"]=="buy"  else "▼ SELL"
-        da  = "▲ BUY"  if s["dii_cash"]=="buy"  else "▼ SELL"
-        mc2 = "up" if s["macd_hist"]>0 else "dn"
-        ec  = "up" if s["ema_cross"]=="bullish" else "dn"
-        spk = spark_svg(s.get("sparkline",[]))
-        pr  = fmt(s["last_price"]) if s["last_price"]>0 else s.get("price_str","N/A")
+        fc  = "bf" if s["fii_cash"] == "buy" else "bx"
+        dc  = "bd" if s["dii_cash"] == "buy" else "bx"
+        fa  = "▲ BUY"  if s["fii_cash"] == "buy" else "▼ SELL"
+        da  = "▲ BUY"  if s["dii_cash"] == "buy" else "▼ SELL"
+        mc2 = "up" if s["macd_hist"] > 0 else "dn"
+        ec  = "up" if s["ema_cross"] == "bullish" else "dn"
+        spk = spark_svg(s.get("sparkline", []))
+        pr  = fmt(s["last_price"]) if s["last_price"] > 0 else s.get("price_str","N/A")
 
         rows += f"""
       <tr style="animation-delay:{i*0.05:.2f}s">
@@ -643,25 +643,23 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
 
     css = """
 :root{
-  --bg:#050c14;--sur:#0b1623;--bdr:#1a3050;--fi:#00d4aa;--di:#ff8c42;
-  --bo:#a78bfa;--se:#ff4d6d;--tx:#e2eaf4;--mu:#5a7a99;--go:#f0c060;
+  --bg:#050c14;--sur:#0b1623;--bdr:#1a3050;
+  --fi:#00d4aa;--di:#ff8c42;--bo:#a78bfa;
+  --se:#ff4d6d;--tx:#e2eaf4;--mu:#5a7a99;--go:#f0c060;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-
-body{
-  background:var(--bg);color:var(--tx);
-  font-family:'Syne',sans-serif;min-height:100vh;
-}
+body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;min-height:100vh}
 body::before{
   content:'';position:fixed;inset:0;
-  background:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
+  background:
+    linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
   background-size:40px 40px;pointer-events:none;z-index:0;
 }
 .w{position:relative;z-index:1}
 
-/* ── HEADER ── */
+/* ── HEADER ─────────────────────────────────────────────── */
 header{
   background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
   border-bottom:1px solid var(--bdr);padding:14px 20px;
@@ -670,7 +668,7 @@ header{
   position:sticky;top:0;z-index:99;backdrop-filter:blur(8px);
 }
 .lg{display:flex;align-items:center;gap:12px}
-.li{
+.logo-icon{
   width:40px;height:40px;min-width:40px;
   background:linear-gradient(135deg,var(--fi),var(--bo));
   border-radius:10px;display:flex;align-items:center;justify-content:center;
@@ -686,19 +684,21 @@ header{
   padding:4px 10px;border-radius:20px;
   font-size:10px;font-weight:700;color:var(--fi);letter-spacing:1px;
 }
-.ld{
-  width:7px;height:7px;border-radius:50%;background:var(--fi);
-  animation:pulse 1.5s infinite;
-}
+.led{width:7px;height:7px;border-radius:50%;background:var(--fi);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 .src{
   font-size:10px;color:var(--bo);
   background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);
   padding:4px 10px;border-radius:12px;
 }
+.drb{
+  font-size:10px;color:var(--go);
+  background:rgba(240,192,96,.1);border:1px solid rgba(240,192,96,.25);
+  padding:4px 10px;border-radius:12px;font-family:'Space Mono',monospace;
+}
 .dt{font-family:'Space Mono',monospace;font-size:10px;color:var(--mu)}
 
-/* ── SUMMARY GRID ── */
+/* ── SUMMARY GRID ───────────────────────────────────────── */
 .sum{
   display:grid;grid-template-columns:repeat(4,1fr);
   gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr);
@@ -708,10 +708,10 @@ header{
 .sv{font-family:'Space Mono',monospace;font-size:18px;font-weight:700}
 .sb2{font-size:10px;color:var(--mu);margin-top:3px}
 
-.up{color:var(--fi)} .dn{color:var(--se)}
-.cfi{color:var(--fi)} .cdi{color:var(--di)} .cbo{color:var(--bo)} .cgo{color:var(--go)}
+.up{color:var(--fi)}.dn{color:var(--se)}
+.cfi{color:var(--fi)}.cdi{color:var(--di)}.cbo{color:var(--bo)}.cgo{color:var(--go)}
 
-/* ── TABLE WRAPPER ── */
+/* ── TABLE WRAPPER ──────────────────────────────────────── */
 .tw{padding:16px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tt{
   font-size:10px;letter-spacing:2px;text-transform:uppercase;
@@ -720,7 +720,7 @@ header{
 }
 .tt::before{content:'';width:3px;height:14px;background:var(--fi);border-radius:2px;flex-shrink:0}
 
-/* ── TABLE ── */
+/* ── TABLE ──────────────────────────────────────────────── */
 table{width:100%;border-collapse:collapse;min-width:860px}
 thead tr{border-bottom:2px solid var(--bdr)}
 th{
@@ -735,10 +735,7 @@ tbody tr{
 }
 @keyframes si{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 tbody tr:hover{background:rgba(0,212,170,.03)}
-td{
-  padding:10px 10px;font-size:12px;
-  vertical-align:middle;text-align:center;
-}
+td{padding:10px;font-size:12px;vertical-align:middle;text-align:center}
 td:first-child{text-align:left}
 
 .sn{font-weight:700;font-size:13px;line-height:1.3}
@@ -748,8 +745,8 @@ td:first-child{text-align:left}
 
 .b{
   display:inline-block;padding:4px 9px;
-  border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px;
-  white-space:nowrap;
+  border-radius:5px;font-size:10px;font-weight:800;
+  letter-spacing:.5px;white-space:nowrap;
 }
 .bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
 .bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
@@ -758,7 +755,7 @@ td:first-child{text-align:left}
 .rv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .rb2{width:78px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
 .rf2{height:100%;border-radius:2px}
-.ro .rf2{background:var(--se)} .rn2 .rf2{background:var(--go)} .rs2 .rf2{background:var(--fi)}
+.ro .rf2{background:var(--se)}.rn2 .rf2{background:var(--go)}.rs2 .rf2{background:var(--fi)}
 
 .im{display:flex;justify-content:center;gap:5px;font-size:10px;margin-bottom:2px}
 .il{color:var(--mu);font-size:9px;min-width:30px;text-align:right}
@@ -767,46 +764,36 @@ td:first-child{text-align:left}
   font-size:10px;font-family:'Space Mono',monospace;
   display:flex;align-items:center;gap:4px;justify-content:center;margin-bottom:2px;
 }
-.sr-r{
-  font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
-  background:rgba(255,77,109,.2);color:var(--se);
-}
-.sr-s{
-  font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
-  background:rgba(0,212,170,.15);color:var(--fi);
-}
+.sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(255,77,109,.2);color:var(--se)}
+.sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(0,212,170,.15);color:var(--fi)}
 
 .sig{
   display:inline-block;padding:4px 10px;border-radius:5px;
   font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;
 }
-.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);box-shadow:0 0 8px rgba(0,212,170,.2)}
+.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);
+  box-shadow:0 0 8px rgba(0,212,170,.2)}
 .sbuy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
 .sna{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
 .sca{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
 .sse{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
 
-/* ── LEGEND ── */
+/* ── LEGEND ─────────────────────────────────────────────── */
 .leg{padding:0 20px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
 .ld2{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
-/* ── FOOTER ── */
+/* ── FOOTER ─────────────────────────────────────────────── */
 footer{
   background:var(--sur);border-top:1px solid var(--bdr);
   padding:12px 20px;display:flex;justify-content:space-between;
   font-size:10px;color:var(--mu);flex-wrap:wrap;gap:8px;
 }
 
-/* ── DATE RANGE BADGE ── */
-.drb{
-  font-size:10px;color:var(--go);
-  background:rgba(240,192,96,.1);border:1px solid rgba(240,192,96,.25);
-  padding:3px 10px;border-radius:10px;font-family:'Space Mono',monospace;
-}
-
 /* ═══════════════════════════════════════════════════════════
-   RESPONSIVE — TABLET  (max 900px)
+   RESPONSIVE — TABLET (≤900px)
 ══════════════════════════════════════════════════════════════ */
 @media(max-width:900px){
   .sum{grid-template-columns:repeat(2,1fr)}
@@ -816,29 +803,24 @@ footer{
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RESPONSIVE — MOBILE  (max 600px)
-   Cards layout replaces table on small screens
+   RESPONSIVE — MOBILE (≤600px) — card layout
 ══════════════════════════════════════════════════════════════ */
 @media(max-width:600px){
-
-  /* Header */
   header{padding:10px 14px}
   .lt{font-size:13px}
-  .lv{font-size:9px;padding:3px 8px}
-  .src{font-size:9px;padding:3px 8px}
+  .lv,.src{font-size:9px;padding:3px 8px}
   .dt{display:none}
+  .ls2{display:none}
 
-  /* Summary */
   .sum{grid-template-columns:repeat(2,1fr)}
   .sc2{padding:10px 12px}
   .sv{font-size:15px}
   .sl{font-size:8px}
   .sb2{font-size:9px}
 
-  /* Table → card layout */
-  .tw{padding:10px 10px;overflow-x:visible}
+  .tw{padding:10px;overflow-x:visible}
   table,thead,tbody,th,td,tr{display:block}
-  thead{display:none} /* hide headers — labels from data-label */
+  thead{display:none}
 
   tbody tr{
     background:var(--sur);border:1px solid var(--bdr);
@@ -848,35 +830,34 @@ footer{
   tbody tr:hover{background:rgba(0,212,170,.04)}
 
   td{
-    text-align:left;padding:5px 0;
-    border:none;display:flex;align-items:center;
-    justify-content:space-between;gap:8px;
-    font-size:12px;
+    text-align:left;padding:5px 0;border:none;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:8px;font-size:12px;
   }
   td:first-child{
     flex-direction:column;align-items:flex-start;
-    margin-bottom:6px;
-    border-bottom:1px solid var(--bdr);padding-bottom:8px;
+    margin-bottom:6px;border-bottom:1px solid var(--bdr);padding-bottom:8px;
   }
   td::before{
     content:attr(data-label);
     font-size:9px;letter-spacing:1px;text-transform:uppercase;
-    color:var(--mu);flex-shrink:0;min-width:70px;
+    color:var(--mu);flex-shrink:0;min-width:80px;
   }
   td:first-child::before{display:none}
 
   .rb2{margin:4px 0 0}
-  .im{justify-content:flex-end}
-  .sr{justify-content:flex-end}
+  .im,.sr{justify-content:flex-end}
 
-  /* Legend */
-  .leg{padding:0 10px 12px;gap:10px}
+  .leg{padding:0 10px 12px;gap:8px}
   .li2{font-size:10px}
-
   footer{padding:10px 14px;font-size:9px}
   .tt{font-size:9px}
+  .drb{font-size:9px;padding:3px 8px}
 }
 """
+
+    drb_html = (f'<div class="drb">🗓 {date_range_label}</div>'
+                if date_range_label else "")
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -892,16 +873,16 @@ footer{
 
 <header>
   <div class="lg">
-    <div class="li">📊</div>
+    <div class="logo-icon">📊</div>
     <div>
       <div class="lt">FII<span>/DII</span> PULSE</div>
       <div class="ls2">INSTITUTIONAL INTELLIGENCE DASHBOARD · AUTO-GENERATED</div>
     </div>
   </div>
   <div class="hm">
-    {f'<div class="drb">📅 {date_range_label}</div>' if date_range_label else ''}
+    {drb_html}
     <div class="src">📡 {source}</div>
-    <div class="lv"><div class="ld"></div>LIVE</div>
+    <div class="lv"><div class="led"></div>LIVE</div>
     <div class="dt">{date_str}</div>
   </div>
 </header>
@@ -932,7 +913,9 @@ footer{
 <div class="tw">
   <div class="tt">
     Institutional Activity · Technical Analysis ·
-    <span style="color:var(--go);font-family:'Space Mono',monospace">{date_range_label or date_str}</span>
+    <span style="color:var(--go);font-family:'Space Mono',monospace">
+      {date_range_label or date_str}
+    </span>
   </div>
   <table>
     <thead><tr>
@@ -960,7 +943,7 @@ footer{
 </div>
 
 <footer>
-  <div>🤖 FII/DII Pulse v7 · {source} · yfinance · {date_str}</div>
+  <div>🤖 FII/DII Pulse v8 · {source} · yfinance · {date_str}</div>
   <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
 </footer>
 
@@ -973,7 +956,8 @@ footer{
 #  EMAIL
 # ─────────────────────────────────────────────────────────────────────────────
 
-def send_email(html_path: Path, date_str: str, source: str, count: int, date_range_label: str = ""):
+def send_email(html_path: Path, date_str: str, source: str,
+               count: int, date_range_label: str = ""):
     user  = os.getenv("GMAIL_USER","").strip()
     pwd   = os.getenv("GMAIL_PASS","").strip()
     rcpts = os.getenv("RECIPIENT_EMAIL", user).strip()
@@ -998,37 +982,33 @@ color:#e2eaf4;padding:30px;max-width:600px;margin:0 auto;">
               border-bottom:1px solid #1a3050;text-align:center;">
     <div style="font-size:32px;margin-bottom:8px;">📊</div>
     <h1 style="color:#00d4aa;margin:0;font-size:22px;letter-spacing:1px;">FII/DII PULSE</h1>
-    <p style="color:#5a7a99;margin:6px 0 0;font-size:12px;letter-spacing:1px;">
-      INSTITUTIONAL INTELLIGENCE REPORT</p>
+    <p style="color:#5a7a99;margin:6px 0 0;font-size:12px;">INSTITUTIONAL INTELLIGENCE REPORT</p>
   </div>
   <div style="background:#0b1623;padding:14px 24px;border-bottom:1px solid #1a3050;font-size:12px;">
-    <span style="color:#5a7a99;">📅 {date_str}</span>
-    &nbsp;&nbsp;|&nbsp;&nbsp;
-    <span style="color:#f0c060;">🗓 Range: {date_range_label}</span>
-    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <span style="color:#5a7a99;">📅 {date_str}</span> &nbsp;|&nbsp;
+    <span style="color:#f0c060;">🗓 {date_range_label}</span> &nbsp;|&nbsp;
     <span style="color:#a78bfa;">📡 {source}</span>
   </div>
   <div style="background:#0f1e2e;padding:20px 24px;border-bottom:1px solid #1a3050;">
     <p style="color:#e2eaf4;font-size:14px;margin:0 0 10px;">
-      Today's report tracked <strong style="color:#00d4aa;">{count} stocks</strong>
+      Tracked <strong style="color:#00d4aa;">{count} stocks</strong>
       with FII/DII institutional activity.</p>
     <p style="color:#5a7a99;font-size:12px;margin:0;">
-      The full interactive dashboard is <strong>attached below</strong> as an HTML file.
+      Full interactive dashboard attached as HTML file.
     </p>
   </div>
   <div style="background:#0b1623;padding:16px 24px;border-bottom:1px solid #1a3050;">
     <p style="color:#f0c060;font-size:12px;font-weight:bold;margin:0 0 8px;">
-      📎 How to open your report:</p>
+      📎 How to open:</p>
     <ol style="color:#5a7a99;font-size:12px;margin:0;padding-left:18px;line-height:1.8;">
-      <li>Find the attachment: <code style="color:#00d4aa;">{fname}</code></li>
-      <li>Save it to your desktop</li>
-      <li>Double-click → opens in Chrome / Firefox / Edge</li>
+      <li>Save: <code style="color:#00d4aa;">{fname}</code></li>
+      <li>Double-click → opens in any browser</li>
     </ol>
   </div>
   <div style="background:#050c14;padding:14px 24px;text-align:center;">
     <p style="color:#3a5a78;font-size:10px;margin:0;">
       ⚠️ Not financial advice. Educational purposes only. Always DYOR.<br>
-      Auto-generated by FII/DII Pulse v7
+      Auto-generated by FII/DII Pulse v8
     </p>
   </div>
 </div></body></html>"""
@@ -1037,7 +1017,6 @@ color:#e2eaf4;padding:30px;max-width:600px;margin:0 auto;">
 
     with open(html_path, "rb") as f:
         data = f.read()
-
     att = MIMEBase("application", "octet-stream")
     att.set_payload(data)
     encoders.encode_base64(att)
@@ -1069,10 +1048,9 @@ def main():
     date_file= now_ist.strftime("%Y-%m-%d")
 
     log.info("=" * 65)
-    log.info(f"  🚀 FII/DII Pulse v7 — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
+    log.info(f"  🚀 FII/DII Pulse v8 — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
     log.info("=" * 65)
 
-    # Pre-compute the date range label for HTML/email
     try:
         from_date, to_date, date_range_label = get_date_range()
     except Exception:
@@ -1092,7 +1070,7 @@ def main():
     send_email(dated_path, date_str, source, len(stocks), date_range_label)
 
     log.info("=" * 65)
-    log.info("  ✅ Complete!")
+    log.info(f"  ✅ Complete! Range: {date_range_label}")
     log.info("=" * 65)
 
 
