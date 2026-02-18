@@ -1,11 +1,9 @@
 name: 📊 FII/DII Daily Report
 
 on:
-  # ── Run every weekday at 6:30 AM IST (1:00 AM UTC) ──────────────────────
   schedule:
     - cron: "0 1 * * 1-5"   # Mon–Fri 6:30 AM IST
 
-  # ── Also allow manual trigger from GitHub UI ────────────────────────────
   workflow_dispatch:
     inputs:
       send_email:
@@ -16,63 +14,58 @@ on:
         options: ["true", "false"]
 
 permissions:
-  contents: write        # needed to push docs/ to gh-pages
+  contents: write
   pages: write
   id-token: write
 
 jobs:
-  # ────────────────────────────────────────────────────────────────────────
   generate-report:
     name: Generate & Deploy FII/DII Report
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
-      # 1. Checkout repo — MUST be first so all files are available
+      # 1. Checkout repo first — so ALL files are available
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Verify expected files exist after checkout
+      # 2. Verify files exist
       - name: 🔍 Verify repo structure
         run: |
-          echo "📁 Repository contents:"
+          echo "📁 Repository root contents:"
           ls -la
-          echo ""
-          echo "✅ Checking required files..."
-          test -f requirements.txt && echo "  ✓ requirements.txt found" || echo "  ✗ requirements.txt MISSING"
-          test -f main.py          && echo "  ✓ main.py found"          || echo "  ✗ main.py MISSING"
 
-      # 3. Set up Python — NO cache to avoid requirements.txt lookup issues
+      # 3. Set up Python — NO cache (avoids requirements.txt pre-scan bug)
       - name: 🐍 Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # 4. Install dependencies directly (no cache, avoids the lookup bug)
+      # 4. Install all dependencies inline
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 lxml yfinance pandas numpy python-dotenv
 
-      # 5. Run the dashboard generator
+      # 5. Run your script using the CORRECT filename
       - name: 🚀 Generate FII/DII Dashboard
         env:
           GMAIL_USER:      ${{ secrets.GMAIL_USER }}
           GMAIL_PASS:      ${{ secrets.GMAIL_PASS }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
         run: |
-          python FII-DII_Pulse/main.py
+          python "FII&DII_stock_act.py"
 
-      # 6. Ensure docs/ has required GitHub Pages files
+      # 6. Prepare docs/ folder for GitHub Pages
       - name: 📄 Prepare GitHub Pages folder
         run: |
           mkdir -p docs
           touch docs/.nojekyll
           echo "theme: null" > docs/_config.yml
-          echo "docs/ contents:"
+          echo "📁 docs/ contents:"
           ls -la docs/
 
-      # 7. Commit & push the generated docs/ back to main branch
+      # 7. Commit & push generated report back to repo
       - name: 📤 Commit & push HTML report
         run: |
           git config user.name  "github-actions[bot]"
@@ -84,7 +77,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8. Deploy docs/ to GitHub Pages (gh-pages branch)
+      # 8. Deploy docs/ to GitHub Pages
       - name: 🌐 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -94,7 +87,7 @@ jobs:
           force_orphan:   false
           commit_message: "🌐 Deploy FII/DII Dashboard — ${{ github.run_number }}"
 
-      # 9. Print the live GitHub Pages URL
+      # 9. Print live URL
       - name: 🔗 Print GitHub Pages URL
         run: |
           REPO="${{ github.repository }}"
@@ -106,7 +99,7 @@ jobs:
           echo "   https://${OWNER}.github.io/${REPONAME}/"
           echo "=========================================="
 
-      # 10. Upload report as workflow artifact (downloadable from Actions UI)
+      # 10. Upload artifact
       - name: 📎 Upload report artifact
         uses: actions/upload-artifact@v4
         with:
