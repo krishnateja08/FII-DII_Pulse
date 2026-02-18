@@ -6,123 +6,131 @@
 <title>FII/DII Pulse — 18 Feb 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#050c14;--sur:#0b1623;--card:#0f1e2e;--bdr:#1a3050;
-  --fii:#00d4aa;--dii:#ff8c42;--both:#a78bfa;--sell:#ff4d6d;
-  --txt:#e2eaf4;--mut:#5a7a99;--gold:#f0c060;--grn:#00d4aa;--red:#ff4d6d;}
+:root{--bg:#050c14;--sur:#0b1623;--bdr:#1a3050;--fi:#00d4aa;--di:#ff8c42;
+  --bo:#a78bfa;--se:#ff4d6d;--tx:#e2eaf4;--mu:#5a7a99;--go:#f0c060}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--txt);font-family:'Syne',sans-serif;min-height:100vh}
+body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;min-height:100vh}
 body::before{content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
+  background:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
   background-size:40px 40px;pointer-events:none;z-index:0}
 .w{position:relative;z-index:1}
+/* HEADER */
 header{background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
-  border-bottom:1px solid var(--bdr);padding:18px 28px;
-  display:flex;align-items:center;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:12px}
-.li{width:40px;height:40px;background:linear-gradient(135deg,var(--fii),var(--both));
+  border-bottom:1px solid var(--bdr);padding:16px 26px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:99;backdrop-filter:blur(8px)}
+.lg{display:flex;align-items:center;gap:12px}
+.li{width:40px;height:40px;background:linear-gradient(135deg,var(--fi),var(--bo));
   border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:18px;box-shadow:0 0 20px rgba(0,212,170,.4)}
-.lt{font-size:19px;font-weight:800;letter-spacing:1px}
-.lt span{color:var(--fii)}
-.ls{font-size:10px;color:var(--mut);letter-spacing:1px;margin-top:2px}
-.hm{display:flex;align-items:center;gap:14px}
-.lb{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.1);
-  border:1px solid rgba(0,212,170,.3);padding:5px 13px;border-radius:20px;
-  font-size:11px;font-weight:700;color:var(--fii);letter-spacing:1px}
-.ld{width:7px;height:7px;border-radius:50%;background:var(--fii);animation:pulse 1.5s infinite}
+  font-size:18px;box-shadow:0 0 18px rgba(0,212,170,.4)}
+.lt{font-size:18px;font-weight:800;letter-spacing:1px}
+.lt span{color:var(--fi)}
+.ls2{font-size:9px;color:var(--mu);letter-spacing:1px;margin-top:2px}
+.hm{display:flex;align-items:center;gap:12px}
+.lv{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.1);
+  border:1px solid rgba(0,212,170,.3);padding:5px 12px;border-radius:20px;
+  font-size:11px;font-weight:700;color:var(--fi);letter-spacing:1px}
+.ld{width:7px;height:7px;border-radius:50%;background:var(--fi);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
-.dt{font-family:'Space Mono',monospace;font-size:11px;color:var(--mut)}
-.src{font-size:10px;color:var(--both);background:rgba(167,139,250,.1);
-  border:1px solid rgba(167,139,250,.2);padding:4px 10px;border-radius:12px}
-.sum{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bdr);gap:1px;
-  border-bottom:1px solid var(--bdr)}
-.sc{background:var(--sur);padding:16px 22px}
-.sl{font-size:10px;letter-spacing:2px;color:var(--mut);text-transform:uppercase;margin-bottom:5px}
+.src{font-size:10px;color:var(--bo);background:rgba(167,139,250,.1);
+  border:1px solid rgba(167,139,250,.25);padding:4px 10px;border-radius:12px}
+.dt{font-family:'Space Mono',monospace;font-size:11px;color:var(--mu)}
+/* SUMMARY BAR */
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--bdr);border-bottom:1px solid var(--bdr)}
+.sc2{background:var(--sur);padding:14px 20px}
+.sl{font-size:10px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px}
 .sv{font-family:'Space Mono',monospace;font-size:20px;font-weight:700}
-.sb{font-size:11px;color:var(--mut);margin-top:4px}
-.up{color:var(--grn)} .down{color:var(--red)}
-.cf{color:var(--fii)} .cd{color:var(--dii)} .cb{color:var(--both)} .cg{color:var(--gold)}
-.tw{padding:22px 28px;overflow-x:auto}
-.tt{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);
-  margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.tt::before{content:'';width:3px;height:14px;background:var(--fii);border-radius:2px}
-table{width:100%;border-collapse:collapse;min-width:880px}
+.sb2{font-size:11px;color:var(--mu);margin-top:3px}
+.up{color:var(--fi)} .dn{color:var(--se)}
+.cfi{color:var(--fi)} .cdi{color:var(--di)} .cbo{color:var(--bo)} .cgo{color:var(--go)}
+/* TABLE */
+.tw{padding:20px 26px;overflow-x:auto}
+.tt{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);
+  margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.tt::before{content:'';width:3px;height:14px;background:var(--fi);border-radius:2px}
+table{width:100%;border-collapse:collapse;min-width:920px}
 thead tr{border-bottom:2px solid var(--bdr)}
-th{padding:9px 11px;text-align:left;font-size:10px;letter-spacing:1.5px;
-  color:var(--mut);text-transform:uppercase}
+th{padding:9px 10px;text-align:left;font-size:9px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;font-weight:600}
 th:not(:first-child){text-align:center}
-tbody tr{border-bottom:1px solid rgba(26,48,80,.4);transition:background .15s;
-  animation:si .4s ease forwards;opacity:0}
-@keyframes si{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
-tbody tr:nth-child(1){animation-delay:.05s} tbody tr:nth-child(2){animation-delay:.1s}
-tbody tr:nth-child(3){animation-delay:.15s} tbody tr:nth-child(4){animation-delay:.2s}
-tbody tr:nth-child(5){animation-delay:.25s} tbody tr:nth-child(6){animation-delay:.3s}
-tbody tr:nth-child(7){animation-delay:.35s} tbody tr:nth-child(8){animation-delay:.4s}
-tbody tr:nth-child(9){animation-delay:.45s} tbody tr:nth-child(10){animation-delay:.5s}
-tbody tr:nth-child(n+11){animation-delay:.55s}
+tbody tr{border-bottom:1px solid rgba(26,48,80,.4);
+  animation:si .4s ease both;opacity:0;transition:background .15s}
+@keyframes si{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 tbody tr:hover{background:rgba(0,212,170,.03)}
-td{padding:12px 11px;font-size:12px;vertical-align:middle;text-align:center}
+td{padding:11px 10px;font-size:12px;vertical-align:middle;text-align:center}
 td:first-child{text-align:left}
-.sn{font-weight:700;font-size:13px} .ss{font-size:10px;color:var(--mut);font-family:'Space Mono',monospace;margin-top:2px}
-.pm{font-family:'Space Mono',monospace;font-size:13px;font-weight:700} .spk{margin-top:4px}
-.badge{display:inline-block;padding:4px 9px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px}
-.badge-fii{background:rgba(0,212,170,.12);color:var(--fii);border:1px solid rgba(0,212,170,.25)}
-.badge-dii{background:rgba(255,140,66,.12);color:var(--dii);border:1px solid rgba(255,140,66,.25)}
-.badge-both{background:rgba(167,139,250,.15);color:var(--both);border:1px solid rgba(167,139,250,.3)}
-.badge-sell{background:rgba(255,77,109,.1);color:var(--sell);border:1px solid rgba(255,77,109,.25)}
-.rn{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
-.rb{width:80px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
-.rf{height:100%;border-radius:2px}
-.rsi-overbought .rf{background:var(--red)} .rsi-neutral .rf{background:var(--gold)} .rsi-oversold .rf{background:var(--grn)}
+.sn{font-weight:700;font-size:13px}
+.sy{font-size:9px;color:var(--mu);font-family:'Space Mono',monospace;margin-top:2px}
+.pv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+.sp{margin-top:4px}
+/* BADGES */
+.b{display:inline-block;padding:4px 9px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px}
+.bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
+.bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
+.bx{background:rgba(255,77,109,.1);color:var(--se);border:1px solid rgba(255,77,109,.25)}
+/* RSI */
+.rv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+.rb2{width:78px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
+.rf2{height:100%;border-radius:2px}
+.ro .rf2{background:var(--se)} .rn2 .rf2{background:var(--go)} .rs2 .rf2{background:var(--fi)}
+/* INDICATORS */
 .im{display:flex;justify-content:center;gap:5px;font-size:10px;margin-bottom:2px}
-.il{color:var(--mut);font-size:9px}
-.sr{font-size:10px;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:4px;justify-content:center;margin-bottom:2px}
-.sr-r{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;background:rgba(255,77,109,.2);color:var(--red)}
-.sr-s{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;background:rgba(0,212,170,.15);color:var(--grn)}
-.signal{display:inline-block;padding:4px 10px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px}
-.signal-strong-buy{background:rgba(0,212,170,.2);color:var(--grn);border:1px solid rgba(0,212,170,.5);box-shadow:0 0 8px rgba(0,212,170,.2)}
-.signal-buy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.25)}
-.signal-neutral{background:rgba(240,192,96,.1);color:var(--gold);border:1px solid rgba(240,192,96,.25)}
-.signal-caution{background:rgba(255,140,66,.1);color:var(--dii);border:1px solid rgba(255,140,66,.3)}
-.signal-sell{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.3)}
-.leg{padding:0 28px 20px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-.li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut)}
+.il{color:var(--mu);font-size:9px;min-width:28px;text-align:right}
+/* S/R */
+.sr{font-size:10px;font-family:'Space Mono',monospace;display:flex;align-items:center;
+  gap:4px;justify-content:center;margin-bottom:2px}
+.sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(255,77,109,.2);color:var(--se)}
+.sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(0,212,170,.15);color:var(--fi)}
+/* SIGNALS */
+.sig{display:inline-block;padding:4px 10px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.5px}
+.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);
+  box-shadow:0 0 8px rgba(0,212,170,.2)}
+.sb{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
+.sn{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
+.sc2{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
+.ss{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
+/* LEGEND */
+.leg{padding:0 26px 18px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
 .ld2{width:9px;height:9px;border-radius:50%}
-footer{background:var(--sur);border-top:1px solid var(--bdr);padding:13px 28px;
-  display:flex;justify-content:space-between;font-size:11px;color:var(--mut);flex-wrap:wrap;gap:8px}
+footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
+  display:flex;justify-content:space-between;font-size:11px;color:var(--mu);flex-wrap:wrap;gap:8px}
 </style>
 </head>
 <body>
 <div class="w">
 <header>
-  <div class="logo">
+  <div class="lg">
     <div class="li">📊</div>
     <div>
       <div class="lt">FII<span>/DII</span> PULSE</div>
-      <div class="ls">INSTITUTIONAL INTELLIGENCE DASHBOARD · AUTO-GENERATED</div>
+      <div class="ls2">INSTITUTIONAL INTELLIGENCE DASHBOARD · AUTO-GENERATED</div>
     </div>
   </div>
   <div class="hm">
     <div class="src">📡 MunafaSutra</div>
-    <div class="lb"><div class="ld"></div> LIVE DATA</div>
+    <div class="lv"><div class="ld"></div>LIVE DATA</div>
     <div class="dt">📅 18 Feb 2026</div>
   </div>
 </header>
 
 <div class="sum">
-  <div class="sc"><div class="sl">Nifty 50</div>
-    <div class="sv cf">₹25,752.65</div>
-    <div class="sb up">▲ 0.11%</div></div>
-  <div class="sc"><div class="sl">Sensex</div>
-    <div class="sv cd">₹83,450.96</div>
-    <div class="sb up">▲ 0.21%</div></div>
-  <div class="sc"><div class="sl">Stocks Tracked</div>
-    <div class="sv cb">20</div>
-    <div class="sb">FII Buys: 15 · DII Buys: 15 · Both: 15</div></div>
-  <div class="sc"><div class="sl">Strong Buy Signals</div>
-    <div class="sv cg">3</div>
-    <div class="sb">Stocks with STRONG BUY rating</div></div>
+  <div class="sc2"><div class="sl">Nifty 50</div>
+    <div class="sv cfi">₹25,715.55</div>
+    <div class="sb2 dn">▼ -0.04%</div></div>
+  <div class="sc2"><div class="sl">Sensex</div>
+    <div class="sv cdi">₹83,553.59</div>
+    <div class="sb2 up">▲ 0.12%</div></div>
+  <div class="sc2"><div class="sl">Stocks Tracked</div>
+    <div class="sv cbo">20</div>
+    <div class="sb2">FII Buys: 18 · DII Buys: 18 · Both: 18</div></div>
+  <div class="sc2"><div class="sl">Strong Buy Signals</div>
+    <div class="sv cgo">3</div>
+    <div class="sb2">Stocks with STRONG BUY</div></div>
 </div>
 
 <div class="tw">
@@ -130,544 +138,566 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:13px 28px;
   <table>
     <thead><tr>
       <th>Stock</th><th>Price / Trend</th><th>FII Cash</th><th>DII Cash</th>
-      <th>RSI (14)</th><th>MACD · EMA · ADX · BB</th>
+      <th>RSI (14)</th><th>MACD · EMA · ADX · BB · StRSI</th>
       <th>Support / Resistance (6M)</th><th>Signal</th>
     </tr></thead>
     <tbody>
-        <tr>
-          <td><div class="sn">SRF Limited  (SRF)</div>
-              <div class="ss">SRF</div></td>
-          <td><div class="pm">₹2,742.90</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,2.6 23.3,4.0 35.0,15.5 46.7,16.3 58.3,14.8 70.0,26.0" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td>
-            <div class="rsi-oversold">
-              <span class="rn up">37.0</span>
-              <div class="rb"><div class="rf" style="width:37%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="down">-4.8</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>19.5</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹2,840.30</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹2,688.30</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹3,204.09</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹2,645.00</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">RBL Bank  (RBLBANK)</div>
-              <div class="ss">RBLBANK</div></td>
-          <td><div class="pm">₹322.25</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.6 11.7,26.0 23.3,22.5 35.0,8.8 46.7,14.1 58.3,13.2 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">63.5</span>
-              <div class="rb"><div class="rf" style="width:64%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+2.29</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>12.6</span></div>
-            <div class="im"><span class="il">BB</span><span>Overbought</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹327.65</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹314.55</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹332.00</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹242.37</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Tube Invest Of India Ltd  (TIINDIA)</div>
-              <div class="ss">TIINDIA</div></td>
-          <td><div class="pm">₹2,462.70</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,12.6 23.3,10.6 35.0,0.0 46.7,2.2 58.3,1.2 70.0,8.4" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">51.6</span>
-              <div class="rb"><div class="rf" style="width:52%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+23.89</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>26.4</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹2,505.47</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹2,430.47</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹3,417.01</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹2,163.07</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">United Spirits Limited  (UNITDSPR)</div>
-              <div class="ss">UNITDSPR</div></td>
-          <td><div class="pm">₹1,424.00</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,16.1 11.7,15.9 23.3,12.5 35.0,7.5 46.7,24.4 58.3,26.0 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">63.9</span>
-              <div class="rb"><div class="rf" style="width:64%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+8.45</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>21.9</span></div>
-            <div class="im"><span class="il">BB</span><span>Overbought</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹1,432.53</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹1,408.73</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹1,481.30</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹1,270.26</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Union Bank of India  (UNIONBANK)</div>
-              <div class="ss">UNIONBANK</div></td>
-          <td><div class="pm">₹188.89</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.1 11.7,25.0 23.3,22.2 35.0,20.5 46.7,26.0 58.3,15.0 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">69.2</span>
-              <div class="rb"><div class="rf" style="width:69%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+0.16</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>25.9</span></div>
-            <div class="im"><span class="il">BB</span><span>Overbought</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹191.97</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹183.83</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹190.00</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹124.64</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">ITC Limited  (ITC)</div>
-              <div class="ss">ITC</div></td>
-          <td><div class="pm">₹325.45</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,5.9 11.7,9.0 23.3,16.0 35.0,17.8 46.7,26.0 58.3,16.7 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">49.4</span>
-              <div class="rb"><div class="rf" style="width:49%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+3.05</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>43.8</span></div>
-            <div class="im"><span class="il">BB</span><span>Overbought</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹329.62</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹319.72</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹418.23</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹295.80</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Punjab National Bank  (PNB)</div>
-              <div class="ss">PNB</div></td>
-          <td><div class="pm">₹124.82</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,5.9 11.7,8.0 23.3,8.2 35.0,16.6 46.7,26.0 58.3,18.2 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">53.9</span>
-              <div class="rb"><div class="rf" style="width:54%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="down">-0.23</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>11.0</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹127.01</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹121.22</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹135.15</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹100.60</div>
-          </td>
-          <td><span class="signal signal-neutral">NEUTRAL</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Ambuja Cements Limited  (AMBUJACEM)</div>
-              <div class="ss">AMBUJACEM</div></td>
-          <td><div class="pm">₹522.00</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,4.5 23.3,1.4 35.0,10.9 46.7,26.0 58.3,20.1 70.0,23.1" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">43.5</span>
-              <div class="rb"><div class="rf" style="width:44%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="down">-0.38</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>21.6</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹526.72</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹519.07</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹600.80</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹493.35</div>
-          </td>
-          <td><span class="signal signal-neutral">NEUTRAL</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Pnb Housing Fin Ltd.  (PNBHOUSING)</div>
-              <div class="ss">PNBHOUSING</div></td>
-          <td><div class="pm">₹863.65</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,10.0 23.3,9.8 35.0,11.6 46.7,26.0 58.3,14.6 70.0,2.3" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">47.1</span>
-              <div class="rb"><div class="rf" style="width:47%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+4.09</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>25.7</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹872.90</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹847.70</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹1,015.75</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹750.30</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">IndusInd Bank Limited  (INDUSINDBK)</div>
-              <div class="ss">INDUSINDBK</div></td>
-          <td><div class="pm">₹943.80</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.6 11.7,20.0 23.3,23.2 35.0,26.0 46.7,21.9 58.3,14.7 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">64.4</span>
-              <div class="rb"><div class="rf" style="width:64%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+0.89</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>17.9</span></div>
-            <div class="im"><span class="il">BB</span><span>Overbought</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹954.60</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹930.60</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹961.90</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹710.60</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Bank of Baroda  (BANKBARODA)</div>
-              <div class="ss">BANKBARODA</div></td>
-          <td><div class="pm">₹303.25</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,20.8 11.7,21.2 23.3,19.8 35.0,22.1 46.7,26.0 58.3,17.6 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">58.0</span>
-              <div class="rb"><div class="rf" style="width:58%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+0.45</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>15.3</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹308.43</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹294.63</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹313.35</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹230.81</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Container Corporation of India Limited  (CONCOR)</div>
-              <div class="ss">CONCOR</div></td>
-          <td><div class="pm">₹505.50</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,2.4 11.7,2.4 23.3,0.0 35.0,12.8 46.7,26.0 58.3,17.6 70.0,14.9" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">48.7</span>
-              <div class="rb"><div class="rf" style="width:49%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="down">-0.22</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>13.5</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹511.07</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹500.77</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹563.15</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹469.60</div>
-          </td>
-          <td><span class="signal signal-neutral">NEUTRAL</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">The Phoenix Mills Limited  (PHOENIXLTD)</div>
-              <div class="ss">PHOENIXLTD</div></td>
-          <td><div class="pm">₹1,767.20</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,18.1 11.7,13.6 23.3,0.0 35.0,2.7 46.7,26.0 58.3,5.7 70.0,9.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">50.6</span>
-              <div class="rb"><div class="rf" style="width:51%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+8.7</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>15.5</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹1,785.10</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹1,746.20</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹1,993.00</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹1,468.44</div>
-          </td>
-          <td><span class="signal signal-neutral">NEUTRAL</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">KEI Industries Limited  (KEI)</div>
-              <div class="ss">KEI</div></td>
-          <td><div class="pm">₹4,567.80</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,1.4 11.7,3.3 23.3,0.0 35.0,3.1 46.7,8.3 58.3,26.0 70.0,8.1" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">62.8</span>
-              <div class="rb"><div class="rf" style="width:63%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+35.27</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>26.9</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹4,614.40</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹4,485.60</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹4,646.00</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹3,724.29</div>
-          </td>
-          <td><span class="signal signal-strong-buy">STRONG BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">ICICI Bank Limited  (ICICIBANK)</div>
-              <div class="ss">ICICIBANK</div></td>
-          <td><div class="pm">₹1,407.50</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,18.1 23.3,18.4 35.0,0.0 46.7,11.9 58.3,14.2 70.0,17.4" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td><span class="badge badge-sell">▼ SELL</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">54.5</span>
-              <div class="rb"><div class="rf" style="width:54%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+2.78</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>15.9</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹1,416.20</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹1,396.20</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹1,445.00</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹1,317.40</div>
-          </td>
-          <td><span class="signal signal-strong-buy">STRONG BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Bharat Electronics Limited  (BEL)</div>
-              <div class="ss">BEL</div></td>
-          <td><div class="pm">₹446.85</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,22.0 11.7,22.0 23.3,21.4 35.0,6.8 46.7,26.0 58.3,20.4 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">61.8</span>
-              <div class="rb"><div class="rf" style="width:62%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="down">-0.16</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>22.6</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹450.70</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹441.65</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹460.00</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹361.20</div>
-          </td>
-          <td><span class="signal signal-neutral">NEUTRAL</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Sona Blw Precision Frgs L  (SONACOMS)</div>
-              <div class="ss">SONACOMS</div></td>
-          <td><div class="pm">₹529.75</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,14.9 11.7,13.9 23.3,0.0 35.0,10.5 46.7,20.3 58.3,26.0 70.0,16.6" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn down">63.1</span>
-              <div class="rb"><div class="rf" style="width:63%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+1.67</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>28.2</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹534.92</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹522.47</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹549.45</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹401.00</div>
-          </td>
-          <td><span class="signal signal-strong-buy">STRONG BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Jindal Steel & Power Limited  (JINDALSTEL)</div>
-              <div class="ss">JINDALSTEL</div></td>
-          <td><div class="pm">₹1,211.00</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.7 11.7,19.4 23.3,20.3 35.0,7.5 46.7,26.0 58.3,0.1 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-overbought">
-              <span class="rn down">70.8</span>
-              <div class="rb"><div class="rf" style="width:71%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+3.26</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>32.5</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹1,220.80</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹1,195.80</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹1,215.40</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹943.30</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Larsen & Toubro Limited  (LT)</div>
-              <div class="ss">LT</div></td>
-          <td><div class="pm">₹4,279.80</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,17.3 23.3,17.1 35.0,14.7 46.7,16.6 58.3,12.2 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-overbought">
-              <span class="rn down">74.2</span>
-              <div class="rb"><div class="rf" style="width:74%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+32.84</span></div>
-            <div class="im"><span class="il">EMA</span><span class="up">↑ Bull</span></div>
-            <div class="im"><span class="il">ADX</span><span>26.1</span></div>
-            <div class="im"><span class="il">BB</span><span>Overbought</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹4,314.50</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹4,217.60</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹4,287.00</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹3,516.40</div>
-          </td>
-          <td><span class="signal signal-neutral">NEUTRAL</span></td>
-        </tr>
-        <tr>
-          <td><div class="sn">Aurobindo Pharma Limited  (AUROPHARMA)</div>
-              <div class="ss">AUROPHARMA</div></td>
-          <td><div class="pm">₹1,186.70</div><div class="spk"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,26.0 23.3,18.7 35.0,15.0 46.7,19.0 58.3,6.2 70.0,5.6" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
-          <td><span class="badge badge-fii">▲ BUY</span></td>
-          <td><span class="badge badge-dii">▲ BUY</span></td>
-          <td>
-            <div class="rsi-neutral">
-              <span class="rn up">52.2</span>
-              <div class="rb"><div class="rf" style="width:52%"></div></div>
-            </div>
-          </td>
-          <td>
-            <div class="im"><span class="il">MACD</span><span class="up">+1.25</span></div>
-            <div class="im"><span class="il">EMA</span><span class="down">↓ Bear</span></div>
-            <div class="im"><span class="il">ADX</span><span>13.0</span></div>
-            <div class="im"><span class="il">BB</span><span>Mid</span></div>
-          </td>
-          <td>
-            <div class="sr"><span class="sr-r">R1</span> ₹1,210.43</div>
-            <div class="sr"><span class="sr-s">S1</span> ₹1,165.33</div>
-            <div class="sr"><span class="sr-r">6mH</span> ₹1,270.80</div>
-            <div class="sr"><span class="sr-s">6mL</span> ₹1,016.10</div>
-          </td>
-          <td><span class="signal signal-buy">BUY</span></td>
-        </tr></tbody>
+      <tr style="animation-delay:0.00s">
+        <td><div class="sn">SRF Limited  (SRF)</div>
+            <div class="sy">SRF</div></td>
+        <td><div class="pv">₹2,742.90</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,2.6 23.3,4.0 35.0,15.5 46.7,16.3 58.3,14.8 70.0,26.0" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rs2">
+          <div class="rv up">37.0</div>
+          <div class="rb2"><div class="rf2" style="width:37%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="dn">-4.8</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>19.5</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹2,840.30</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹2,688.30</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹3,204.09</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹2,645.00</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.05s">
+        <td><div class="sn">RBL Bank  (RBLBANK)</div>
+            <div class="sy">RBLBANK</div></td>
+        <td><div class="pv">₹322.25</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.6 11.7,26.0 23.3,22.5 35.0,8.8 46.7,14.1 58.3,13.2 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">63.5</div>
+          <div class="rb2"><div class="rf2" style="width:64%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+2.29</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>12.6</span></div>
+          <div class="im"><span class="il">BB</span><span>Overbought</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹327.65</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹314.55</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹332.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹242.37</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.10s">
+        <td><div class="sn">Tube Invest Of India Ltd  (TIINDIA)</div>
+            <div class="sy">TIINDIA</div></td>
+        <td><div class="pv">₹2,462.70</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,12.6 23.3,10.6 35.0,0.0 46.7,2.2 58.3,1.2 70.0,8.4" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv up">51.6</div>
+          <div class="rb2"><div class="rf2" style="width:52%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+23.89</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>26.4</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.49</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹2,505.47</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹2,430.47</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹3,417.01</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹2,163.07</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.15s">
+        <td><div class="sn">United Spirits Limited  (UNITDSPR)</div>
+            <div class="sy">UNITDSPR</div></td>
+        <td><div class="pv">₹1,424.00</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,16.1 11.7,15.9 23.3,12.5 35.0,7.5 46.7,24.4 58.3,26.0 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">63.9</div>
+          <div class="rb2"><div class="rf2" style="width:64%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+8.45</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>21.9</span></div>
+          <div class="im"><span class="il">BB</span><span>Overbought</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.97</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹1,432.53</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,408.73</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,481.30</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹1,270.26</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.20s">
+        <td><div class="sn">Union Bank of India  (UNIONBANK)</div>
+            <div class="sy">UNIONBANK</div></td>
+        <td><div class="pv">₹188.89</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.1 11.7,25.0 23.3,22.2 35.0,20.5 46.7,26.0 58.3,15.0 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">69.2</div>
+          <div class="rb2"><div class="rf2" style="width:69%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+0.16</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>25.9</span></div>
+          <div class="im"><span class="il">BB</span><span>Overbought</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹191.97</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹183.83</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹190.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹124.64</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.25s">
+        <td><div class="sn">ITC Limited  (ITC)</div>
+            <div class="sy">ITC</div></td>
+        <td><div class="pv">₹325.45</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,5.9 11.7,9.0 23.3,16.0 35.0,17.8 46.7,26.0 58.3,16.7 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv up">49.4</div>
+          <div class="rb2"><div class="rf2" style="width:49%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+3.05</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>43.8</span></div>
+          <div class="im"><span class="il">BB</span><span>Overbought</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹329.62</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹319.72</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹418.23</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹295.80</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.30s">
+        <td><div class="sn">Punjab National Bank  (PNB)</div>
+            <div class="sy">PNB</div></td>
+        <td><div class="pv">₹124.82</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,5.9 11.7,8.0 23.3,8.2 35.0,16.6 46.7,26.0 58.3,18.2 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv up">53.9</div>
+          <div class="rb2"><div class="rf2" style="width:54%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="dn">-0.23</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>11.0</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹127.01</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹121.22</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹135.15</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹100.60</div>
+        </td>
+        <td><span class="sig sn">NEUTRAL</span></td>
+      </tr>
+      <tr style="animation-delay:0.35s">
+        <td><div class="sn">Ambuja Cements Limited  (AMBUJACEM)</div>
+            <div class="sy">AMBUJACEM</div></td>
+        <td><div class="pv">₹522.00</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,4.5 23.3,1.4 35.0,10.9 46.7,26.0 58.3,20.1 70.0,23.1" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv up">43.5</div>
+          <div class="rb2"><div class="rf2" style="width:44%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="dn">-0.38</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>21.6</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.48</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹526.72</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹519.07</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹600.80</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹493.35</div>
+        </td>
+        <td><span class="sig sn">NEUTRAL</span></td>
+      </tr>
+      <tr style="animation-delay:0.40s">
+        <td><div class="sn">Pnb Housing Fin Ltd.  (PNBHOUSING)</div>
+            <div class="sy">PNBHOUSING</div></td>
+        <td><div class="pv">₹863.65</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,10.0 23.3,9.8 35.0,11.6 46.7,26.0 58.3,14.6 70.0,2.3" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv up">47.1</div>
+          <div class="rb2"><div class="rf2" style="width:47%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+4.09</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>25.7</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹872.90</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹847.70</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,015.75</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹750.30</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.45s">
+        <td><div class="sn">IndusInd Bank Limited  (INDUSINDBK)</div>
+            <div class="sy">INDUSINDBK</div></td>
+        <td><div class="pv">₹943.80</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.6 11.7,20.0 23.3,23.2 35.0,26.0 46.7,21.9 58.3,14.7 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">64.4</div>
+          <div class="rb2"><div class="rf2" style="width:64%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+0.89</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>17.9</span></div>
+          <div class="im"><span class="il">BB</span><span>Overbought</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹954.60</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹930.60</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹961.90</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹710.60</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.50s">
+        <td><div class="sn">Bank of Baroda  (BANKBARODA)</div>
+            <div class="sy">BANKBARODA</div></td>
+        <td><div class="pv">₹303.25</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,20.8 11.7,21.2 23.3,19.8 35.0,22.1 46.7,26.0 58.3,17.6 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">58.0</div>
+          <div class="rb2"><div class="rf2" style="width:58%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+0.45</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>15.3</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹308.43</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹294.63</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹313.35</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹230.81</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.55s">
+        <td><div class="sn">Container Corporation of India Limited  (CONCOR)</div>
+            <div class="sy">CONCOR</div></td>
+        <td><div class="pv">₹505.50</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,2.4 11.7,2.4 23.3,0.0 35.0,12.8 46.7,26.0 58.3,17.6 70.0,14.9" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv up">48.7</div>
+          <div class="rb2"><div class="rf2" style="width:49%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="dn">-0.22</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>13.5</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.27</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹511.07</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹500.77</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹563.15</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹469.60</div>
+        </td>
+        <td><span class="sig sn">NEUTRAL</span></td>
+      </tr>
+      <tr style="animation-delay:0.60s">
+        <td><div class="sn">The Phoenix Mills Limited  (PHOENIXLTD)</div>
+            <div class="sy">PHOENIXLTD</div></td>
+        <td><div class="pv">₹1,767.20</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,18.1 11.7,13.6 23.3,0.0 35.0,2.7 46.7,26.0 58.3,5.7 70.0,9.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bx">▼ SELL</span></td>
+        <td><span class="b bx">▼ SELL</span></td>
+        <td class="rn2">
+          <div class="rv up">50.6</div>
+          <div class="rb2"><div class="rf2" style="width:51%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+8.7</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>15.5</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.9</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹1,785.10</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,746.20</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,993.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹1,468.44</div>
+        </td>
+        <td><span class="sig sn">NEUTRAL</span></td>
+      </tr>
+      <tr style="animation-delay:0.65s">
+        <td><div class="sn">KEI Industries Limited  (KEI)</div>
+            <div class="sy">KEI</div></td>
+        <td><div class="pv">₹4,567.80</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,1.4 11.7,3.3 23.3,0.0 35.0,3.1 46.7,8.3 58.3,26.0 70.0,8.1" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">62.8</div>
+          <div class="rb2"><div class="rf2" style="width:63%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+35.27</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>26.9</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.79</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹4,614.40</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹4,485.60</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹4,646.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹3,724.29</div>
+        </td>
+        <td><span class="sig sbs">STRONG BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.70s">
+        <td><div class="sn">ICICI Bank Limited  (ICICIBANK)</div>
+            <div class="sy">ICICIBANK</div></td>
+        <td><div class="pv">₹1,407.50</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,18.1 23.3,18.4 35.0,0.0 46.7,11.9 58.3,14.2 70.0,17.4" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bx">▼ SELL</span></td>
+        <td><span class="b bx">▼ SELL</span></td>
+        <td class="rn2">
+          <div class="rv up">54.5</div>
+          <div class="rb2"><div class="rf2" style="width:54%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+2.78</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>15.9</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.6</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹1,416.20</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,396.20</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,445.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹1,317.40</div>
+        </td>
+        <td><span class="sig sbs">STRONG BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.75s">
+        <td><div class="sn">Bharat Electronics Limited  (BEL)</div>
+            <div class="sy">BEL</div></td>
+        <td><div class="pv">₹446.85</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,22.0 11.7,22.0 23.3,21.4 35.0,6.8 46.7,26.0 58.3,20.4 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">61.8</div>
+          <div class="rb2"><div class="rf2" style="width:62%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="dn">-0.16</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>22.6</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.55</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹450.70</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹441.65</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹460.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹361.20</div>
+        </td>
+        <td><span class="sig sn">NEUTRAL</span></td>
+      </tr>
+      <tr style="animation-delay:0.80s">
+        <td><div class="sn">Sona Blw Precision Frgs L  (SONACOMS)</div>
+            <div class="sy">SONACOMS</div></td>
+        <td><div class="pv">₹529.75</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,14.9 11.7,13.9 23.3,0.0 35.0,10.5 46.7,20.3 58.3,26.0 70.0,16.6" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv dn">63.1</div>
+          <div class="rb2"><div class="rf2" style="width:63%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+1.67</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>28.2</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.16</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹534.92</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹522.47</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹549.45</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹401.00</div>
+        </td>
+        <td><span class="sig sbs">STRONG BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.85s">
+        <td><div class="sn">Jindal Steel & Power Limited  (JINDALSTEL)</div>
+            <div class="sy">JINDALSTEL</div></td>
+        <td><div class="pv">₹1,211.00</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.7 11.7,19.4 23.3,20.3 35.0,7.5 46.7,26.0 58.3,0.1 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="ro">
+          <div class="rv dn">70.8</div>
+          <div class="rb2"><div class="rf2" style="width:71%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+3.26</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>32.5</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.74</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹1,220.80</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,195.80</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,215.40</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹943.30</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.90s">
+        <td><div class="sn">Larsen & Toubro Limited  (LT)</div>
+            <div class="sy">LT</div></td>
+        <td><div class="pv">₹4,279.80</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,17.3 23.3,17.1 35.0,14.7 46.7,16.6 58.3,12.2 70.0,0.0" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="ro">
+          <div class="rv dn">74.2</div>
+          <div class="rb2"><div class="rf2" style="width:74%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+32.84</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>26.1</span></div>
+          <div class="im"><span class="il">BB</span><span>Overbought</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹4,314.50</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹4,217.60</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹4,287.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹3,516.40</div>
+        </td>
+        <td><span class="sig sn">NEUTRAL</span></td>
+      </tr>
+      <tr style="animation-delay:0.95s">
+        <td><div class="sn">Aurobindo Pharma Limited  (AUROPHARMA)</div>
+            <div class="sy">AUROPHARMA</div></td>
+        <td><div class="pv">₹1,186.70</div><div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,26.0 23.3,18.7 35.0,15.0 46.7,19.0 58.3,6.2 70.0,5.6" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div></td>
+        <td><span class="b bf">▲ BUY</span></td>
+        <td><span class="b bd">▲ BUY</span></td>
+        <td class="rn2">
+          <div class="rv up">52.2</div>
+          <div class="rb2"><div class="rf2" style="width:52%"></div></div>
+        </td>
+        <td>
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+1.25</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>13.0</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.61</span></div>
+        </td>
+        <td>
+          <div class="sr"><span class="sr-r">R1</span> ₹1,210.43</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,165.33</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,270.80</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹1,016.10</div>
+        </td>
+        <td><span class="sig sb">BUY</span></td>
+      </tr></tbody>
   </table>
 </div>
 
 <div class="leg">
-  <div class="li2"><div class="ld2" style="background:var(--fii)"></div> FII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--dii)"></div> DII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--both)"></div> Both Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--red)"></div> Selling</div>
+  <div class="li2"><div class="ld2" style="background:var(--fi)"></div> FII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--di)"></div> DII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--bo)"></div> Both Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--se)"></div> Selling</div>
   <div class="li2" style="margin-left:auto;font-size:10px;">
-    RSI: &lt;40 Oversold · &gt;70 Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend</div>
+    RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend · StRSI&lt;0.3: Oversold</div>
 </div>
 
 <footer>
-  <div>🤖 Auto-generated by FII/DII Pulse · Source: MunafaSutra · Technicals: yfinance+pandas</div>
-  <div>⚠️ Not financial advice. For educational purposes only. Always DYOR.</div>
+  <div>🤖 FII/DII Pulse v4 · Source: MunafaSutra · Technicals: yfinance + pandas · 18 Feb 2026</div>
+  <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
 </footer>
-</div></body></html>
+</div>
+</body>
+</html>
