@@ -1,5 +1,5 @@
 """
-FII/DII Intelligence Dashboard — v8 (CSV Edition)
+FII/DII Intelligence Dashboard — v8 (CSV Edition) · Jade Garden Theme
 ===================================================
 KEY CHANGE from original v8:
   fetch_from_nse() now uses the CSV download endpoint instead of the
@@ -22,6 +22,9 @@ Date Logic (VERIFIED):
   - from_date = 5 trading days BEFORE to_date
     → to_date is day-1, from_date is day-6 = 6 trading days total
     → Matches NSE website window: e.g. 10-02-2026 → 17-02-2026
+
+THEME: Jade Garden — Sage green + white, clean modern fintech
+  (Only HTML/CSS output changed; all logic is identical to v8 CSV Edition)
 """
 
 import io, os, smtplib, logging, time, re
@@ -429,9 +432,7 @@ def fetch_from_nse() -> list:
         log.info(f"  -> Raw columns: {list(df.columns)}")
 
         # ── Normalise column names ─────────────────────────────────────────
-        # Maps every known NSE column variant (JSON API + CSV download) → internal name
         NSE_EXACT = {
-            # JSON API names (BD_ prefix)
             "BD_SYMBOL":      "SYMBOL",
             "BD_SCRIP_NAME":  "COMPANY",
             "BD_CLIENT_NAME": "CLIENT",
@@ -440,7 +441,6 @@ def fetch_from_nse() -> list:
             "BD_DT_DATE":     "DATE",
             "BD_TP_WATP":     "PRICE",
             "BD_REMARKS":     "REMARKS",
-            # CSV download column headers (title-cased)
             "Symbol":                          "SYMBOL",
             "Security Name":                   "COMPANY",
             "Client Name":                     "CLIENT",
@@ -449,14 +449,12 @@ def fetch_from_nse() -> list:
             "Trade Price / Wght. Avg. Price":  "PRICE",
             "Remarks":                         "REMARKS",
             "Date":                            "DATE",
-            # UPPER-CASE CSV variants
             "SYMBOL":          "SYMBOL",
             "SECURITY NAME":   "COMPANY",
             "CLIENT NAME":     "CLIENT",
             "BUY / SELL":      "BUYSELL",
             "QUANTITY TRADED": "QTY",
             "TRADE PRICE / WGHT. AVG. PRICE": "PRICE",
-            # Misc alternates
             "SCRIP_NAME":  "COMPANY",
             "CLIENT_NAME": "CLIENT",
             "BUY_SELL":    "BUYSELL",
@@ -465,7 +463,6 @@ def fetch_from_nse() -> list:
             "TRADE_PRICE": "PRICE",
         }
 
-        # Build case-insensitive lookup
         nse_upper = {k.upper(): v for k, v in NSE_EXACT.items()}
 
         rename = {}
@@ -477,7 +474,6 @@ def fetch_from_nse() -> list:
                 rename[c] = target
                 mapped.add(target)
                 continue
-            # Fuzzy fallbacks
             cuu = cu.upper()
             if "CLIENT" in cuu and "CLIENT" not in mapped:
                 rename[c] = "CLIENT"; mapped.add("CLIENT")
@@ -504,10 +500,6 @@ def fetch_from_nse() -> list:
             log.info(f"  -> All columns present: {list(df.columns)}")
             return []
 
-        # ── Option 1: Include ALL stocks from CSV ─────────────────────────
-        # Every stock in the bulk/block deal CSV is shown.
-        # FII / DII tags are applied where client name matches keywords.
-        # Stocks with no keyword match appear with "neutral" (untagged).
         stocks, matched = {}, 0
         for _, row in df.iterrows():
             sym    = str(row.get("SYMBOL",  "")).strip().upper()
@@ -515,7 +507,6 @@ def fetch_from_nse() -> list:
             client = str(row.get("CLIENT",  "")).strip().upper()
             bs     = str(row.get("BUYSELL", "")).strip().upper()
 
-            # Skip completely empty / invalid rows
             if not sym or sym in ("NAN", "") or not client or client == "NAN":
                 continue
 
@@ -529,10 +520,9 @@ def fetch_from_nse() -> list:
                     "name":        name,
                     "fii_cash":    "neutral",
                     "dii_cash":    "neutral",
-                    "client_name": client,   # keep raw client for display
+                    "client_name": client,
                 }
 
-            # Tag FII / DII where matched; multiple rows per symbol are merged
             if is_fii:
                 stocks[sym]["fii_cash"] = action
                 matched += 1
@@ -540,7 +530,6 @@ def fetch_from_nse() -> list:
                 stocks[sym]["dii_cash"] = action
                 matched += 1
 
-        # Return ALL stocks (no neutral filter) — full CSV coverage
         result = list(stocks.values())
 
         log.info(
@@ -786,7 +775,8 @@ def spark_svg(prices):
         f"{round(i*w/(len(prices)-1),1)},{round(h-(p-mn)/rng*h,1)}"
         for i, p in enumerate(prices)
     ]
-    col = "#00d4aa" if prices[-1] >= prices[0] else "#ff4d6d"
+    # Jade Garden: use sage green for up, soft coral for down
+    col = "#3d9970" if prices[-1] >= prices[0] else "#e05c5c"
     return (
         f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
         f'xmlns="http://www.w3.org/2000/svg">'
@@ -811,12 +801,10 @@ def fmt(v):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  GENERATE HTML
+#  SECTOR MAP & ICONS  (unchanged)
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── Sector map: symbol prefix / known tickers → sector ───────────────────────
 SECTOR_MAP = {
-    # Banking & Finance
     "HDFCBANK":"Banking & Finance","ICICIBANK":"Banking & Finance",
     "SBIN":"Banking & Finance","AXISBANK":"Banking & Finance",
     "KOTAKBANK":"Banking & Finance","INDUSINDBK":"Banking & Finance",
@@ -826,7 +814,6 @@ SECTOR_MAP = {
     "AUBANK":"Banking & Finance","RBLBANK":"Banking & Finance",
     "YESBANK":"Banking & Finance","UJJIVANSFB":"Banking & Finance",
     "EQUITASBNK":"Banking & Finance","ESAFSFB":"Banking & Finance",
-    # NBFC & Fintech
     "BAJFINANCE":"NBFC & Fintech","BAJAJFINSV":"NBFC & Fintech",
     "CHOLAFIN":"NBFC & Fintech","MUTHOOTFIN":"NBFC & Fintech",
     "MANAPPURAM":"NBFC & Fintech","SBICARD":"NBFC & Fintech",
@@ -834,7 +821,6 @@ SECTOR_MAP = {
     "CAMS":"NBFC & Fintech","KFINTECH":"NBFC & Fintech",
     "NUVAMA":"NBFC & Fintech","360ONE":"NBFC & Fintech",
     "IIFL":"NBFC & Fintech","MOTHERSON":"Auto & Auto Ancillaries",
-    # IT & Technology
     "TCS":"IT & Technology","INFY":"IT & Technology",
     "WIPRO":"IT & Technology","HCLTECH":"IT & Technology",
     "TECHM":"IT & Technology","LTIM":"IT & Technology",
@@ -842,7 +828,6 @@ SECTOR_MAP = {
     "PERSISTENT":"IT & Technology","OFSS":"IT & Technology",
     "LTTS":"IT & Technology","HEXAWARE":"IT & Technology",
     "KPITTECH":"IT & Technology","TATAELXSI":"IT & Technology",
-    # Pharma & Healthcare
     "SUNPHARMA":"Pharma & Healthcare","DRREDDY":"Pharma & Healthcare",
     "CIPLA":"Pharma & Healthcare","DIVISLAB":"Pharma & Healthcare",
     "TORNTPHARM":"Pharma & Healthcare","AUROPHARMA":"Pharma & Healthcare",
@@ -851,28 +836,24 @@ SECTOR_MAP = {
     "FORTIS":"Pharma & Healthcare","APOLLOHOSP":"Pharma & Healthcare",
     "MAXHEALTH":"Pharma & Healthcare","KIMS":"Pharma & Healthcare",
     "MEDANTA":"Pharma & Healthcare","NARAYANA":"Pharma & Healthcare",
-    # Oil, Gas & Energy
     "RELIANCE":"Oil, Gas & Energy","ONGC":"Oil, Gas & Energy",
     "IOC":"Oil, Gas & Energy","BPCL":"Oil, Gas & Energy",
     "HINDPETRO":"Oil, Gas & Energy","GAIL":"Oil, Gas & Energy",
     "OIL":"Oil, Gas & Energy","MGL":"Oil, Gas & Energy",
     "IGL":"Oil, Gas & Energy","PETRONET":"Oil, Gas & Energy",
     "GUJGASLTD":"Oil, Gas & Energy","ATGL":"Oil, Gas & Energy",
-    # Power & Utilities
     "NTPC":"Power & Utilities","POWERGRID":"Power & Utilities",
     "ADANIPOWER":"Power & Utilities","TATAPOWER":"Power & Utilities",
     "JSWENERGY":"Power & Utilities","TORNTPOWER":"Power & Utilities",
     "CESC":"Power & Utilities","NHPC":"Power & Utilities",
     "SJVN":"Power & Utilities","IREDA":"Power & Utilities",
     "PFC":"Power & Utilities","RECLTD":"Power & Utilities",
-    # Metals & Mining
     "TATASTEEL":"Metals & Mining","JSWSTEEL":"Metals & Mining",
     "HINDALCO":"Metals & Mining","VEDL":"Metals & Mining",
     "SAIL":"Metals & Mining","NMDC":"Metals & Mining",
     "NATIONALUM":"Metals & Mining","WELCORP":"Metals & Mining",
     "APLAPOLLO":"Metals & Mining","JINDALSTEL":"Metals & Mining",
     "MOIL":"Metals & Mining","RATNAMANI":"Metals & Mining",
-    # Auto & Auto Ancillaries
     "MARUTI":"Auto & Auto Ancillaries","TATAMOTORS":"Auto & Auto Ancillaries",
     "M&M":"Auto & Auto Ancillaries","BAJAJ-AUTO":"Auto & Auto Ancillaries",
     "HEROMOTOCO":"Auto & Auto Ancillaries","EICHERMOT":"Auto & Auto Ancillaries",
@@ -881,7 +862,6 @@ SECTOR_MAP = {
     "BHARATFORG":"Auto & Auto Ancillaries","EXIDEIND":"Auto & Auto Ancillaries",
     "AMARAJABAT":"Auto & Auto Ancillaries","BALKRISIND":"Auto & Auto Ancillaries",
     "TIINDIA":"Auto & Auto Ancillaries","APOLLOTYRE":"Auto & Auto Ancillaries",
-    # FMCG & Consumer
     "HINDUNILVR":"FMCG & Consumer","ITC":"FMCG & Consumer",
     "NESTLEIND":"FMCG & Consumer","BRITANNIA":"FMCG & Consumer",
     "DABUR":"FMCG & Consumer","MARICO":"FMCG & Consumer",
@@ -889,7 +869,6 @@ SECTOR_MAP = {
     "EMAMILTD":"FMCG & Consumer","TATACONSUM":"FMCG & Consumer",
     "VARUN":"FMCG & Consumer","RADICO":"FMCG & Consumer",
     "UBL":"FMCG & Consumer","MCDOWELL-N":"FMCG & Consumer",
-    # Cement & Construction
     "ULTRACEMCO":"Cement & Construction","AMBUJACEM":"Cement & Construction",
     "ACC":"Cement & Construction","SHREECEM":"Cement & Construction",
     "DALMIACEMENTBHARAT":"Cement & Construction","RAMCOCEM":"Cement & Construction",
@@ -897,49 +876,40 @@ SECTOR_MAP = {
     "LT":"Cement & Construction","NCC":"Cement & Construction",
     "KNRCON":"Cement & Construction","PNCINFRA":"Cement & Construction",
     "RVNL":"Cement & Construction","IRCON":"Cement & Construction",
-    # Real Estate
     "DLF":"Real Estate","GODREJPROP":"Real Estate",
     "OBEROIRLTY":"Real Estate","PRESTIGE":"Real Estate",
     "PHOENIXLTD":"Real Estate","BRIGADE":"Real Estate",
     "SOBHA":"Real Estate","MAHLIFE":"Real Estate",
     "LODHA":"Real Estate","SUNTECK":"Real Estate",
-    # Capital Goods & Industrials
     "SIEMENS":"Capital Goods & Industrials","ABB":"Capital Goods & Industrials",
     "HAVELLS":"Capital Goods & Industrials","BHEL":"Capital Goods & Industrials",
     "BEL":"Capital Goods & Industrials","HAL":"Capital Goods & Industrials",
     "COCHINSHIP":"Capital Goods & Industrials","MAZDOCK":"Capital Goods & Industrials",
     "GRINDWELL":"Capital Goods & Industrials","THERMAX":"Capital Goods & Industrials",
     "CUMMINSIND":"Capital Goods & Industrials","KALYANKJIL":"Capital Goods & Industrials",
-    # Telecom & Media
     "BHARTIARTL":"Telecom & Media","IDEA":"Telecom & Media",
     "INDUSTOWER":"Telecom & Media","TATACOMM":"Telecom & Media",
     "ZEEL":"Telecom & Media","SUNTV":"Telecom & Media",
     "PVRINOX":"Telecom & Media",
-    # Chemicals & Specialty
     "PIDILITIND":"Chemicals & Specialty","ASIANPAINT":"Chemicals & Specialty",
     "BERGEPAINT":"Chemicals & Specialty","ATUL":"Chemicals & Specialty",
     "NAVINFLUOR":"Chemicals & Specialty","SOLARINDS":"Chemicals & Specialty",
     "FINEORG":"Chemicals & Specialty","CLEAN":"Chemicals & Specialty",
     "DEEPAKNITR":"Chemicals & Specialty","ALKYLAMINE":"Chemicals & Specialty",
-    # Insurance
     "SBILIFE":"Insurance","HDFCLIFE":"Insurance",
     "ICICIPRULI":"Insurance","MAXFINSERV":"Insurance",
     "GICRE":"Insurance","NIACL":"Insurance",
     "STARHEALTH":"Insurance","GODIGIT":"Insurance",
-    # Exchange & Capital Markets
     "BSE":"Exchange & Capital Markets","MCX":"Exchange & Capital Markets",
     "CDSL":"Exchange & Capital Markets","NSDL":"Exchange & Capital Markets",
     "CRISIL":"Exchange & Capital Markets","ICRA":"Exchange & Capital Markets",
-    # Aviation & Logistics
     "INDIGO":"Aviation & Logistics","SPICEJET":"Aviation & Logistics",
     "GMRAIRPORT":"Aviation & Logistics","ADANIPORTS":"Aviation & Logistics",
     "CONCOR":"Aviation & Logistics","BLUEDART":"Aviation & Logistics",
     "DELHIVERY":"Aviation & Logistics","MAHINDRA LOG":"Aviation & Logistics",
-    # Retail & E-Commerce
     "DMART":"Retail & E-Commerce","TRENT":"Retail & E-Commerce",
     "NYKAA":"Retail & E-Commerce","ZOMATO":"Retail & E-Commerce",
     "CARTRADE":"Retail & E-Commerce","SHOPERSTOP":"Retail & E-Commerce",
-    # Agri & Fertilisers
     "UPL":"Agri & Fertilisers","COROMANDEL":"Agri & Fertilisers",
     "CHAMBLFERT":"Agri & Fertilisers","GNFC":"Agri & Fertilisers",
     "GSFC":"Agri & Fertilisers","NFL":"Agri & Fertilisers",
@@ -969,7 +939,6 @@ SECTOR_ICONS = {
     "Others":                   "🔷",
 }
 
-# Signal sort priority: Strong Buy first, Sell last
 SIGNAL_ORDER = {
     "STRONG BUY": 0,
     "BUY":        1,
@@ -983,10 +952,15 @@ SIGNAL_ORDER = {
 
 
 def get_sector(symbol: str) -> str:
-    """Return sector for a given NSE symbol (strips .NS suffix)."""
     sym = symbol.replace(".NS", "").strip().upper()
     return SECTOR_MAP.get(sym, "Others")
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  GENERATE HTML  —  🌿 JADE GARDEN THEME
+#  Only this function's CSS string and structural HTML skin has changed.
+#  All data-building logic, sector grouping, sorting, row generation = identical.
+# ─────────────────────────────────────────────────────────────────────────────
 
 def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
     nc = "up" if market["nifty_chg"]  >= 0 else "dn"
@@ -998,30 +972,26 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
     bb = sum(1 for s in stocks if s["both_buy"])
     st = sum(1 for s in stocks if s["overall"] == "STRONG BUY")
 
-    # ── Assign sector to every stock ──────────────────────────────────────
     for s in stocks:
         s["sector"] = get_sector(s["symbol"])
 
-    # ── Group by sector ───────────────────────────────────────────────────
     from collections import defaultdict
     sector_groups = defaultdict(list)
     for s in stocks:
         sector_groups[s["sector"]].append(s)
 
-    # ── Sort each sector internally: Strong Buy → Buy → Neutral → Sell ───
     def signal_sort_key(s):
         return SIGNAL_ORDER.get(s.get("overall", "N/A"), 5)
 
     for sec in sector_groups:
         sector_groups[sec].sort(key=signal_sort_key)
 
-    # ── Sort sectors by their best signal score (best sector first) ───────
     def sector_best(items):
         return min(SIGNAL_ORDER.get(s.get("overall","N/A"), 5) for s in items)
 
     sorted_sectors = sorted(sector_groups.items(), key=lambda kv: sector_best(kv[1]))
 
-    # ── Build table rows with sector header rows ──────────────────────────
+    # ── Build table rows ──────────────────────────────────────────────────
     rows = ""
     row_idx = 0
     for sector_name, sec_stocks in sorted_sectors:
@@ -1031,7 +1001,6 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
         sec_buy   = sum(1 for s in sec_stocks if s["overall"] == "BUY")
         sec_sell  = sum(1 for s in sec_stocks if s["overall"] in ("SELL","BOTH SELL"))
 
-        # Sector header row — colspan=5 (Stock, Price, RSI, Levels, Signal)
         rows += f"""
     <tr class="sec-hdr">
       <td colspan="5">
@@ -1051,7 +1020,6 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
       </td>
     </tr>"""
 
-        # Stock rows — 5 columns: Stock | Price | RSI | Levels | Signal
         for s in sec_stocks:
             spk = spark_svg(s.get("sparkline", []))
             pr  = fmt(s["last_price"]) if s["last_price"] > 0 else s.get("price_str","N/A")
@@ -1080,165 +1048,426 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
     </tr>"""
             row_idx += 1
 
+    # ════════════════════════════════════════════════════════════════════════
+    #  🌿 JADE GARDEN CSS  — Light, clean, sage-green fintech aesthetic
+    #  Palette:
+    #    --jade     #2d6a4f  (deep jade green — primary brand)
+    #    --sage     #3d9970  (medium sage — accents, buy signals)
+    #    --mint     #52b788  (light mint — hover, subtle highlights)
+    #    --foam     #d8f3dc  (pale green foam — backgrounds, tags)
+    #    --ivory    #f8faf8  (near-white page background)
+    #    --paper    #ffffff  (card/table background)
+    #    --ink      #1b3a2d  (dark green-tinted text)
+    #    --mist     #6c9b80  (muted secondary text)
+    #    --coral    #e05c5c  (sell / negative — warm coral, not harsh red)
+    #    --sand     #f4a261  (caution / DII — warm amber)
+    #    --sky      #457b9d  (neutral / bulk-block — calm blue)
+    #    --border   #c8e6c9  (subtle green-tinted border)
+    # ════════════════════════════════════════════════════════════════════════
     css = """
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root{
-  --bg:#050c14;--sur:#0b1623;--bdr:#1a3050;
-  --fi:#00d4aa;--di:#ff8c42;--bo:#a78bfa;
-  --se:#ff4d6d;--tx:#e2eaf4;--mu:#5a7a99;--go:#f0c060;
+  --jade:#2d6a4f;
+  --jade2:#1b4332;
+  --sage:#3d9970;
+  --mint:#52b788;
+  --foam:#d8f3dc;
+  --foam2:#b7e4c7;
+  --ivory:#f4f9f5;
+  --paper:#ffffff;
+  --ink:#1b3a2d;
+  --mist:#5a8a6e;
+  --coral:#d64045;
+  --sand:#e98a4e;
+  --sky:#457b9d;
+  --border:#c8e6c9;
+  --border2:#e8f5e9;
+  --shadow:0 1px 3px rgba(45,106,79,.08),0 4px 16px rgba(45,106,79,.06);
+  --shadow-sm:0 1px 4px rgba(45,106,79,.1);
 }
+
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;min-height:100vh}
-body::before{
-  content:'';position:fixed;inset:0;
-  background:
-    linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
-  background-size:40px 40px;pointer-events:none;z-index:0;
-}
-.w{position:relative;z-index:1}
-header{
-  background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
-  border-bottom:1px solid var(--bdr);padding:14px 20px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:99;backdrop-filter:blur(8px);
-}
-.lg{display:flex;align-items:center;gap:12px}
-.logo-icon{
-  width:40px;height:40px;min-width:40px;
-  background:linear-gradient(135deg,var(--fi),var(--bo));
-  border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:18px;box-shadow:0 0 18px rgba(0,212,170,.4);
-}
-.lt{font-size:16px;font-weight:800;letter-spacing:1px}
-.lt span{color:var(--fi)}
-.ls2{font-size:9px;color:var(--mu);letter-spacing:1px;margin-top:2px}
-.hm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.lv{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.1);
-  border:1px solid rgba(0,212,170,.3);padding:4px 10px;border-radius:20px;
-  font-size:10px;font-weight:700;color:var(--fi);letter-spacing:1px;}
-.led{width:7px;height:7px;border-radius:50%;background:var(--fi);animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
-.src{font-size:10px;color:var(--bo);background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);padding:4px 10px;border-radius:12px;}
-.drb{font-size:10px;color:var(--go);background:rgba(240,192,96,.1);border:1px solid rgba(240,192,96,.25);padding:4px 10px;border-radius:12px;font-family:'Space Mono',monospace;}
-.dt{font-family:'Space Mono',monospace;font-size:10px;color:var(--mu)}
-.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr);}
-.sc2{background:var(--sur);padding:14px 16px}
-.sl{font-size:9px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px}
-.sv{font-family:'Space Mono',monospace;font-size:18px;font-weight:700}
-.sb2{font-size:10px;color:var(--mu);margin-top:3px}
-.up{color:var(--fi)}.dn{color:var(--se)}
-.cfi{color:var(--fi)}.cdi{color:var(--di)}.cbo{color:var(--bo)}.cgo{color:var(--go)}
-.tw{padding:16px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tt{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);
-  margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.tt::before{content:'';width:3px;height:14px;background:var(--fi);border-radius:2px;flex-shrink:0}
 
-/* ── SECTOR HEADER ROW ── */
+body{
+  background:var(--ivory);
+  color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;
+  min-height:100vh;
+  line-height:1.5;
+}
+
+/* Subtle leaf-vein texture overlay */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    radial-gradient(ellipse 800px 600px at 10% 20%,rgba(82,183,136,.06),transparent),
+    radial-gradient(ellipse 600px 800px at 90% 80%,rgba(45,106,79,.04),transparent);
+  pointer-events:none;z-index:0;
+}
+
+.w{position:relative;z-index:1}
+
+/* ── HEADER ── */
+header{
+  background:var(--jade2);
+  border-bottom:3px solid var(--sage);
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+  position:sticky;top:0;z-index:99;
+  box-shadow:0 2px 12px rgba(27,67,50,.25);
+}
+
+.lg{display:flex;align-items:center;gap:14px}
+
+.logo-icon{
+  width:42px;height:42px;min-width:42px;
+  background:linear-gradient(135deg,var(--sage),var(--mint));
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  box-shadow:0 2px 10px rgba(82,183,136,.35);
+}
+
+.lt{font-size:17px;font-weight:700;letter-spacing:.3px;color:#fff}
+.lt span{color:var(--mint)}
+.ls2{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:1.5px;margin-top:2px;text-transform:uppercase}
+
+.hm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.lv{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(82,183,136,.2);
+  border:1px solid rgba(82,183,136,.4);
+  padding:4px 12px;border-radius:20px;
+  font-size:10px;font-weight:600;color:var(--mint);letter-spacing:1px;
+}
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--mint);
+  animation:pulse 1.8s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+
+.src{
+  font-size:10px;color:rgba(255,255,255,.65);
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  padding:4px 12px;border-radius:20px;
+}
+
+.drb{
+  font-size:10px;color:var(--mint);
+  background:rgba(82,183,136,.15);
+  border:1px solid rgba(82,183,136,.3);
+  padding:4px 12px;border-radius:20px;
+  font-family:'DM Mono',monospace;
+}
+
+.dt{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.4)}
+
+/* ── SUMMARY STRIP ── */
+.sum{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+.sc2{
+  background:var(--paper);
+  padding:16px 20px;
+  transition:background .2s;
+}
+.sc2:hover{background:var(--foam2)}
+
+.sl{
+  font-size:9px;letter-spacing:2px;color:var(--mist);
+  text-transform:uppercase;margin-bottom:6px;font-weight:500;
+}
+
+.sv{
+  font-family:'DM Mono',monospace;
+  font-size:20px;font-weight:700;
+  color:var(--ink);
+}
+
+.sb2{font-size:10px;color:var(--mist);margin-top:4px;font-weight:500}
+
+.up{color:var(--sage)!important}
+.dn{color:var(--coral)!important}
+
+/* ── SECTOR NAV ── */
+.snav{
+  padding:10px 24px;
+  display:flex;gap:8px;flex-wrap:wrap;
+  background:var(--paper);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:70px;z-index:90;
+  box-shadow:var(--shadow-sm);
+  overflow-x:auto;
+}
+
+.snav-link{
+  font-size:10px;font-weight:600;
+  color:var(--jade);
+  text-decoration:none;
+  padding:4px 12px;border-radius:20px;
+  border:1px solid var(--border);
+  background:var(--foam);
+  white-space:nowrap;
+  transition:all .2s;
+}
+.snav-link:hover{
+  background:var(--jade);color:#fff;
+  border-color:var(--jade);
+}
+
+/* ── TABLE WRAPPER ── */
+.tw{padding:20px 24px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.tt{
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--mist);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:600;
+}
+.tt::before{
+  content:'';width:3px;height:14px;
+  background:linear-gradient(var(--sage),var(--mint));
+  border-radius:2px;flex-shrink:0;
+}
+
+/* ── TABLE ── */
+table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  min-width:860px;
+  background:var(--paper);
+  border-radius:16px;
+  border:1px solid var(--border);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+thead tr{border-bottom:2px solid var(--border)}
+
+th{
+  padding:11px 14px;text-align:left;
+  font-size:9px;letter-spacing:1.5px;
+  color:var(--mist);text-transform:uppercase;font-weight:700;
+  white-space:nowrap;background:var(--foam);
+}
+th:not(:first-child){text-align:center}
+
+tbody tr:not(.sec-hdr){
+  border-bottom:1px solid var(--border2);
+  animation:si .35s ease both;
+  opacity:0;
+  transition:background .15s;
+}
+
+@keyframes si{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+tbody tr:not(.sec-hdr):hover{background:var(--foam)}
+
+td{
+  padding:12px 14px;font-size:12px;
+  vertical-align:middle;text-align:center;
+  color:var(--ink);
+}
+td:first-child{text-align:left}
+
+.sn{font-weight:700;font-size:13px;line-height:1.3;color:var(--ink)}
+.sy{
+  font-size:9px;color:var(--mist);
+  font-family:'DM Mono',monospace;margin-top:2px;
+  letter-spacing:.5px;
+}
+
+.pv{
+  font-family:'DM Mono',monospace;
+  font-size:13px;font-weight:700;color:var(--ink);
+}
+.sp{margin-top:5px}
+
+/* RSI */
+.rv{font-family:'DM Mono',monospace;font-size:13px;font-weight:700}
+.rb2{
+  width:78px;height:4px;
+  background:var(--border);border-radius:2px;
+  margin:5px auto 0;overflow:hidden;
+}
+.rf2{height:100%;border-radius:2px}
+.ro .rf2{background:var(--coral)}
+.rn2 .rf2{background:var(--sand)}
+.rs2 .rf2{background:var(--sage)}
+
+/* Levels */
+.sr{
+  font-size:10px;font-family:'DM Mono',monospace;
+  display:flex;align-items:center;gap:5px;
+  justify-content:center;margin-bottom:3px;
+}
+.sr-r{
+  font-size:8px;padding:1px 5px;border-radius:4px;font-weight:700;
+  background:rgba(214,64,69,.1);color:var(--coral);
+}
+.sr-s{
+  font-size:8px;padding:1px 5px;border-radius:4px;font-weight:700;
+  background:rgba(61,153,112,.12);color:var(--sage);
+}
+
+/* ── SECTOR HEADER ROWS ── */
 tr.sec-hdr td{
-  background:linear-gradient(90deg,rgba(0,212,170,.08),rgba(167,139,250,.06),transparent);
-  border-top:2px solid rgba(0,212,170,.2);
-  border-bottom:1px solid rgba(0,212,170,.15);
-  padding:10px 12px;
+  background:linear-gradient(90deg,var(--foam),rgba(216,243,220,.4),transparent);
+  border-top:2px solid var(--border);
+  border-bottom:1px solid var(--foam2);
+  padding:10px 14px;
 }
 .sec-hdr-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .sec-icon{font-size:16px}
-.sec-name{font-size:13px;font-weight:800;letter-spacing:.5px;color:var(--tx)}
-.sec-count{font-size:10px;color:var(--mu);background:rgba(90,122,153,.15);
-  padding:2px 8px;border-radius:10px;border:1px solid rgba(90,122,153,.3);}
-.sec-pills{display:flex;gap:6px;flex-wrap:wrap;margin-left:4px}
-.sec-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.3px}
-
-table{width:100%;border-collapse:collapse;min-width:860px}
-thead tr{border-bottom:2px solid var(--bdr)}
-th{padding:9px 10px;text-align:left;font-size:9px;letter-spacing:1.5px;
-  color:var(--mu);text-transform:uppercase;font-weight:600;white-space:nowrap;}
-th:not(:first-child){text-align:center}
-tbody tr:not(.sec-hdr){border-bottom:1px solid rgba(26,48,80,.4);
-  animation:si .4s ease both;opacity:0;transition:background .15s;}
-@keyframes si{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
-tbody tr:not(.sec-hdr):hover{background:rgba(0,212,170,.03)}
-td{padding:10px;font-size:12px;vertical-align:middle;text-align:center}
-td:first-child{text-align:left}
-.sn{font-weight:700;font-size:13px;line-height:1.3}
-.sy{font-size:9px;color:var(--mu);font-family:'Space Mono',monospace;margin-top:2px}
-.pv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
-.sp{margin-top:4px}
-.b{display:inline-block;padding:4px 9px;border-radius:5px;font-size:10px;
-  font-weight:800;letter-spacing:.5px;white-space:nowrap;}
-.bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
-.bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
-.bx{background:rgba(255,77,109,.1);color:var(--se);border:1px solid rgba(255,77,109,.25)}
-.bn{background:rgba(90,122,153,.1);color:#5a7a99;border:1px solid rgba(90,122,153,.2)}
-.rv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
-.rb2{width:78px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
-.rf2{height:100%;border-radius:2px}
-.ro .rf2{background:var(--se)}.rn2 .rf2{background:var(--go)}.rs2 .rf2{background:var(--fi)}
-.im{display:flex;justify-content:center;gap:5px;font-size:10px;margin-bottom:2px}
-.il{color:var(--mu);font-size:9px;min-width:30px;text-align:right}
-.sr{font-size:10px;font-family:'Space Mono',monospace;display:flex;align-items:center;
-  gap:4px;justify-content:center;margin-bottom:2px;}
-.sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
-  background:rgba(255,77,109,.2);color:var(--se)}
-.sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
-  background:rgba(0,212,170,.15);color:var(--fi)}
-.sig{display:inline-block;padding:4px 10px;border-radius:5px;
-  font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;}
-.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);
-  box-shadow:0 0 8px rgba(0,212,170,.2)}
-.sbuy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
-.sdii{background:rgba(255,140,66,.15);color:var(--di);border:1px solid rgba(255,140,66,.4)}
-.sblk{background:rgba(90,122,153,.15);color:#8ab4d4;border:1px solid rgba(90,122,153,.3)}
-.sna{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
-.sca{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
-.sse{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
-.leg{padding:0 20px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
-.ld2{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
-  display:flex;justify-content:space-between;font-size:10px;color:var(--mu);flex-wrap:wrap;gap:8px;}
-
-@media(max-width:900px){
-  .sum{grid-template-columns:repeat(2,1fr)}.sv{font-size:16px}
-  .lt{font-size:14px}.ls2{display:none}
+.sec-name{
+  font-size:13px;font-weight:700;letter-spacing:.2px;
+  color:var(--jade);
 }
+.sec-count{
+  font-size:10px;color:var(--mist);font-weight:600;
+  background:var(--foam2);
+  padding:2px 10px;border-radius:20px;
+  border:1px solid var(--border);
+}
+.sec-pills{display:flex;gap:6px;flex-wrap:wrap;margin-left:2px}
+.sec-pill{
+  font-size:9px;font-weight:700;
+  padding:2px 9px;border-radius:20px;letter-spacing:.3px;
+}
+
+/* ── SIGNAL BADGES ── */
+.sig{
+  display:inline-block;padding:5px 12px;border-radius:8px;
+  font-size:9px;font-weight:700;letter-spacing:.6px;
+  white-space:nowrap;
+}
+
+/* Strong Buy — jade green filled */
+.sbs{
+  background:var(--jade);color:#fff;
+  box-shadow:0 2px 8px rgba(45,106,79,.25);
+}
+/* Buy — sage outline */
+.sbuy{
+  background:var(--foam);color:var(--jade);
+  border:1.5px solid var(--sage);
+}
+/* DII Buy — amber */
+.sdii{
+  background:rgba(233,138,78,.1);color:#c06a1f;
+  border:1.5px solid rgba(233,138,78,.4);
+}
+/* Bulk/Block — sky blue */
+.sblk{
+  background:rgba(69,123,157,.08);color:var(--sky);
+  border:1.5px solid rgba(69,123,157,.3);
+}
+/* Neutral — warm sand */
+.sna{
+  background:rgba(233,138,78,.08);color:#a0622a;
+  border:1.5px solid rgba(233,138,78,.25);
+}
+/* Caution — light coral outline */
+.sca{
+  background:rgba(214,64,69,.07);color:var(--coral);
+  border:1.5px solid rgba(214,64,69,.25);
+}
+/* Sell — coral filled */
+.sse{
+  background:var(--coral);color:#fff;
+  box-shadow:0 2px 8px rgba(214,64,69,.2);
+}
+
+/* Sector pill reuses same classes */
+.sec-pill.sbs{background:rgba(45,106,79,.15);color:var(--jade);border:1px solid rgba(45,106,79,.3)}
+.sec-pill.sbuy{background:rgba(61,153,112,.12);color:var(--sage);border:1px solid rgba(61,153,112,.3)}
+.sec-pill.sse{background:rgba(214,64,69,.1);color:var(--coral);border:1px solid rgba(214,64,69,.25)}
+
+/* ── LEGEND ── */
+.leg{
+  padding:0 24px 20px;
+  display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+}
+.li2{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mist);font-weight:500}
+.ld2{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--jade2);
+  border-top:2px solid var(--sage);
+  padding:14px 24px;
+  display:flex;justify-content:space-between;
+  font-size:10px;color:rgba(255,255,255,.45);
+  flex-wrap:wrap;gap:8px;
+  font-weight:500;letter-spacing:.3px;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sum{grid-template-columns:repeat(2,1fr)}.sv{font-size:17px}
+  .lt{font-size:15px}.ls2{display:none}
+}
+
 @media(max-width:600px){
-  header{padding:10px 14px}.lt{font-size:13px}
-  .lv,.src{font-size:9px;padding:3px 8px}.dt{display:none}.ls2{display:none}
-  .sum{grid-template-columns:repeat(2,1fr)}.sc2{padding:10px 12px}
-  .sv{font-size:15px}.sl{font-size:8px}.sb2{font-size:9px}
-  .tw{padding:10px;overflow-x:visible}
+  header{padding:10px 16px}.lt{font-size:13px}
+  .lv,.src{font-size:9px;padding:3px 9px}.dt{display:none}.ls2{display:none}
+  .sum{grid-template-columns:repeat(2,1fr)}.sc2{padding:12px 14px}
+  .sv{font-size:16px}.sl{font-size:8px}.sb2{font-size:9px}
+  .tw{padding:12px;overflow-x:visible}
   table,thead,tbody,th,td,tr{display:block}
   thead{display:none}
   tr.sec-hdr{display:block;margin-top:14px}
-  tr.sec-hdr td{border-radius:8px;padding:8px 10px}
-  .sec-hdr-inner{gap:6px}
-  .sec-name{font-size:12px}
-  tbody tr:not(.sec-hdr){background:var(--sur);border:1px solid var(--bdr);
-    border-radius:10px;margin-bottom:8px;padding:12px;
-    animation:si .4s ease both;}
-  tbody tr:not(.sec-hdr):hover{background:rgba(0,212,170,.04)}
-  td{text-align:left;padding:5px 0;border:none;display:flex;
-    align-items:center;justify-content:space-between;gap:8px;font-size:12px;}
-  td:first-child{flex-direction:column;align-items:flex-start;
-    margin-bottom:6px;border-bottom:1px solid var(--bdr);padding-bottom:8px;}
-  td::before{content:attr(data-label);font-size:9px;letter-spacing:1px;
-    text-transform:uppercase;color:var(--mu);flex-shrink:0;min-width:80px;}
+  tr.sec-hdr td{border-radius:10px;padding:10px 12px}
+  .sec-hdr-inner{gap:6px}.sec-name{font-size:12px}
+  tbody tr:not(.sec-hdr){
+    background:var(--paper);
+    border:1px solid var(--border);
+    border-radius:12px;margin-bottom:10px;padding:14px;
+    animation:si .35s ease both;
+    box-shadow:var(--shadow-sm);
+  }
+  tbody tr:not(.sec-hdr):hover{background:var(--foam)}
+  td{
+    text-align:left;padding:5px 0;border:none;
+    display:flex;align-items:center;
+    justify-content:space-between;gap:8px;font-size:12px;
+  }
+  td:first-child{
+    flex-direction:column;align-items:flex-start;
+    margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:10px;
+  }
+  td::before{
+    content:attr(data-label);font-size:9px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--mist);flex-shrink:0;min-width:80px;
+    font-weight:600;
+  }
   td:first-child::before{display:none}
-  .rb2{margin:4px 0 0}.im,.sr{justify-content:flex-end}
-  .leg{padding:0 10px 12px;gap:8px}.li2{font-size:10px}
-  footer{padding:10px 14px;font-size:9px}
-  .tt{font-size:9px}.drb{font-size:9px;padding:3px 8px}
+  .rb2{margin:4px 0 0}.sr{justify-content:flex-end}
+  .leg{padding:0 12px 14px;gap:10px}.li2{font-size:10px}
+  footer{padding:10px 16px;font-size:9px}
+  .tt{font-size:9px}.drb{font-size:9px;padding:3px 9px}
+  .snav{top:66px;padding:8px 14px}
 }
 """
 
     drb_html = (f'<div class="drb">🗓 {date_range_label}</div>'
                 if date_range_label else "")
 
-    # Build sector quick-nav links
     sector_nav = ""
     for sector_name, _ in sorted_sectors:
-        icon = SECTOR_ICONS.get(sector_name, "🔷")
+        icon   = SECTOR_ICONS.get(sector_name, "🔷")
         anchor = sector_name.replace(" ","_").replace("&","and")
         sector_nav += f'<a href="#{anchor}" class="snav-link">{icon} {sector_name}</a>'
 
@@ -1247,19 +1476,10 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FII/DII Pulse — {date_str}</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>FII/DII Pulse — Jade Garden — {date_str}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 {css}
-/* sector nav bar */
-.snav{{padding:8px 20px;display:flex;gap:8px;flex-wrap:wrap;
-  background:rgba(11,22,35,.8);border-bottom:1px solid var(--bdr);
-  position:sticky;top:68px;z-index:90;backdrop-filter:blur(6px);overflow-x:auto;}}
-.snav-link{{font-size:10px;color:var(--mu);text-decoration:none;
-  padding:4px 10px;border-radius:12px;border:1px solid var(--bdr);
-  white-space:nowrap;transition:all .2s;}}
-.snav-link:hover{{color:var(--fi);border-color:rgba(0,212,170,.4);
-  background:rgba(0,212,170,.08);}}
 </style>
 </head>
 <body>
@@ -1270,7 +1490,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
     <div class="logo-icon">📊</div>
     <div>
       <div class="lt">FII<span>/DII</span> PULSE</div>
-      <div class="ls2">INSTITUTIONAL INTELLIGENCE · SECTOR-WISE · AUTO-GENERATED</div>
+      <div class="ls2">Institutional Intelligence · Sector-wise · Jade Garden</div>
     </div>
   </div>
   <div class="hm">
@@ -1281,36 +1501,35 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
   </div>
 </header>
 
-<!-- Sector Quick Nav -->
 <div class="snav">{sector_nav}</div>
 
 <div class="sum">
   <div class="sc2">
     <div class="sl">Nifty 50</div>
-    <div class="sv cfi">₹{market['nifty_price']:,.2f}</div>
+    <div class="sv">₹{market['nifty_price']:,.2f}</div>
     <div class="sb2 {nc}">{na} {market['nifty_chg']}%</div>
   </div>
   <div class="sc2">
     <div class="sl">Sensex</div>
-    <div class="sv cdi">₹{market['sensex_price']:,.2f}</div>
+    <div class="sv">₹{market['sensex_price']:,.2f}</div>
     <div class="sb2 {xc}">{xa} {market['sensex_chg']}%</div>
   </div>
   <div class="sc2">
     <div class="sl">Stocks Tracked</div>
-    <div class="sv cbo">{len(stocks)}</div>
-    <div class="sb2">FII Buys: {fb} · DII Buys: {db} · Both: {bb}</div>
+    <div class="sv">{len(stocks)}</div>
+    <div class="sb2">FII: {fb} · DII: {db} · Both: {bb}</div>
   </div>
   <div class="sc2">
-    <div class="sl">Strong Buy Signals</div>
-    <div class="sv cgo">{st}</div>
-    <div class="sb2">Stocks with STRONG BUY</div>
+    <div class="sl">Strong Buy</div>
+    <div class="sv">{st}</div>
+    <div class="sb2">Stocks signalled</div>
   </div>
 </div>
 
 <div class="tw">
   <div class="tt">
-    Sector-wise Institutional Activity · Sorted: Strong Buy → Buy → Neutral → Sell ·
-    <span style="color:var(--go);font-family:'Space Mono',monospace">
+    Sector-wise Institutional Activity · Strong Buy → Buy → Neutral → Sell ·
+    <span style="color:var(--jade);font-family:'DM Mono',monospace;font-weight:600">
       {date_range_label or date_str}
     </span>
   </div>
@@ -1327,18 +1546,18 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
 </div>
 
 <div class="leg">
-  <div class="li2"><div class="ld2" style="background:var(--fi)"></div>FII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--di)"></div>DII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--bo)"></div>Both Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--se)"></div>Selling</div>
-  <div class="li2"><div class="ld2" style="background:#8ab4d4"></div>Bulk/Block (Unclassified)</div>
-  <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;">
-    Sorted: Strong Buy → Buy → Neutral → Sell within each sector
+  <div class="li2"><div class="ld2" style="background:var(--sage)"></div>FII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--sand)"></div>DII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--jade)"></div>Both Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--coral)"></div>Selling</div>
+  <div class="li2"><div class="ld2" style="background:var(--sky)"></div>Bulk/Block</div>
+  <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;color:var(--mist)">
+    🌿 Jade Garden Theme · Sorted by signal strength within sectors
   </div>
 </div>
 
 <footer>
-  <div>🤖 FII/DII Pulse v8 · Sector-Wise · {source} · yfinance · {date_str}</div>
+  <div>🌿 FII/DII Pulse v8 · Jade Garden · {source} · yfinance · {date_str}</div>
   <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
 </footer>
 
@@ -1348,7 +1567,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 20px;
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  EMAIL
+#  EMAIL  (unchanged)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def send_email(html_path: Path, date_str: str, source: str,
@@ -1364,20 +1583,13 @@ def send_email(html_path: Path, date_str: str, source: str,
     to_list = [r.strip() for r in rcpts.split(",") if r.strip()]
     log.info(f"📧 Sending full HTML dashboard to: {to_list}")
 
-    # Read the full generated HTML dashboard
     full_html = html_path.read_text(encoding="utf-8")
 
-    # Gmail / most email clients strip <style> blocks from <head>.
-    # We inline a lightweight compatibility wrapper so the email
-    # renders cleanly in Gmail, Outlook, and mobile clients.
-    # The full CSS is already embedded inside the HTML — we just
-    # send the whole file as the email body.
     msg            = MIMEMultipart("alternative")
-    msg["Subject"] = f"📊 FII/DII Pulse — Sector-wise Report — {date_str}"
+    msg["Subject"] = f"🌿 FII/DII Pulse · Jade Garden — {date_str}"
     msg["From"]    = f"FII/DII Pulse <{user}>"
     msg["To"]      = ", ".join(to_list)
 
-    # Plain text fallback
     plain = (
         f"FII/DII Pulse — {date_str}\n"
         f"Source: {source}\n"
@@ -1387,8 +1599,6 @@ def send_email(html_path: Path, date_str: str, source: str,
         f"Not financial advice. Educational purposes only."
     )
     msg.attach(MIMEText(plain, "plain", "utf-8"))
-
-    # Full HTML dashboard as the email body
     msg.attach(MIMEText(full_html, "html", "utf-8"))
 
     try:
@@ -1405,7 +1615,7 @@ def send_email(html_path: Path, date_str: str, source: str,
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  MAIN
+#  MAIN  (unchanged)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
@@ -1415,7 +1625,7 @@ def main():
     date_file= now_ist.strftime("%Y-%m-%d")
 
     log.info("=" * 65)
-    log.info(f"  🚀 FII/DII Pulse v8 (CSV Edition) — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
+    log.info(f"  🌿 FII/DII Pulse v8 Jade Garden — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
     log.info("=" * 65)
 
     try:
