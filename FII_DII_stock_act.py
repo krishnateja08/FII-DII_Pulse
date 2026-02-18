@@ -83,30 +83,69 @@ NSE_HEADERS = {
 }
 
 # ── FII / DII keyword classifiers ─────────────────────────────────────────────
+# ── FII / DII keyword classifiers (expanded) ────────────────────────────────
 FII_KW = [
-    "FII","FPI","FOREIGN","OVERSEAS","GLOBAL","INTERNATIONAL",
-    "MORGAN STANLEY","GOLDMAN SACHS","CITIGROUP","CITI BANK",
-    "BLACKROCK","VANGUARD","FIDELITY","NOMURA","MACQUARIE",
-    "UBS","BARCLAYS","HSBC","JPMORGAN","JP MORGAN","DEUTSCHE",
-    "MERRILL LYNCH","SOCIETE GENERALE","BNP PARIBAS","LAZARD",
-    "WARBURG","WELLINGTON","ABERDEEN","SCHRODERS","ASHMORE",
-    "EASTSPRING","MATTHEWS ASIA","DIMENSIONAL","NEUBERGER",
-    "INVESCO DEVELOPING","CREDIT SUISSE","CLSA","JEFFERIES",
-    "MOTILAL OSWAL FOREIGN","MIRAE ASSET GLOBAL",
+    # Generic FII tags
+    "FII","FPI","FOREIGN","OVERSEAS","GLOBAL","INTERNATIONAL","NON RESIDENT",
+    # Major foreign banks & brokers
+    "MORGAN STANLEY","GOLDMAN SACHS","CITIGROUP","CITI BANK","CITIBANK",
+    "BLACKROCK","VANGUARD","FIDELITY","NOMURA","MACQUARIE","MORGANSTANLEY",
+    "UBS","BARCLAYS","HSBC","JPMORGAN","JP MORGAN","DEUTSCHE","DB INTERNATIONAL",
+    "MERRILL LYNCH","SOCIETE GENERALE","BNP PARIBAS","LAZARD","NATIXIS",
+    "WARBURG","WELLINGTON","ABERDEEN","SCHRODERS","ASHMORE","INVESCO",
+    "EASTSPRING","MATTHEWS ASIA","DIMENSIONAL","NEUBERGER","PICTET",
+    "CREDIT SUISSE","CLSA","JEFFERIES","BOFA","BANK OF AMERICA","CITI GROUP",
+    "MOTILAL OSWAL FOREIGN","MIRAE ASSET GLOBAL","AMUNDI","FRANKLIN OVERSEAS",
+    "FIRST STATE","OPPENHEIMER","ARTISAN","DRIEHAUS","CAUSEWAY","COMMONWEALTH",
+    "DODGE & COX","HARBOR","WASATCH","WILLIAM BLAIR","MANNING","THORNBURG",
+    "GENESIS","CORONATION","ALLAN GRAY","AFRICA","EMERGING MARKETS",
+    "SINGAPORE","CAYMAN","MAURITIUS","CYPRUS","NETHERLANDS ANTILLES",
 ]
+
 DII_KW = [
-    "MUTUAL FUND"," MF ","LIC OF INDIA","LIC ","SBI LIFE","SBI MF",
-    "HDFC MUTUAL","HDFC MF","ICICI PRUDENTIAL MF","ICICI PRU MF",
-    "KOTAK MAHINDRA MF","KOTAK MF","AXIS MUTUAL","AXIS MF",
-    "NIPPON INDIA MF","NIPPON MF","ADITYA BIRLA SUN LIFE",
-    "DSP MUTUAL","DSP MF","FRANKLIN TEMPLETON","TATA MUTUAL","TATA MF",
-    "MIRAE ASSET MF","EDELWEISS MF","MOTILAL OSWAL MF","SUNDARAM MF",
-    "UTI MUTUAL","UTI MF","CANARA ROBECO","PGIM INDIA MF",
-    "INSURANCE","LIFE INSURANCE","GENERAL INSURANCE",
-    "PROVIDENT FUND","PENSION FUND","NATIONAL PENSION",
-    "EMPLOYEES PROVIDENT","NPS TRUST","GIC RE","UNITED INDIA",
-    "NEW INDIA ASSURANCE","ORIENTAL INSURANCE","NATIONAL INSURANCE",
-    "BAJAJ ALLIANZ","HDFC ERGO","ICICI LOMBARD","STAR HEALTH",
+    # Mutual Funds
+    "MUTUAL FUND","TRUSTEE","AMC LIMITED","ASSET MANAGEMENT",
+    " MF ","MF-","- MF","(MF)","_MF_",
+    "SBI MF","SBI MUTUAL","SBI BLUECHIP","SBI MAGNUM",
+    "HDFC MF","HDFC MUTUAL","HDFC BALANCED","HDFC EQUITY",
+    "ICICI PRUDENTIAL MF","ICICI PRU MF","ICICI PRUDENTIAL MUTUAL",
+    "KOTAK MAHINDRA MF","KOTAK MF","KOTAK MUTUAL",
+    "AXIS MUTUAL","AXIS MF","AXIS LONG TERM",
+    "NIPPON INDIA MF","NIPPON MF","NIPPON MUTUAL","NIPPON INDIA MUTUAL",
+    "ADITYA BIRLA SUN LIFE","ABSL MF","ADITYA BIRLA MF",
+    "DSP MUTUAL","DSP MF","DSP BLACKROCK",
+    "FRANKLIN TEMPLETON","FRANKLIN INDIA",
+    "TATA MUTUAL","TATA MF","TATA AIA",
+    "MIRAE ASSET MF","MIRAE ASSET MUTUAL",
+    "EDELWEISS MF","EDELWEISS MUTUAL",
+    "MOTILAL OSWAL MF","MOTILAL OSWAL MUTUAL",
+    "SUNDARAM MF","SUNDARAM MUTUAL",
+    "UTI MUTUAL","UTI MF","UTI TRUSTEE",
+    "CANARA ROBECO","PGIM INDIA MF","PGIM INDIA MUTUAL",
+    "WHITEOAK CAPITAL MF","WHITEOAK MF",
+    "QUANT MUTUAL","QUANT MF",
+    "BANDHAN MF","BANDHAN MUTUAL",
+    "NAVI MF","NAVI MUTUAL","360 ONE MF","360ONE MF",
+    "GROWW MF","GROWW MUTUAL",
+    "SAMCO MF","SAMCO MUTUAL","TRUST MF","TRUST MUTUAL",
+    # Insurance & LIC
+    "LIC OF INDIA","LIC MF","LIFE INSURANCE CORPORATION",
+    "SBI LIFE","HDFC LIFE","ICICI PRUDENTIAL LIFE","MAX LIFE","BAJAJ LIFE",
+    "INSURANCE","LIFE INSURANCE","GENERAL INSURANCE","REINSURANCE",
+    "NEW INDIA ASSURANCE","ORIENTAL INSURANCE","NATIONAL INSURANCE CO",
+    "BAJAJ ALLIANZ","HDFC ERGO","ICICI LOMBARD","STAR HEALTH","CARE HEALTH",
+    "GIC RE","GIC OF INDIA","UNITED INDIA","AGRICULTURE INSURANCE",
+    # Provident / Pension Funds
+    "PROVIDENT FUND","PENSION FUND","NATIONAL PENSION","NPS TRUST",
+    "EMPLOYEES PROVIDENT","EPFO","COAL MINES","SEAMEN PROVIDENT",
+    # Sovereign / Govt Funds
+    "NATIONAL INVESTMENT AND INFRASTRUCTURE","NIIF",
+    "INDIA INFRASTRUCTURE FINANCE","IIFCL",
+    "POWER FINANCE","PFC","REC LIMITED","REC LTD",
+    "NABARD","SIDBI","EXIM BANK","NATIONAL HOUSING BANK",
+    # AIF / Portfolio Managers (SEBI registered)
+    "ALTERNATIVE INVESTMENT FUND","AIF","CAT III AIF","CAT II AIF",
+    "PORTFOLIO MANAGEMENT","PMS ",
 ]
 
 # ── FALLBACK stocks ───────────────────────────────────────────────────────────
@@ -229,104 +268,127 @@ def fetch_from_nse() -> list:
         to_str   = fmt_nse_date(to_date)
         log.info(f"  -> Range: {from_str} to {to_str}")
 
-        api_url = (
-            "https://www.nseindia.com/api/historicalOR/bulk-block-short-deals"
-            f"?optionType=bulk_deals&from={from_str}&to={to_str}"
-        )
+        api_urls = [
+            (
+                "https://www.nseindia.com/api/historicalOR/bulk-block-short-deals"
+                f"?optionType=bulk_deals&from={from_str}&to={to_str}",
+                "bulk_deals"
+            ),
+            (
+                "https://www.nseindia.com/api/historicalOR/bulk-block-short-deals"
+                f"?optionType=block_deals&from={from_str}&to={to_str}",
+                "block_deals"
+            ),
+        ]
 
-        raw = None
+        all_rows = []  # collect rows from all deal types
+        all_rows = []  # collect rows from both bulk_deals + block_deals
 
-        # ── METHOD A: curl_cffi Chrome TLS impersonation ──────────────────
+        # ── Open ONE session, seed cookies ONCE, then hit all URLs ────────
+        session_obj = None
+
         try:
             from curl_cffi import requests as cffi_req
-            log.info("  -> Method A: curl_cffi Chrome120 impersonation")
-            with cffi_req.Session(impersonate="chrome120") as s:
-                r1 = s.get("https://www.nseindia.com/", timeout=15)
-                log.info(f"  -> Homepage HTTP {r1.status_code} cookies={list(s.cookies.keys())}")
-                time.sleep(2)
-                s.get("https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
-                      timeout=15)
-                time.sleep(2)
-                resp = s.get(api_url, timeout=30)
-                body = resp.content
-                preview = body[:300].decode("utf-8", errors="replace")
-                log.info(f"  -> HTTP {resp.status_code} | {len(body)} bytes | {preview[:80]!r}")
-                if resp.status_code == 200 and len(body) > 10 and not preview.lstrip().startswith("<"):
-                    raw = resp.json()
-                    log.info("  OK curl_cffi success")
-                else:
-                    log.warning(f"  !! curl_cffi bad response ({len(body)}b)")
+            log.info("  -> Using curl_cffi Chrome120 (bypasses Akamai)")
+            session_obj = cffi_req.Session(impersonate="chrome120")
+            r1 = session_obj.get("https://www.nseindia.com/", timeout=15)
+            log.info(f"  -> Homepage HTTP {r1.status_code} cookies={list(session_obj.cookies.keys())}")
+            time.sleep(2)
+            session_obj.get(
+                "https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
+                timeout=15
+            )
+            time.sleep(2)
+            use_cffi = True
         except ImportError:
-            log.warning("  -> curl_cffi not installed, trying Method B")
+            log.warning("  -> curl_cffi not installed, using requests")
+            use_cffi = False
         except Exception as e:
-            log.warning(f"  -> curl_cffi error: {e}, trying Method B")
+            log.warning(f"  -> curl_cffi session error: {e}, using requests")
+            use_cffi = False
 
-        # ── METHOD B: requests + cookie seeding ───────────────────────────
-        if raw is None:
-            log.info("  -> Method B: requests cookie seeding (3 attempts)")
-            for attempt in range(1, 4):
-                log.info(f"  -> Attempt {attempt}/3")
+        if not use_cffi:
+            session_obj = requests.Session()
+            r = session_obj.get("https://www.nseindia.com/", headers=NSE_HEADERS, timeout=15)
+            log.info(f"  -> Homepage HTTP {r.status_code} cookies={list(session_obj.cookies.keys())}")
+            time.sleep(2.5)
+            session_obj.get(
+                "https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
+                headers=NSE_HEADERS, timeout=15
+            )
+            time.sleep(2)
+
+        # ── Fetch each deal type URL ───────────────────────────────────────
+        for api_url, deal_type in api_urls:
+            log.info(f"  -> Fetching {deal_type}: {api_url}")
+            raw = None
+            for attempt in range(1, 3):  # 2 attempts per URL
                 try:
-                    s2 = requests.Session()
-                    r = s2.get("https://www.nseindia.com/", headers=NSE_HEADERS, timeout=15)
-                    log.info(f"  -> Home HTTP {r.status_code} cookies={list(s2.cookies.keys())}")
-                    time.sleep(2.5)
-                    s2.get("https://www.nseindia.com/market-data/bulk-block-short-selling-deals",
-                           headers=NSE_HEADERS, timeout=15)
-                    time.sleep(2)
-                    resp = s2.get(api_url, headers=NSE_HEADERS, timeout=30)
-                    body = resp.content
-                    preview = body[:300].decode("utf-8", errors="replace")
-                    log.info(f"  -> HTTP {resp.status_code} | {len(body)} bytes | {preview[:80]!r}")
+                    if use_cffi:
+                        resp = session_obj.get(api_url, timeout=30)
+                    else:
+                        resp = session_obj.get(api_url, headers=NSE_HEADERS, timeout=30)
+
+                    body    = resp.content
+                    preview = body[:200].decode("utf-8", errors="replace")
+                    log.info(f"  -> [{deal_type}] HTTP {resp.status_code} | {len(body)} bytes | {preview[:60]!r}")
+
                     if len(body) == 0:
-                        log.warning("  !! Empty body — Akamai blocked"); time.sleep(4); continue
+                        log.warning(f"  !! [{deal_type}] Empty body"); time.sleep(3); continue
                     if preview.lstrip().startswith("<"):
-                        log.warning("  !! HTML response — bot block"); time.sleep(4); continue
+                        log.warning(f"  !! [{deal_type}] HTML returned (bot block)"); time.sleep(3); continue
                     if resp.status_code != 200:
-                        log.warning(f"  !! HTTP {resp.status_code}"); time.sleep(3); continue
+                        log.warning(f"  !! [{deal_type}] HTTP {resp.status_code}"); time.sleep(2); continue
+
                     raw = resp.json()
-                    log.info("  OK requests success")
+                    log.info(f"  OK [{deal_type}] JSON parsed")
                     break
                 except Exception as e:
-                    log.warning(f"  !! Attempt {attempt} failed: {e}")
+                    log.warning(f"  !! [{deal_type}] attempt {attempt} error: {e}")
                     time.sleep(3)
 
-        if raw is None:
-            log.warning("  !! All methods failed — falling back")
+            if raw is None:
+                log.warning(f"  !! [{deal_type}] failed — skipping")
+                continue
+
+            # ── Parse this deal type into rows ────────────────────────────
+            tmp_df = None
+            if isinstance(raw, list) and raw:
+                tmp_df = pd.DataFrame(raw)
+            elif isinstance(raw, dict):
+                for key in ["data","Data","results","bulkDeals","blockDeals",
+                            "deals","bulkDealData","blockDealData","records"]:
+                    val = raw.get(key)
+                    if isinstance(val, list) and val:
+                        cols = raw.get("columns", raw.get("Columns"))
+                        tmp_df = pd.DataFrame(val, columns=cols) \
+                            if (cols and not isinstance(val[0], dict)) \
+                            else pd.DataFrame(val)
+                        break
+                if tmp_df is None and "columns" in raw and "data" in raw:
+                    tmp_df = pd.DataFrame(raw["data"], columns=raw["columns"])
+
+            if tmp_df is not None and not tmp_df.empty:
+                tmp_df["_deal_type"] = deal_type
+                all_rows.append(tmp_df)
+                log.info(f"  -> [{deal_type}] {len(tmp_df)} rows added")
+            else:
+                log.info(f"  -> [{deal_type}] No data in range")
+
+            time.sleep(1.5)  # polite delay between URLs
+
+        # ── Close curl_cffi session if used ───────────────────────────────
+        if use_cffi and hasattr(session_obj, "close"):
+            try: session_obj.close()
+            except: pass
+
+        if not all_rows:
+            log.warning("  !! No data from any deal type — falling back")
             return []
 
-        # ── Debug structure ────────────────────────────────────────────────
-        if isinstance(raw, dict):
-            log.info(f"  → Top-level keys: {list(raw.keys())}")
-            for k, v in raw.items():
-                log.info(f"     '{k}': {type(v).__name__}"
-                         f"{' len='+str(len(v)) if isinstance(v,(list,dict)) else ' = '+str(v)[:80]}")
-        elif isinstance(raw, list):
-            log.info(f"  → Direct list len={len(raw)}")
-            if raw: log.info(f"  → Sample: {str(raw[0])[:120]}")
-
-        # ── Parse to DataFrame ─────────────────────────────────────────────
-        df = None
-        if isinstance(raw, list) and raw:
-            df = pd.DataFrame(raw)
-        elif isinstance(raw, dict):
-            for key in ["data","Data","results","bulkDeals","deals","bulkDealData","records"]:
-                val = raw.get(key)
-                if isinstance(val, list) and val:
-                    cols = raw.get("columns", raw.get("Columns"))
-                    df = pd.DataFrame(val, columns=cols) if (cols and not isinstance(val[0], dict)) \
-                         else pd.DataFrame(val)
-                    log.info(f"  → key='{key}' shape={df.shape}")
-                    break
-            if df is None and "columns" in raw and "data" in raw:
-                df = pd.DataFrame(raw["data"], columns=raw["columns"])
-
-        if df is None or df.empty:
-            log.warning("  ⚠️  Empty DataFrame — no bulk deals in range")
-            return []
-
-        log.info(f"  → Shape: {df.shape}  Columns: {list(df.columns)}")
-        if len(df): log.info(f"  → Row0: {df.iloc[0].to_dict()}")
+        # ── Merge all deal types into one DataFrame ────────────────────────
+        df = pd.concat(all_rows, ignore_index=True)
+        log.info(f"  -> Combined shape: {df.shape} from {len(all_rows)} deal type(s)")
 
         # -- Normalise columns: use exact NSE BD_ names first, then fuzzy
         df.columns = [str(c).strip() for c in df.columns]
