@@ -17,78 +17,52 @@ permissions:
   id-token: write
 
 jobs:
-  generate-and-deploy:
+  # ── JOB 1: Generate report and push docs/ to gh-pages branch ─────────────
+  generate:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      # ── 1. Checkout main branch ───────────────────────────────────────────
-      - name: Checkout repository
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0   # need full history for gh-pages push
 
-      # ── 2. Python setup ───────────────────────────────────────────────────
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # ── 3. Install dependencies ───────────────────────────────────────────
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install \
-            requests \
-            pandas \
-            numpy \
-            yfinance \
-            beautifulsoup4 \
-            lxml \
-            pytz \
-            python-dotenv \
-            curl_cffi
+            requests pandas numpy yfinance \
+            beautifulsoup4 lxml pytz \
+            python-dotenv curl_cffi
 
-      # ── 4. Run dashboard script ───────────────────────────────────────────
       - name: Generate FII/DII Dashboard
         env:
-          GMAIL_USER:       ${{ secrets.GMAIL_USER }}
-          GMAIL_PASS:       ${{ secrets.GMAIL_PASS }}
-          RECIPIENT_EMAIL:  ${{ secrets.RECIPIENT_EMAIL }}
-        run: |
-          python "FII&DII_stock_act.py"
+          GMAIL_USER:      ${{ secrets.GMAIL_USER }}
+          GMAIL_PASS:      ${{ secrets.GMAIL_PASS }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        run: python "FII&DII_stock_act.py"
 
-      # ── 5. Commit HTML back to main branch ────────────────────────────────
-      - name: Commit report to main branch
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name  "github-actions[bot]"
-          git add docs/
-          git diff --staged --quiet || git commit -m "📊 Auto-update FII/DII report $(TZ='Asia/Kolkata' date +'%Y-%m-%d %H:%M IST')"
-          git push origin main
-
-      # ── 6. Upload docs/ as GitHub Pages artifact ──────────────────────────
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/
-
-      # ── 7. Deploy to GitHub Pages ─────────────────────────────────────────
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      # ── 8. Save log for debugging ─────────────────────────────────────────
-      - name: Upload run log
+      - name: Save log artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-log-${{ github.run_number }}
           path: dashboard.log
           retention-days: 7
+
+      # Push docs/ folder contents → gh-pages branch (root)
+      - name: Deploy docs/ to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs          # contents of docs/ become root of gh-pages
+          publish_branch: gh-pages
+          commit_message: "📊 Auto-update FII/DII report ${{ github.run_number }}"
+          keep_files: false            # replace with fresh report each time
