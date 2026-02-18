@@ -61,7 +61,7 @@ jobs:
           GMAIL_PASS:      ${{ secrets.GMAIL_PASS }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
         run: |
-          python main.py
+          python FII-DII_Pulse/main.py
 
       # 6. Ensure docs/ has required GitHub Pages files
       - name: 📄 Prepare GitHub Pages folder
