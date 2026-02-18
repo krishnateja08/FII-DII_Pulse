@@ -28,64 +28,73 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      # 1. Checkout repo
+      # 1. Checkout repo — MUST be first so all files are available
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Set up Python
+      # 2. Verify expected files exist after checkout
+      - name: 🔍 Verify repo structure
+        run: |
+          echo "📁 Repository contents:"
+          ls -la
+          echo ""
+          echo "✅ Checking required files..."
+          test -f requirements.txt && echo "  ✓ requirements.txt found" || echo "  ✗ requirements.txt MISSING"
+          test -f main.py          && echo "  ✓ main.py found"          || echo "  ✗ main.py MISSING"
+
+      # 3. Set up Python — NO cache to avoid requirements.txt lookup issues
       - name: 🐍 Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
-      # 3. Install dependencies
+      # 4. Install dependencies directly (no cache, avoids the lookup bug)
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install requests beautifulsoup4 lxml yfinance pandas numpy python-dotenv
 
-      # 4. Run the dashboard generator
+      # 5. Run the dashboard generator
       - name: 🚀 Generate FII/DII Dashboard
         env:
           GMAIL_USER:      ${{ secrets.GMAIL_USER }}
           GMAIL_PASS:      ${{ secrets.GMAIL_PASS }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
         run: |
-          python FII&DII_stock_act.py
+          python main.py
 
-      # 5. Ensure docs/ directory has a minimal _config.yml for GitHub Pages
-      - name: 📄 Ensure GitHub Pages config
+      # 6. Ensure docs/ has required GitHub Pages files
+      - name: 📄 Prepare GitHub Pages folder
         run: |
           mkdir -p docs
-          if [ ! -f docs/_config.yml ]; then
-            echo "theme: null" > docs/_config.yml
-          fi
-          # Create a .nojekyll so GH Pages serves raw HTML
           touch docs/.nojekyll
+          echo "theme: null" > docs/_config.yml
+          echo "docs/ contents:"
+          ls -la docs/
 
-      # 6. Commit & push the generated docs/
-      - name: 📤 Commit & push HTML report to docs/
+      # 7. Commit & push the generated docs/ back to main branch
+      - name: 📤 Commit & push HTML report
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
-          git diff --cached --quiet || git commit -m "📊 Auto-report: $(date +'%Y-%m-%d %H:%M UTC')"
+          git diff --cached --quiet && echo "No changes to commit" || \
+            git commit -m "📊 Auto-report: $(date +'%Y-%m-%d %H:%M UTC')"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 7. Deploy docs/ to GitHub Pages
+      # 8. Deploy docs/ to GitHub Pages (gh-pages branch)
       - name: 🌐 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir:  ./docs
+          github_token:   ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:    ./docs
           publish_branch: gh-pages
-          force_orphan: false
+          force_orphan:   false
           commit_message: "🌐 Deploy FII/DII Dashboard — ${{ github.run_number }}"
 
-      # 8. Print the Pages URL
+      # 9. Print the live GitHub Pages URL
       - name: 🔗 Print GitHub Pages URL
         run: |
           REPO="${{ github.repository }}"
@@ -97,7 +106,7 @@ jobs:
           echo "   https://${OWNER}.github.io/${REPONAME}/"
           echo "=========================================="
 
-      # 9. Upload report as workflow artifact (downloadable from Actions UI)
+      # 10. Upload report as workflow artifact (downloadable from Actions UI)
       - name: 📎 Upload report artifact
         uses: actions/upload-artifact@v4
         with:
