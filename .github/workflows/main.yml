@@ -1,108 +1,84 @@
-name: 📊 FII/DII Daily Report
+name: FII/DII Intelligence Dashboard
 
 on:
+  # ── Automatic schedule ─────────────────────────────────────────────────────
+  # Runs at 07:00 PM IST = 13:30 UTC (after Block Deal window closes at 18:30 IST)
+  # Also runs at 09:30 AM IST = 04:00 UTC (morning summary using previous day)
   schedule:
-    - cron: "0 1 * * 1-5"   # Mon–Fri 6:30 AM IST
+    - cron: "30 13 * * 1-5"   # 07:00 PM IST  Mon–Fri  (post Block Deal cutoff)
+    - cron: "0 4 * * 2-6"     # 09:30 AM IST  Tue–Sat  (morning run, prev day)
 
+  # ── Manual trigger ─────────────────────────────────────────────────────────
   workflow_dispatch:
     inputs:
-      send_email:
-        description: "Send email report?"
+      reason:
+        description: "Reason for manual run"
         required: false
-        default: "true"
-        type: choice
-        options: ["true", "false"]
+        default: "Manual trigger"
 
+# ── Permissions for GitHub Pages deployment ───────────────────────────────────
 permissions:
   contents: write
   pages: write
   id-token: write
 
 jobs:
-  generate-report:
-    name: Generate & Deploy FII/DII Report
+  generate-dashboard:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
-      # 1. Checkout repo first — so ALL files are available
-      - name: ⬇️ Checkout repository
+      # ── 1. Checkout repo ──────────────────────────────────────────────────
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. Verify files exist
-      - name: 🔍 Verify repo structure
-        run: |
-          echo "📁 Repository root contents:"
-          ls -la
-
-      # 3. Set up Python — NO cache (avoids requirements.txt pre-scan bug)
-      - name: 🐍 Set up Python 3.11
+      # ── 2. Set up Python ──────────────────────────────────────────────────
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
-      # 4. Install all dependencies inline
-      - name: 📦 Install dependencies
+      # ── 3. Install dependencies ───────────────────────────────────────────
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml yfinance pandas numpy python-dotenv pytz
+          pip install \
+            requests \
+            pandas \
+            numpy \
+            yfinance \
+            beautifulsoup4 \
+            lxml \
+            pytz \
+            python-dotenv
 
-      # 5. Run your script using the CORRECT filename
-      - name: 🚀 Generate FII/DII Dashboard
+      # ── 4. Run the dashboard script ───────────────────────────────────────
+      - name: Generate FII/DII Dashboard
         env:
-          GMAIL_USER:      ${{ secrets.GMAIL_USER }}
-          GMAIL_PASS:      ${{ secrets.GMAIL_PASS }}
-          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          GMAIL_USER:       ${{ secrets.GMAIL_USER }}
+          GMAIL_PASS:       ${{ secrets.GMAIL_PASS }}
+          RECIPIENT_EMAIL:  ${{ secrets.RECIPIENT_EMAIL }}
         run: |
           python "FII&DII_stock_act.py"
 
-      # 6. Prepare docs/ folder for GitHub Pages
-      - name: 📄 Prepare GitHub Pages folder
+      # ── 5. Commit & push the generated HTML ──────────────────────────────
+      - name: Commit generated report
         run: |
-          mkdir -p docs
-          touch docs/.nojekyll
-          echo "theme: null" > docs/_config.yml
-          echo "📁 docs/ contents:"
-          ls -la docs/
-
-      # 7. Commit & push generated report back to repo
-      - name: 📤 Commit & push HTML report
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
           git add docs/
-          git diff --cached --quiet && echo "No changes to commit" || \
-            git commit -m "📊 Auto-report: $(date +'%Y-%m-%d %H:%M UTC')"
+          # Only commit if there are changes
+          git diff --staged --quiet || git commit -m "📊 Auto-update FII/DII report $(date +'%Y-%m-%d %H:%M IST' --date='TZ=Asia/Kolkata now')"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8. Deploy docs/ to GitHub Pages
-      - name: 🌐 Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token:   ${{ secrets.GITHUB_TOKEN }}
-          publish_dir:    ./docs
-          publish_branch: gh-pages
-          force_orphan:   false
-          commit_message: "🌐 Deploy FII/DII Dashboard — ${{ github.run_number }}"
-
-      # 9. Print live URL
-      - name: 🔗 Print GitHub Pages URL
-        run: |
-          REPO="${{ github.repository }}"
-          OWNER=$(echo $REPO | cut -d'/' -f1)
-          REPONAME=$(echo $REPO | cut -d'/' -f2)
-          echo ""
-          echo "=========================================="
-          echo "✅ Dashboard live at:"
-          echo "   https://${OWNER}.github.io/${REPONAME}/"
-          echo "=========================================="
-
-      # 10. Upload artifact
-      - name: 📎 Upload report artifact
+      # ── 6. Upload dashboard log as artifact (for debugging) ──────────────
+      - name: Upload run log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fii-dii-report-${{ github.run_number }}
-          path: docs/index.html
-          retention-days: 30
+          name: dashboard-log-${{ github.run_number }}
+          path: dashboard.log
+          retention-days: 7
