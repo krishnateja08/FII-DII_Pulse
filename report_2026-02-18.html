@@ -15,7 +15,6 @@ body::before{content:'';position:fixed;inset:0;
     linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
   background-size:40px 40px;pointer-events:none;z-index:0}
 .w{position:relative;z-index:1}
-/* HEADER */
 header{background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
   border-bottom:1px solid var(--bdr);padding:16px 26px;
   display:flex;align-items:center;justify-content:space-between;
@@ -36,7 +35,6 @@ header{background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
 .src{font-size:10px;color:var(--bo);background:rgba(167,139,250,.1);
   border:1px solid rgba(167,139,250,.25);padding:4px 10px;border-radius:12px}
 .dt{font-family:'Space Mono',monospace;font-size:11px;color:var(--mu)}
-/* SUMMARY BAR */
 .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
   background:var(--bdr);border-bottom:1px solid var(--bdr)}
 .sc2{background:var(--sur);padding:14px 20px}
@@ -45,7 +43,6 @@ header{background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
 .sb2{font-size:11px;color:var(--mu);margin-top:3px}
 .up{color:var(--fi)} .dn{color:var(--se)}
 .cfi{color:var(--fi)} .cdi{color:var(--di)} .cbo{color:var(--bo)} .cgo{color:var(--go)}
-/* TABLE */
 .tw{padding:20px 26px;overflow-x:auto}
 .tt{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);
   margin-bottom:14px;display:flex;align-items:center;gap:10px}
@@ -65,35 +62,29 @@ td:first-child{text-align:left}
 .sy{font-size:9px;color:var(--mu);font-family:'Space Mono',monospace;margin-top:2px}
 .pv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .sp{margin-top:4px}
-/* BADGES */
 .b{display:inline-block;padding:4px 9px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.5px}
 .bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
 .bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
 .bx{background:rgba(255,77,109,.1);color:var(--se);border:1px solid rgba(255,77,109,.25)}
-/* RSI */
 .rv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
 .rb2{width:78px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
 .rf2{height:100%;border-radius:2px}
 .ro .rf2{background:var(--se)} .rn2 .rf2{background:var(--go)} .rs2 .rf2{background:var(--fi)}
-/* INDICATORS */
 .im{display:flex;justify-content:center;gap:5px;font-size:10px;margin-bottom:2px}
-.il{color:var(--mu);font-size:9px;min-width:28px;text-align:right}
-/* S/R */
+.il{color:var(--mu);font-size:9px;min-width:30px;text-align:right}
 .sr{font-size:10px;font-family:'Space Mono',monospace;display:flex;align-items:center;
   gap:4px;justify-content:center;margin-bottom:2px}
 .sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
   background:rgba(255,77,109,.2);color:var(--se)}
 .sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
   background:rgba(0,212,170,.15);color:var(--fi)}
-/* SIGNALS */
 .sig{display:inline-block;padding:4px 10px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.5px}
 .sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);
   box-shadow:0 0 8px rgba(0,212,170,.2)}
-.sb{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
+.sbuy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
 .sn{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
-.sc2{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
-.ss{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
-/* LEGEND */
+.sca{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
+.sse{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
 .leg{padding:0 26px 18px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
 .ld2{width:9px;height:9px;border-radius:50%}
@@ -120,11 +111,11 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
 
 <div class="sum">
   <div class="sc2"><div class="sl">Nifty 50</div>
-    <div class="sv cfi">₹25,715.55</div>
-    <div class="sb2 dn">▼ -0.04%</div></div>
+    <div class="sv cfi">₹25,730.60</div>
+    <div class="sb2 up">▲ 0.02%</div></div>
   <div class="sc2"><div class="sl">Sensex</div>
-    <div class="sv cdi">₹83,553.59</div>
-    <div class="sb2 up">▲ 0.12%</div></div>
+    <div class="sv cdi">₹83,522.59</div>
+    <div class="sb2 up">▲ 0.09%</div></div>
   <div class="sc2"><div class="sl">Stocks Tracked</div>
     <div class="sv cbo">20</div>
     <div class="sb2">FII Buys: 18 · DII Buys: 18 · Both: 18</div></div>
@@ -134,11 +125,11 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
 </div>
 
 <div class="tw">
-  <div class="tt">Institutional Stock Activity · Technical Analysis · 18 Feb 2026</div>
+  <div class="tt">Institutional Activity · Technical Analysis · 18 Feb 2026</div>
   <table>
     <thead><tr>
       <th>Stock</th><th>Price / Trend</th><th>FII Cash</th><th>DII Cash</th>
-      <th>RSI (14)</th><th>MACD · EMA · ADX · BB · StRSI</th>
+      <th>RSI(14)</th><th>MACD · EMA · ADX · BB · StRSI</th>
       <th>Support / Resistance (6M)</th><th>Signal</th>
     </tr></thead>
     <tbody>
@@ -167,7 +158,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹3,204.09</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹2,645.00</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.05s">
         <td><div class="sn">RBL Bank  (RBLBANK)</div>
@@ -194,7 +185,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹332.00</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹242.37</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.10s">
         <td><div class="sn">Tube Invest Of India Ltd  (TIINDIA)</div>
@@ -221,7 +212,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹3,417.01</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹2,163.07</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.15s">
         <td><div class="sn">United Spirits Limited  (UNITDSPR)</div>
@@ -248,7 +239,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹1,481.30</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹1,270.26</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.20s">
         <td><div class="sn">Union Bank of India  (UNIONBANK)</div>
@@ -275,7 +266,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹190.00</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹124.64</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.25s">
         <td><div class="sn">ITC Limited  (ITC)</div>
@@ -302,7 +293,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹418.23</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹295.80</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.30s">
         <td><div class="sn">Punjab National Bank  (PNB)</div>
@@ -383,7 +374,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹1,015.75</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹750.30</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.45s">
         <td><div class="sn">IndusInd Bank Limited  (INDUSINDBK)</div>
@@ -410,7 +401,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹961.90</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹710.60</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.50s">
         <td><div class="sn">Bank of Baroda  (BANKBARODA)</div>
@@ -437,7 +428,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹313.35</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹230.81</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.55s">
         <td><div class="sn">Container Corporation of India Limited  (CONCOR)</div>
@@ -626,7 +617,7 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹1,215.40</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹943.30</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr>
       <tr style="animation-delay:0.90s">
         <td><div class="sn">Larsen & Toubro Limited  (LT)</div>
@@ -680,24 +671,22 @@ footer{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 26px;
           <div class="sr"><span class="sr-r">6mH</span> ₹1,270.80</div>
           <div class="sr"><span class="sr-s">6mL</span> ₹1,016.10</div>
         </td>
-        <td><span class="sig sb">BUY</span></td>
+        <td><span class="sig sbuy">BUY</span></td>
       </tr></tbody>
   </table>
 </div>
 
 <div class="leg">
-  <div class="li2"><div class="ld2" style="background:var(--fi)"></div> FII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--di)"></div> DII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--bo)"></div> Both Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--se)"></div> Selling</div>
+  <div class="li2"><div class="ld2" style="background:var(--fi)"></div>FII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--di)"></div>DII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--bo)"></div>Both Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--se)"></div>Selling</div>
   <div class="li2" style="margin-left:auto;font-size:10px;">
-    RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend · StRSI&lt;0.3: Oversold</div>
+    RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend</div>
 </div>
 
 <footer>
-  <div>🤖 FII/DII Pulse v4 · Source: MunafaSutra · Technicals: yfinance + pandas · 18 Feb 2026</div>
+  <div>🤖 FII/DII Pulse v6 · Source: MunafaSutra · Technicals: yfinance+pandas · 18 Feb 2026</div>
   <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
 </footer>
-</div>
-</body>
-</html>
+</div></body></html>
