@@ -1056,24 +1056,6 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
             sig_cls_val = sig_class(overall)
             is_up       = s.get("sparkline") and len(s["sparkline"]) >= 2 and s["sparkline"][-1] >= s["sparkline"][0]
 
-            # FII badge
-            fii_action = s["fii_cash"]
-            if fii_action == "buy":
-                fii_badge = '<span class="flow-badge fii-b">FII ▲</span>'
-            elif fii_action == "sell":
-                fii_badge = '<span class="flow-badge fii-s">FII ▼</span>'
-            else:
-                fii_badge = '<span class="flow-badge flow-neutral">FII —</span>'
-
-            # DII badge
-            dii_action = s["dii_cash"]
-            if dii_action == "buy":
-                dii_badge = '<span class="flow-badge dii-b">DII ▲</span>'
-            elif dii_action == "sell":
-                dii_badge = '<span class="flow-badge dii-s">DII ▼</span>'
-            else:
-                dii_badge = '<span class="flow-badge flow-neutral">DII —</span>'
-
             # Signal label
             if overall == "STRONG BUY":
                 sig_label = "⚡ STRONG BUY"
@@ -1119,12 +1101,6 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
                 <div class="ema-val">{ema_h}</div>
               </td>
               <td class="td-c">
-                <div class="flow-row">
-                  {fii_badge}
-                  {dii_badge}
-                </div>
-              </td>
-              <td class="td-c">
                 <span class="sig-pill {sig_cls_val}">{sig_label}</span>
               </td>
             </tr>"""
@@ -1148,7 +1124,6 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
                   <th class="th-c">RSI (14)</th>
                   <th class="th-c">S/R LEVELS</th>
                   <th class="th-c">MACD / EMA</th>
-                  <th class="th-c">FLOW</th>
                   <th class="th-c">SIGNAL</th>
                 </tr>
               </thead>
