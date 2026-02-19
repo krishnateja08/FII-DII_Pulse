@@ -1,5 +1,5 @@
 """
-FII/DII Intelligence Dashboard — v8 (CSV Edition) · Bloomberg Terminal Theme
+FII/DII Intelligence Dashboard — v8 (CSV Edition) · Stealth Slate Theme
 ===================================================
 KEY CHANGE from original v8:
   fetch_from_nse() now uses the CSV download endpoint instead of the
@@ -23,8 +23,8 @@ Date Logic (VERIFIED):
     → to_date is day-1, from_date is day-6 = 6 trading days total
     → Matches NSE website window: e.g. 10-02-2026 → 17-02-2026
 
-THEME: Bloomberg Terminal — Amber-on-Black · Phosphor CRT Aesthetic
-  IBM Plex Mono · scanline overlay · amber glow signals
+THEME: Stealth Slate — Dark Charcoal · Teal Accents · Clean Card Layout
+  DM Sans · Card-based sectors · Pill badges · Gradient signals
 """
 
 import io, os, smtplib, logging, time, re
@@ -194,11 +194,6 @@ def fmt_nse_date(dt: datetime) -> str:
 
 
 def get_date_range() -> tuple:
-    """
-    Returns (from_date, to_date, label).
-    to_date  = today if past 18:30 IST, else last completed trading day.
-    from_date = exactly 5 trading days before to_date (6-day window).
-    """
     IST = pytz.timezone("Asia/Kolkata")
     now_ist = datetime.now(IST)
     today   = now_ist.replace(tzinfo=None).replace(
@@ -238,16 +233,10 @@ def get_date_range() -> tuple:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  SOURCE 1 — NSE CSV Download API  (★ KEY CHANGE — full data, no 50-row cap)
+#  SOURCE 1 — NSE CSV Download API
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_from_nse() -> list:
-    """
-    Fetch NSE bulk + block deals via the CSV download endpoint.
-    Adding &csv=true to the historicalOR API triggers the full CSV export —
-    the same file produced by clicking "Download (.csv)" on the NSE website.
-    This removes the 50-record cap that the plain JSON API enforces.
-    """
     log.info("[Source 1] NSE Bulk/Block Deals — CSV Download API (no 50-row cap)...")
 
     try:
@@ -906,39 +895,43 @@ def get_sector(symbol: str) -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  HTML HELPERS  — Bloomberg Terminal Theme
+#  HTML HELPERS  — Stealth Slate Theme
 # ─────────────────────────────────────────────────────────────────────────────
 
 def spark_svg(prices):
-    """Mini sparkline SVG — amber-on-black palette."""
+    """Mini bar-chart sparkline — teal/red palette matching Stealth Slate."""
     if len(prices) < 2:
         return ""
     mn, mx = min(prices), max(prices)
     rng = mx - mn or 1
     w, h = 72, 22
-    pts = [
-        f"{round(i * w / (len(prices) - 1), 1)},{round(h - (p - mn) / rng * h, 1)}"
-        for i, p in enumerate(prices)
-    ]
-    col = "#00ff41" if prices[-1] >= prices[0] else "#ff3333"
+    # Bar chart style matching the screenshot
+    bar_w = max(1, w // len(prices) - 1)
+    bars = ""
+    up = prices[-1] >= prices[0]
+    for i, p in enumerate(prices):
+        bar_h = max(2, round((p - mn) / rng * h))
+        x = i * (w // len(prices))
+        y = h - bar_h
+        col = "#10b981" if up else "#ef4444"
+        bars += f'<rect x="{x}" y="{y}" width="{bar_w}" height="{bar_h}" fill="{col}" rx="1"/>'
     return (
         f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
         f'xmlns="http://www.w3.org/2000/svg" style="display:block">'
-        f'<polyline points="{" ".join(pts)}" fill="none" stroke="{col}" '
-        f'stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'
+        f'{bars}'
         f'</svg>'
     )
 
 
 def rsi_class(v):
-    """Return Bloomberg RSI CSS class."""
+    """Return Stealth Slate RSI CSS class."""
     if v > 70:  return "rsi-hot"
     if v < 40:  return "rsi-cold"
     return "rsi-warm"
 
 
 def sig_class(overall):
-    """Map overall signal → Bloomberg CSS badge class."""
+    """Map overall signal → Stealth Slate CSS badge class."""
     return {
         "STRONG BUY": "sig-sb",
         "BUY":        "sig-buy",
@@ -949,15 +942,6 @@ def sig_class(overall):
         "BULK/BLOCK": "sig-blk",
         "N/A":        "sig-neutral",
     }.get(overall, "sig-neutral")
-
-
-def inst_badge_class(action, investor):
-    """FII/DII badge class."""
-    if action == "buy":
-        return f"flow-{investor}-b"
-    if action == "sell":
-        return f"flow-{investor}-s"
-    return "flow-neutral"
 
 
 def fmt_price(v):
@@ -972,12 +956,12 @@ def fmt_macd(v):
 
 def fmt_ema(cross):
     if cross == "bullish":
-        return '<span class="ema-bull">EMA BULL</span>'
-    return '<span class="ema-bear">EMA BEAR</span>'
+        return '<span class="ema-bull">EMA ▲</span>'
+    return '<span class="ema-bear">EMA ▼</span>'
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  GENERATE HTML  —  Bloomberg Terminal Theme
+#  GENERATE HTML  —  Stealth Slate Theme
 # ─────────────────────────────────────────────────────────────────────────────
 
 def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
@@ -1033,14 +1017,13 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
         <a href="#{anchor}" class="sb-item">
           <div>
             <div class="sb-item-name">{icon} {sector_name}</div>
-            <div class="sb-item-count">{len(sec_stocks)} stocks</div>
+            <div class="sb-item-count">{len(sec_stocks)} securities</div>
           </div>
           <span class="sb-item-sig {sig_cls}">{sig_lbl}</span>
         </a>"""
 
-    # ── Table rows ────────────────────────────────────────────────────────────
-    rows      = ""
-    row_delay = 0
+    # ── Sector card rows ──────────────────────────────────────────────────────
+    sector_cards = ""
 
     for sector_name, sec_stocks in sorted_sectors:
         icon      = SECTOR_ICONS.get(sector_name, "🔷")
@@ -1050,135 +1033,137 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
         sec_buy   = sum(1 for s in sec_stocks if s["overall"] == "BUY")
         sec_sell  = sum(1 for s in sec_stocks if s["overall"] in ("SELL", "BOTH SELL"))
 
-        # Sector summary pills
-        pills = ""
+        # Sector header pills
+        header_pills = ""
         if sec_sb:
-            pills += f'<span class="sec-pill sb">&#9889; {sec_sb} STRONG BUY</span>'
+            header_pills += f'<span class="hdr-pill sb">⚡ {sec_sb} Strong Buy</span>'
         if sec_buy:
-            pills += f'<span class="sec-pill buy">&#9650; {sec_buy} BUY</span>'
+            header_pills += f'<span class="hdr-pill buy">▲ {sec_buy} Buy</span>'
         if sec_sell:
-            pills += f'<span class="sec-pill sell">&#9660; {sec_sell} SELL</span>'
+            header_pills += f'<span class="hdr-pill sell">▼ {sec_sell} Sell</span>'
 
-        rows += f"""
-          <tr class="sec-hdr" id="{anchor}">
-            <td colspan="7">
-              <div class="sec-hdr-inner">
-                <span class="sec-icon">{icon}</span>
-                <span class="sec-name">{sector_name.upper()}</span>
-                <span class="sec-count">{sec_count} STOCKS</span>
-                <div class="sec-pills">{pills}</div>
-              </div>
-            </td>
-          </tr>"""
-
+        # Build stock rows for this sector card
+        stock_rows = ""
         for s in sec_stocks:
-            sym     = s["symbol"].replace(".NS", "")
-            price   = fmt_price(s["last_price"]) if s["last_price"] > 0 else "N/A"
-            spk     = spark_svg(s.get("sparkline", []))
-            rsi_v   = s["rsi"]
-            rsi_cls = rsi_class(rsi_v)
-            macd_h  = fmt_macd(s["macd_hist"])
-            ema_h   = fmt_ema(s["ema_cross"])
-            overall = s["overall"]
+            sym         = s["symbol"].replace(".NS", "")
+            price       = fmt_price(s["last_price"]) if s["last_price"] > 0 else "—"
+            spk         = spark_svg(s.get("sparkline", []))
+            rsi_v       = s["rsi"]
+            rsi_cls     = rsi_class(rsi_v)
+            macd_h      = fmt_macd(s["macd_hist"])
+            ema_h       = fmt_ema(s["ema_cross"])
+            overall     = s["overall"]
             sig_cls_val = sig_class(overall)
+            is_up       = s.get("sparkline") and len(s["sparkline"]) >= 2 and s["sparkline"][-1] >= s["sparkline"][0]
 
             # FII badge
             fii_action = s["fii_cash"]
             if fii_action == "buy":
-                fii_badge = '<span class="flow-badge fii-b">FII BUY</span>'
+                fii_badge = '<span class="flow-badge fii-b">FII ▲</span>'
             elif fii_action == "sell":
-                fii_badge = '<span class="flow-badge fii-s">FII SELL</span>'
+                fii_badge = '<span class="flow-badge fii-s">FII ▼</span>'
             else:
-                fii_badge = '<span class="flow-badge flow-neutral">FII &mdash;</span>'
+                fii_badge = '<span class="flow-badge flow-neutral">FII —</span>'
 
             # DII badge
             dii_action = s["dii_cash"]
             if dii_action == "buy":
-                dii_badge = '<span class="flow-badge dii-b">DII BUY</span>'
+                dii_badge = '<span class="flow-badge dii-b">DII ▲</span>'
             elif dii_action == "sell":
-                dii_badge = '<span class="flow-badge dii-s">DII SELL</span>'
+                dii_badge = '<span class="flow-badge dii-s">DII ▼</span>'
             else:
-                dii_badge = '<span class="flow-badge flow-neutral">DII &mdash;</span>'
+                dii_badge = '<span class="flow-badge flow-neutral">DII —</span>'
 
-            # Signal label decoration
+            # Signal label
             if overall == "STRONG BUY":
-                sig_label = "&#9889; STRONG BUY"
+                sig_label = "⚡ STRONG BUY"
             elif overall == "BUY":
-                sig_label = "&#9650; BUY"
+                sig_label = "▲ BUY"
             elif overall in ("SELL", "BOTH SELL"):
-                sig_label = "&#9660; SELL"
+                sig_label = "▼ SELL"
             elif overall == "CAUTION":
-                sig_label = "&#9888; CAUTION"
+                sig_label = "⚠ CAUTION"
             elif overall == "BULK/BLOCK":
-                sig_label = "&#9632; BULK/BLOCK"
+                sig_label = "■ BULK/BLOCK"
             else:
-                sig_label = "&mdash; NEUTRAL"
+                sig_label = "— NEUTRAL"
 
-            rows += f"""
-          <tr style="animation-delay:{row_delay:.2f}s">
-            <td>
-              <div class="stock-name">{s['name']}</div>
-              <div class="stock-sym">{sym}</div>
-            </td>
-            <td class="td-r">
-              <div class="price-val">{price}</div>
-              <div class="spark-wrap">{spk}</div>
-            </td>
-            <td class="td-c">
-              <div class="rsi-val {rsi_cls}">{rsi_v}</div>
-              <div class="rsi-bar-wrap">
-                <div class="rsi-bar-fill {rsi_cls}" style="width:{min(rsi_v, 100):.0f}%"></div>
-              </div>
-            </td>
-            <td class="td-c">
-              <div class="level-grid">
-                <div class="level-row">
-                  <span class="level-tag r">R1</span>
-                  <span class="level-val r">{fmt_price(s['resist1'])}</span>
-                </div>
-                <div class="level-row">
-                  <span class="level-tag s">S1</span>
-                  <span class="level-val s">{fmt_price(s['support1'])}</span>
-                </div>
-                <div class="level-row">
-                  <span class="level-tag r">6mH</span>
-                  <span class="level-val r">{fmt_price(s['swing_high'])}</span>
-                </div>
-                <div class="level-row">
-                  <span class="level-tag s">6mL</span>
-                  <span class="level-val s">{fmt_price(s['swing_low'])}</span>
-                </div>
-              </div>
-            </td>
-            <td class="td-c">
-              <div class="macd-wrap">{macd_h}</div>
-              <div class="ema-wrap">{ema_h}</div>
-            </td>
-            <td class="td-c">
-              <div class="flow-row">
-                {fii_badge}
-                {dii_badge}
-              </div>
-            </td>
-            <td class="td-c">
-              <span class="sig-badge {sig_cls_val}">{sig_label}</span>
-            </td>
-          </tr>"""
-            row_delay += 0.03
+            price_dir_cls = "price-up" if is_up else "price-dn"
 
-    # ── Date range badge ──────────────────────────────────────────────────────
-    drb_html = (
-        f'<span class="panel-bar-range">&#128197; {date_range_label}</span>'
-        if date_range_label else ""
-    )
+            stock_rows += f"""
+            <tr class="stock-row">
+              <td class="td-stock">
+                <div class="stock-name">{s['name']}</div>
+                <div class="stock-sym">{sym}</div>
+              </td>
+              <td class="td-r">
+                <div class="price-val {price_dir_cls}">{price}</div>
+                <div class="spark-wrap">{spk}</div>
+              </td>
+              <td class="td-c">
+                <div class="rsi-badge {rsi_cls}">{rsi_v}</div>
+                <div class="rsi-track">
+                  <div class="rsi-fill {rsi_cls}" style="width:{min(rsi_v,100):.0f}%"></div>
+                </div>
+              </td>
+              <td class="td-c">
+                <div class="sr-grid">
+                  <div class="sr-row"><span class="sr-tag r">R1</span><span class="sr-val r">{fmt_price(s['resist1'])}</span></div>
+                  <div class="sr-row"><span class="sr-tag s">S1</span><span class="sr-val s">{fmt_price(s['support1'])}</span></div>
+                  <div class="sr-row"><span class="sr-tag r">6mH</span><span class="sr-val r">{fmt_price(s['swing_high'])}</span></div>
+                  <div class="sr-row"><span class="sr-tag s">6mL</span><span class="sr-val s">{fmt_price(s['swing_low'])}</span></div>
+                </div>
+              </td>
+              <td class="td-c">
+                <div class="macd-val">{macd_h}</div>
+                <div class="ema-val">{ema_h}</div>
+              </td>
+              <td class="td-c">
+                <div class="flow-row">
+                  {fii_badge}
+                  {dii_badge}
+                </div>
+              </td>
+              <td class="td-c">
+                <span class="sig-pill {sig_cls_val}">{sig_label}</span>
+              </td>
+            </tr>"""
+
+        sector_cards += f"""
+        <div class="sector-card" id="{anchor}">
+          <div class="sec-card-hdr">
+            <div class="sec-card-left">
+              <span class="sec-icon">{icon}</span>
+              <span class="sec-card-name">{sector_name}</span>
+              <span class="sec-count-badge">{sec_count} securities</span>
+            </div>
+            <div class="sec-hdr-pills">{header_pills}</div>
+          </div>
+          <div class="sec-table-wrap">
+            <table class="sec-table">
+              <thead>
+                <tr>
+                  <th>SECURITY</th>
+                  <th class="th-r">PRICE / TREND</th>
+                  <th class="th-c">RSI (14)</th>
+                  <th class="th-c">S/R LEVELS</th>
+                  <th class="th-c">MACD / EMA</th>
+                  <th class="th-c">FLOW</th>
+                  <th class="th-c">SIGNAL</th>
+                </tr>
+              </thead>
+              <tbody>{stock_rows}</tbody>
+            </table>
+          </div>
+        </div>"""
 
     # ── IST timestamp ─────────────────────────────────────────────────────────
     IST = pytz.timezone("Asia/Kolkata")
     now_ist = datetime.now(IST).strftime("%d-%b-%Y %H:%M IST")
 
-    # ── Ticker tape — built from live market data ─────────────────────────────
+    # ── Ticker tape ───────────────────────────────────────────────────────────
     ticker_items = [
-        ("NIFTY50",
+        ("NIFTY 50",
          f"&#8377;{market['nifty_price']:,.2f}",
          "up" if market["nifty_chg"] >= 0 else "dn",
          f"{'▲' if market['nifty_chg']>=0 else '▼'}{abs(market['nifty_chg']):.2f}%"),
@@ -1186,12 +1171,12 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
          f"&#8377;{market['sensex_price']:,.2f}",
          "up" if market["sensex_chg"] >= 0 else "dn",
          f"{'▲' if market['sensex_chg']>=0 else '▼'}{abs(market['sensex_chg']):.2f}%"),
-        ("TRACKED",   str(len(stocks)), "up",  f"FII:{fb} DII:{db}"),
-        ("BOTH BUY",  str(bb),          "up",  "stocks"),
-        ("STR.BUY",   str(st),          "up",  "signals"),
-        ("SELL",      str(sel),         "dn" if sel > 0 else "up", "caution"),
-        ("DATA SRC",  source[:20],      "up",  "NSE CSV"),
-        ("RANGE",     date_range_label, "up",  "trading window"),
+        ("TRACKED",   str(len(stocks)), "up",  f"FII:{fb} · DII:{db}"),
+        ("BOTH BUY",  str(bb),          "up",  "securities"),
+        ("STRONG BUY",str(st),          "up",  "signals"),
+        ("SELL ALERT",str(sel),         "dn" if sel > 0 else "up", "caution"),
+        ("SOURCE",    source[:20],      "up",  "NSE CSV"),
+        ("RANGE",     date_range_label, "up",  "window"),
     ]
     ticker_html = ""
     for sym, val, cls, extra in ticker_items:
@@ -1202,423 +1187,449 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
             f'<span class="t-extra">{extra}</span>'
             f'</div>'
         )
-    # duplicate for seamless scroll
-    ticker_html = ticker_html * 2
+    ticker_html = ticker_html * 2  # duplicate for seamless scroll
 
     # ══════════════════════════════════════════════════════════════════════════
-    #  CSS — Bloomberg Terminal
+    #  CSS — Stealth Slate Theme
     # ══════════════════════════════════════════════════════════════════════════
     css = """
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
 /* ═══════════════════════════════════════════════════════
-   BLOOMBERG TERMINAL PALETTE
-   --bg       #080808  deep matte black
-   --panel    #0f0f0f  surface
-   --header   #0d0800  warm-black
-   --amber    #ff8c00  primary
-   --amber2   #ffaa33  values
-   --amber3   #ffd080  highlights
-   --orange   #ff6600  borders/accent
-   --green    #00ff41  buy / positive
-   --red      #ff3333  sell / negative
-   --yellow   #ffff00  caution
-   --blue     #4488ff  bulk/block
-   --muted    #554433  dim borders
-   --text     #ffcc88  body
-   --white    #fff8ee  headings
+   STEALTH SLATE PALETTE
+   --bg        #0f1117  deep charcoal
+   --surface   #161b27  card surfaces
+   --surface2  #1c2333  elevated panels
+   --border    #252d3d  subtle borders
+   --border2   #2e3a50  card borders
+   --teal      #10b981  primary accent / buy
+   --teal-dim  #065f46  teal bg tint
+   --blue      #3b82f6  secondary accent
+   --red       #ef4444  sell / negative
+   --yellow    #f59e0b  caution
+   --text      #e2e8f0  primary text
+   --text2     #94a3b8  muted text
+   --text3     #64748b  dim text
+   --white     #f8fafc  headings
 ═══════════════════════════════════════════════════════ */
 
 :root {
-  --bg:      #080808;
-  --panel:   #0f0f0f;
-  --panel2:  #130d04;
-  --header:  #0d0800;
-  --amber:   #ff8c00;
-  --amber2:  #ffaa33;
-  --amber3:  #ffd080;
-  --orange:  #ff6600;
-  --green:   #00ff41;
-  --red:     #ff3333;
-  --yellow:  #ffff00;
-  --blue:    #4488ff;
-  --muted:   #554433;
-  --muted2:  #2a1a08;
-  --muted3:  #1a1008;
-  --text:    #ffcc88;
-  --text2:   #cc9944;
-  --text3:   #886633;
-  --white:   #fff8ee;
-  --border:  rgba(255,102,0,.25);
-  --border2: rgba(255,102,0,.10);
-  --border3: rgba(255,102,0,.05);
+  --bg:       #0f1117;
+  --surface:  #161b27;
+  --surface2: #1c2333;
+  --surface3: #212940;
+  --border:   #252d3d;
+  --border2:  #2e3a50;
+  --teal:     #10b981;
+  --teal2:    #34d399;
+  --teal-dim: rgba(16,185,129,.12);
+  --blue:     #3b82f6;
+  --blue-dim: rgba(59,130,246,.12);
+  --red:      #ef4444;
+  --red-dim:  rgba(239,68,68,.12);
+  --yellow:   #f59e0b;
+  --yel-dim:  rgba(245,158,11,.12);
+  --purple:   #8b5cf6;
+  --text:     #e2e8f0;
+  --text2:    #94a3b8;
+  --text3:    #64748b;
+  --white:    #f8fafc;
+  --radius:   10px;
+  --radius-sm:6px;
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 
 body{
-  background:var(--bg);color:var(--text);
-  font-family:'IBM Plex Mono','Courier New',monospace;
-  min-height:100vh;overflow-x:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans','Segoe UI',system-ui,sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  font-size:14px;
+  line-height:1.5;
 }
 
-/* CRT scanlines */
+/* Subtle grain texture */
 body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:repeating-linear-gradient(
-    0deg,transparent,transparent 2px,
-    rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px
-  );
-}
-
-/* Amber vignette */
-body::after{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,102,0,.04),transparent),
-    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(255,140,0,.03),transparent);
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:.5;
 }
 
 .w{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
 
 /* ── HEADER ── */
 header{
-  background:var(--header);
-  border-bottom:2px solid var(--orange);
-  display:grid;grid-template-columns:auto 1fr auto;
+  background:var(--surface);
+  border-bottom:1px solid var(--border2);
+  display:grid;
+  grid-template-columns:auto 1fr auto;
   align-items:stretch;
   position:sticky;top:0;z-index:500;
-  box-shadow:0 0 40px rgba(255,102,0,.15);
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
 }
 
 .h-brand{
-  padding:10px 20px;border-right:1px solid var(--muted);
-  display:flex;align-items:center;gap:14px;
+  padding:12px 24px;
+  border-right:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
 }
 .h-logo{
-  font-size:20px;font-weight:700;letter-spacing:3px;color:var(--amber);
-  text-shadow:0 0 20px rgba(255,140,0,.6),0 0 40px rgba(255,102,0,.3);
+  font-size:18px;font-weight:700;letter-spacing:.5px;
+  color:var(--white);
+  display:flex;align-items:center;gap:2px;
 }
-.h-logo span{color:var(--orange)}
+.h-logo-fii{color:var(--teal)}
+.h-logo-sep{color:var(--text3);margin:0 2px}
+.h-logo-dii{color:var(--blue)}
 .h-tagline{
-  font-size:8px;letter-spacing:2.5px;color:var(--muted);
-  text-transform:uppercase;margin-top:3px;
+  font-size:10px;color:var(--text3);margin-top:2px;
+  font-weight:400;letter-spacing:.3px;
 }
 
 .h-nav{display:flex;align-items:stretch}
 .h-tab{
-  padding:0 18px;display:flex;align-items:center;
-  font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--muted);border-right:1px solid var(--muted2);
-  cursor:pointer;transition:all .15s;white-space:nowrap;position:relative;
-  text-decoration:none;
+  padding:0 20px;
+  display:flex;align-items:center;
+  font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--text3);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+  position:relative;text-decoration:none;border-bottom:2px solid transparent;
 }
-.h-tab::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:var(--amber);transform:scaleX(0);transition:transform .2s;
-}
-.h-tab:hover{color:var(--amber2);background:rgba(255,102,0,.06)}
-.h-tab:hover::after{transform:scaleX(1)}
-.h-tab.active{color:#000;background:var(--orange);font-weight:700}
-.h-tab.active::after{display:none}
+.h-tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.h-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
 
-.h-meta{display:flex;align-items:center;border-left:1px solid var(--muted)}
+.h-meta{display:flex;align-items:center;border-left:1px solid var(--border)}
 .h-meta-item{
-  padding:8px 14px;border-right:1px solid var(--muted2);
+  padding:10px 16px;border-right:1px solid var(--border);
   display:flex;flex-direction:column;gap:2px;
 }
-.h-meta-label{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
-.h-meta-val{font-size:11px;font-weight:600;color:var(--amber2)}
+.h-meta-label{font-size:9px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;font-weight:500}
+.h-meta-val{font-size:12px;font-weight:600;color:var(--white);font-family:'DM Mono',monospace}
 
 .h-live{
-  padding:8px 16px;display:flex;align-items:center;gap:7px;
-  font-size:9px;font-weight:700;letter-spacing:2px;color:var(--green);
-  text-shadow:0 0 8px rgba(0,255,65,.5);
+  padding:10px 20px;
+  display:flex;align-items:center;gap:8px;
+  font-size:10px;font-weight:700;letter-spacing:1px;color:var(--teal);
 }
 .led{
-  width:7px;height:7px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 8px var(--green),0 0 16px rgba(0,255,65,.4);
-  animation:blink 1.8s ease-in-out infinite;
+  width:7px;height:7px;border-radius:50%;background:var(--teal);
+  box-shadow:0 0 6px var(--teal),0 0 12px rgba(16,185,129,.4);
+  animation:blink 2s ease-in-out infinite;
 }
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
 /* ── TICKER ── */
 .ticker-wrap{
-  background:#000;border-bottom:1px solid var(--muted);
-  height:24px;overflow:hidden;display:flex;align-items:center;
+  background:rgba(0,0,0,.3);
+  border-bottom:1px solid var(--border);
+  height:28px;overflow:hidden;display:flex;align-items:center;
 }
 .ticker-inner{
   display:inline-flex;white-space:nowrap;
-  animation:scroll-ticker 55s linear infinite;
+  animation:scroll-ticker 60s linear infinite;
 }
 @keyframes scroll-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .t-item{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:0 20px;font-size:10px;font-weight:500;
-  border-right:1px solid var(--muted2);color:var(--text3);
+  display:inline-flex;align-items:center;gap:8px;
+  padding:0 24px;font-size:11px;
+  border-right:1px solid var(--border);color:var(--text3);
 }
-.t-sym{color:var(--amber2);font-weight:700;letter-spacing:1px}
-.t-val{font-weight:600}
-.t-val.up{color:var(--green);text-shadow:0 0 6px rgba(0,255,65,.4)}
+.t-sym{color:var(--text2);font-weight:600;font-size:10px;letter-spacing:.5px}
+.t-val{font-weight:700;font-family:'DM Mono',monospace}
+.t-val.up{color:var(--teal)}
 .t-val.dn{color:var(--red)}
-.t-extra{color:var(--text3);font-size:9px}
+.t-extra{color:var(--text3);font-size:10px}
 
 /* ── STATS BAR ── */
 .stats-bar{
   display:grid;grid-template-columns:repeat(6,1fr);
-  background:var(--panel2);border-bottom:1px solid var(--border);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0;
 }
 .stat{
-  padding:10px 16px;border-right:1px solid var(--border2);
-  position:relative;overflow:hidden;transition:background .2s;
+  padding:16px 20px;
+  border-right:1px solid var(--border);
+  transition:background .2s;
 }
-.stat:hover{background:rgba(255,102,0,.05)}
-.stat::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--orange),transparent);
-  transform:scaleX(0);transition:transform .3s;
-}
-.stat:hover::after{transform:scaleX(1)}
+.stat:hover{background:var(--surface2)}
 .stat-lbl{
-  font-size:7px;letter-spacing:2.5px;color:var(--text3);
-  text-transform:uppercase;margin-bottom:5px;font-weight:500;
+  font-size:9px;letter-spacing:1.5px;color:var(--text3);
+  text-transform:uppercase;margin-bottom:6px;font-weight:600;
 }
 .stat-val{
-  font-size:22px;font-weight:700;color:var(--amber2);
+  font-size:26px;font-weight:700;color:var(--white);
   font-variant-numeric:tabular-nums;line-height:1;
-  text-shadow:0 0 12px rgba(255,140,0,.3);
+  font-family:'DM Mono',monospace;
 }
-.stat-val.green{color:var(--green);text-shadow:0 0 12px rgba(0,255,65,.3)}
+.stat-val.teal{color:var(--teal)}
 .stat-val.red{color:var(--red)}
-.stat-chg{font-size:9px;font-weight:600;margin-top:3px}
-.stat-chg.up{color:var(--green)}
+.stat-chg{font-size:11px;font-weight:500;margin-top:4px;display:flex;align-items:center;gap:4px}
+.stat-chg.up{color:var(--teal)}
 .stat-chg.dn{color:var(--red)}
 .stat-chg.neu{color:var(--text3)}
 
 /* ── LAYOUT ── */
-.main{display:grid;grid-template-columns:220px 1fr;flex:1}
+.main{display:grid;grid-template-columns:240px 1fr;flex:1}
 
 /* ── SIDEBAR ── */
 .sidebar{
-  background:var(--panel);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow-y:auto;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow-y:auto;
 }
-.sb-section{border-bottom:1px solid var(--border2);padding-bottom:4px}
+.sb-section{padding-bottom:8px;border-bottom:1px solid var(--border)}
 .sb-title{
-  font-size:7px;letter-spacing:3px;font-weight:700;
-  color:var(--orange);text-transform:uppercase;
-  padding:8px 14px 5px;border-bottom:1px solid var(--border2);
-  display:flex;align-items:center;gap:6px;
+  font-size:9px;letter-spacing:2px;font-weight:700;
+  color:var(--text3);text-transform:uppercase;
+  padding:12px 16px 8px;
 }
-.sb-title::before{content:'▶';font-size:6px;color:var(--amber)}
 
 .sb-item{
-  padding:6px 14px;display:flex;justify-content:space-between;align-items:center;
-  cursor:pointer;border-left:3px solid transparent;
-  transition:all .15s;font-size:10px;
+  padding:8px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .15s;font-size:12px;
   text-decoration:none;color:inherit;
 }
-.sb-item:hover{background:rgba(255,102,0,.08);border-left-color:var(--orange)}
+.sb-item:hover{background:var(--surface2);border-left-color:var(--teal)}
 .sb-item-name{color:var(--text);font-weight:500}
-.sb-item-count{font-size:9px;color:var(--text3);margin-top:1px}
+.sb-item-count{font-size:10px;color:var(--text3);margin-top:2px}
 .sb-item-sig{
-  font-size:8px;font-weight:700;padding:1px 6px;border-radius:2px;
-  letter-spacing:.5px;white-space:nowrap;
+  font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;
+  letter-spacing:.3px;white-space:nowrap;
 }
-.sb-item-sig.buy {color:var(--green); background:rgba(0,255,65,.1); border:1px solid rgba(0,255,65,.2)}
-.sb-item-sig.sell{color:var(--red);   background:rgba(255,51,51,.1);border:1px solid rgba(255,51,51,.2)}
-.sb-item-sig.hold{color:var(--amber2);background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.2)}
+.sb-item-sig.buy {color:var(--teal);background:var(--teal-dim);border:1px solid rgba(16,185,129,.25)}
+.sb-item-sig.sell{color:var(--red);background:var(--red-dim);border:1px solid rgba(239,68,68,.25)}
+.sb-item-sig.hold{color:var(--text2);background:rgba(255,255,255,.05);border:1px solid var(--border2)}
 
-.sb-legend{padding:10px 14px}
-.sb-leg-item{display:flex;align-items:center;gap:7px;font-size:9px;color:var(--text3);padding:2px 0}
-.sb-leg-dot{width:8px;height:8px;border-radius:1px;flex-shrink:0}
+.sb-legend{padding:10px 16px}
+.sb-leg-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);padding:3px 0}
+.sb-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 
 /* ── CONTENT ── */
-.content{overflow:auto;display:flex;flex-direction:column}
+.content{overflow:auto;display:flex;flex-direction:column;gap:0}
 
-.panel-bar{
-  padding:8px 18px;background:var(--muted2);
+.content-hdr{
+  padding:14px 20px;
+  background:var(--surface);
   border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
 }
-.panel-bar-title{
-  font-size:9px;font-weight:700;letter-spacing:2px;
-  color:var(--orange);text-transform:uppercase;
-  display:flex;align-items:center;gap:6px;
+.content-hdr-title{
+  font-size:12px;font-weight:600;color:var(--text2);
+  display:flex;align-items:center;gap:8px;
 }
-.panel-bar-title::before{content:'◈';color:var(--amber)}
-.panel-bar-range{
-  font-size:9px;color:var(--text3);
-  background:rgba(255,102,0,.08);border:1px solid var(--border2);
-  padding:2px 10px;border-radius:2px;
+.content-hdr-range{
+  font-size:11px;color:var(--text3);
+  background:var(--surface2);border:1px solid var(--border2);
+  padding:3px 12px;border-radius:20px;
 }
-.panel-bar-src{font-size:9px;color:var(--text3);margin-left:auto}
+.content-hdr-src{font-size:10px;color:var(--text3);margin-left:auto}
 
-/* ── TABLE ── */
-.tbl-wrap{padding:12px 16px;flex:1;overflow-x:auto}
+/* ── SECTOR CARDS ── */
+.cards-wrap{
+  padding:16px;
+  display:flex;flex-direction:column;gap:16px;
+}
 
-table{width:100%;border-collapse:collapse;font-size:11px;min-width:900px}
+.sector-card{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:box-shadow .2s;
+}
+.sector-card:hover{
+  box-shadow:0 0 0 1px rgba(16,185,129,.15),0 8px 32px rgba(0,0,0,.3);
+}
 
-thead tr{border-bottom:2px solid var(--orange);background:var(--muted3)}
-th{
-  padding:7px 12px;font-size:8px;font-weight:700;letter-spacing:2px;
-  color:var(--orange);text-transform:uppercase;text-align:left;white-space:nowrap;
+.sec-card-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+}
+.sec-card-left{display:flex;align-items:center;gap:10px}
+.sec-icon{font-size:16px}
+.sec-card-name{
+  font-size:14px;font-weight:700;color:var(--white);
+}
+.sec-count-badge{
+  font-size:10px;color:var(--text3);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border2);
+  padding:2px 10px;border-radius:20px;font-weight:500;
+}
+.sec-hdr-pills{display:flex;gap:6px;flex-wrap:wrap}
+.hdr-pill{
+  font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;
+}
+.hdr-pill.sb  {color:var(--teal);background:var(--teal-dim);border:1px solid rgba(16,185,129,.25)}
+.hdr-pill.buy {color:var(--blue);background:var(--blue-dim);border:1px solid rgba(59,130,246,.25)}
+.hdr-pill.sell{color:var(--red); background:var(--red-dim); border:1px solid rgba(239,68,68,.25)}
+
+/* ── SECTOR TABLE ── */
+.sec-table-wrap{overflow-x:auto}
+.sec-table{
+  width:100%;border-collapse:collapse;
+  font-size:12px;min-width:840px;
+}
+
+.sec-table thead tr{
+  background:rgba(0,0,0,.2);
+  border-bottom:1px solid var(--border);
+}
+.sec-table th{
+  padding:8px 14px;font-size:9px;font-weight:700;letter-spacing:1.5px;
+  color:var(--text3);text-transform:uppercase;text-align:left;white-space:nowrap;
 }
 .th-c{text-align:center}
 .th-r{text-align:right}
 
-/* Sector divider */
-tr.sec-hdr td{
-  padding:7px 12px;
-  background:linear-gradient(90deg,var(--muted2),rgba(255,102,0,.04),transparent);
-  border-top:1px solid var(--border);
-  border-bottom:1px solid rgba(255,102,0,.08);
-  font-size:8px;font-weight:700;letter-spacing:3px;color:var(--orange);
-}
-.sec-hdr-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.sec-icon{font-size:13px}
-.sec-name{color:var(--amber2);font-size:9px;letter-spacing:2px}
-.sec-count{
-  font-size:8px;color:var(--muted);padding:1px 7px;
-  border:1px solid var(--muted);border-radius:2px;
-}
-.sec-pills{display:flex;gap:5px;margin-left:6px}
-.sec-pill{
-  font-size:7px;font-weight:700;padding:1px 7px;border-radius:2px;letter-spacing:.5px;
-}
-.sec-pill.sb  {color:var(--green); background:rgba(0,255,65,.1); border:1px solid rgba(0,255,65,.2)}
-.sec-pill.buy {color:var(--amber2);background:rgba(255,140,0,.08);border:1px solid rgba(255,140,0,.2)}
-.sec-pill.sell{color:var(--red);   background:rgba(255,51,51,.08);border:1px solid rgba(255,51,51,.2)}
-
 /* Data rows */
-tbody tr:not(.sec-hdr){
-  border-bottom:1px solid rgba(255,102,0,.06);
+.stock-row{
+  border-bottom:1px solid rgba(255,255,255,.04);
   transition:background .12s;
   animation:row-in .3s ease both;
 }
-@keyframes row-in{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
-tbody tr:not(.sec-hdr):hover{background:rgba(255,140,0,.05)}
+@keyframes row-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.stock-row:hover{background:rgba(255,255,255,.03)}
+.stock-row:last-child{border-bottom:none}
 
-td{padding:9px 12px;vertical-align:middle;text-align:left}
+.sec-table td{padding:12px 14px;vertical-align:middle;text-align:left}
 .td-c{text-align:center}
 .td-r{text-align:right}
+.td-stock{min-width:160px}
 
-.stock-name{font-size:12px;font-weight:700;color:var(--white);letter-spacing:.3px;line-height:1.2}
-.stock-sym{font-size:8px;color:var(--text3);margin-top:2px;letter-spacing:1.5px}
-
-.price-val{
-  font-size:13px;font-weight:700;color:var(--amber3);
-  font-variant-numeric:tabular-nums;
-  text-shadow:0 0 8px rgba(255,208,128,.2);
+.stock-name{
+  font-size:13px;font-weight:700;color:var(--white);letter-spacing:.2px;line-height:1.2;
 }
-.spark-wrap{margin-top:4px}
+.stock-sym{
+  font-size:10px;color:var(--text3);margin-top:2px;
+  letter-spacing:.5px;font-family:'DM Mono',monospace;
+}
+
+/* Price */
+.price-val{
+  font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;
+  font-family:'DM Mono',monospace;
+}
+.price-up{color:var(--teal)}
+.price-dn{color:var(--red)}
+.spark-wrap{margin-top:5px;display:flex;justify-content:flex-end}
 
 /* RSI */
-.rsi-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
-.rsi-val.rsi-hot {color:var(--red);   text-shadow:0 0 8px rgba(255,51,51,.4)}
-.rsi-val.rsi-warm{color:var(--yellow);text-shadow:0 0 8px rgba(255,255,0,.3)}
-.rsi-val.rsi-cold{color:var(--green); text-shadow:0 0 8px rgba(0,255,65,.4)}
-.rsi-bar-wrap{
-  width:72px;height:3px;background:var(--muted2);
+.rsi-badge{
+  font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;
+  font-family:'DM Mono',monospace;display:inline-block;
+}
+.rsi-badge.rsi-hot {color:var(--red)}
+.rsi-badge.rsi-warm{color:var(--yellow)}
+.rsi-badge.rsi-cold{color:var(--teal)}
+.rsi-track{
+  width:72px;height:3px;background:rgba(255,255,255,.08);
   border-radius:2px;margin:5px auto 0;overflow:hidden;
 }
-.rsi-bar-fill{height:100%;border-radius:2px}
-.rsi-bar-fill.rsi-hot {background:var(--red)}
-.rsi-bar-fill.rsi-warm{background:var(--yellow)}
-.rsi-bar-fill.rsi-cold{background:var(--green)}
+.rsi-fill{height:100%;border-radius:2px;transition:width .3s}
+.rsi-fill.rsi-hot {background:var(--red)}
+.rsi-fill.rsi-warm{background:var(--yellow)}
+.rsi-fill.rsi-cold{background:var(--teal)}
 
-/* Levels */
-.level-grid{font-size:9px;line-height:1.9;font-variant-numeric:tabular-nums}
-.level-row{display:flex;align-items:center;gap:5px;justify-content:center}
-.level-tag{
-  font-size:7px;font-weight:700;padding:0 4px;border-radius:2px;min-width:24px;text-align:center;
+/* S/R Levels */
+.sr-grid{font-size:10px;line-height:1.9;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace}
+.sr-row{display:flex;align-items:center;gap:5px;justify-content:center}
+.sr-tag{
+  font-size:8px;font-weight:700;padding:0 4px;border-radius:3px;min-width:26px;text-align:center;
 }
-.level-tag.r{background:rgba(255,51,51,.15);color:var(--red)}
-.level-tag.s{background:rgba(0,255,65,.12);color:var(--green)}
-.level-val.r{color:var(--red)}
-.level-val.s{color:var(--green)}
+.sr-tag.r{background:var(--red-dim);color:var(--red)}
+.sr-tag.s{background:var(--teal-dim);color:var(--teal)}
+.sr-val.r{color:var(--red)}
+.sr-val.s{color:var(--teal)}
 
 /* MACD / EMA */
-.macd-wrap{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
-.macd-pos{color:var(--green);text-shadow:0 0 6px rgba(0,255,65,.3)}
+.macd-val{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace}
+.macd-pos{color:var(--teal)}
 .macd-neg{color:var(--red)}
-.ema-wrap{margin-top:4px}
+.ema-val{margin-top:4px}
 .ema-bull{
-  font-size:8px;font-weight:700;padding:2px 6px;border-radius:2px;
-  color:var(--green);background:rgba(0,255,65,.1);border:1px solid rgba(0,255,65,.2);
+  font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;
+  color:var(--teal);background:var(--teal-dim);border:1px solid rgba(16,185,129,.25);
 }
 .ema-bear{
-  font-size:8px;font-weight:700;padding:2px 6px;border-radius:2px;
-  color:var(--red);background:rgba(255,51,51,.1);border:1px solid rgba(255,51,51,.2);
+  font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;
+  color:var(--red);background:var(--red-dim);border:1px solid rgba(239,68,68,.25);
 }
 
 /* Flow badges */
 .flow-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
 .flow-badge{
-  font-size:8px;font-weight:700;padding:2px 7px;border-radius:2px;
-  letter-spacing:.5px;border:1px solid;white-space:nowrap;
+  font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;
+  letter-spacing:.3px;border:1px solid;white-space:nowrap;
 }
-.fii-b    {color:var(--green); border-color:rgba(0,255,65,.35); background:rgba(0,255,65,.08)}
-.fii-s    {color:var(--red);   border-color:rgba(255,51,51,.35);background:rgba(255,51,51,.08)}
-.dii-b    {color:var(--amber2);border-color:rgba(255,140,0,.35);background:rgba(255,140,0,.08)}
-.dii-s    {color:#ff8888;      border-color:rgba(255,80,80,.25); background:rgba(255,80,80,.06)}
-.flow-neutral{color:var(--muted);border-color:var(--muted);background:transparent}
+.fii-b    {color:var(--teal);border-color:rgba(16,185,129,.35);background:var(--teal-dim)}
+.fii-s    {color:var(--red); border-color:rgba(239,68,68,.35); background:var(--red-dim)}
+.dii-b    {color:var(--blue);border-color:rgba(59,130,246,.35);background:var(--blue-dim)}
+.dii-s    {color:#f87171;    border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.08)}
+.flow-neutral{color:var(--text3);border-color:var(--border2);background:transparent}
 
-/* Signal badges */
-.sig-badge{
-  display:inline-block;padding:4px 12px;border-radius:2px;
-  font-size:9px;font-weight:700;letter-spacing:1px;
+/* Signal pills */
+.sig-pill{
+  display:inline-block;padding:5px 12px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:.3px;
   white-space:nowrap;border:1px solid;
 }
 .sig-sb{
-  background:rgba(0,255,65,.12);color:var(--green);border-color:rgba(0,255,65,.4);
-  text-shadow:0 0 8px rgba(0,255,65,.5);box-shadow:0 0 12px rgba(0,255,65,.08);
+  background:var(--teal-dim);color:var(--teal2);border-color:rgba(16,185,129,.4);
+  box-shadow:0 0 12px rgba(16,185,129,.12);
 }
 .sig-buy{
-  background:rgba(255,140,0,.1);color:var(--amber2);border-color:rgba(255,140,0,.35);
+  background:var(--blue-dim);color:var(--blue);border-color:rgba(59,130,246,.35);
 }
-.sig-neutral{background:transparent;color:var(--text3);border-color:var(--muted)}
+.sig-neutral{background:rgba(255,255,255,.04);color:var(--text3);border-color:var(--border2)}
 .sig-caution{
-  background:rgba(255,255,0,.06);color:var(--yellow);border-color:rgba(255,255,0,.25);
+  background:var(--yel-dim);color:var(--yellow);border-color:rgba(245,158,11,.35);
 }
 .sig-sell{
-  background:rgba(255,51,51,.12);color:var(--red);border-color:rgba(255,51,51,.4);
-  text-shadow:0 0 8px rgba(255,51,51,.4);
+  background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,.4);
 }
 .sig-blk{
-  background:rgba(68,136,255,.1);color:var(--blue);border-color:rgba(68,136,255,.3);
+  background:rgba(139,92,246,.1);color:var(--purple);border-color:rgba(139,92,246,.3);
 }
 
 /* ── FOOTER ── */
 footer{
-  background:var(--header);border-top:2px solid var(--orange);
-  padding:6px 18px;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:12px 20px;
   display:flex;justify-content:space-between;align-items:center;
-  font-size:8px;color:var(--text3);letter-spacing:1px;
-  flex-wrap:wrap;gap:6px;
-  box-shadow:0 -4px 20px rgba(255,102,0,.08);
+  font-size:11px;color:var(--text3);
+  flex-wrap:wrap;gap:8px;
 }
-.footer-brand{color:var(--amber);font-weight:700;letter-spacing:2px}
-.footer-warn{color:var(--red)}
+.footer-brand{color:var(--white);font-weight:700}
+.footer-warn{color:var(--yellow)}
 
 /* ── STATUS BAR ── */
 .status-bar{
-  background:#000;border-top:1px solid var(--muted);
-  padding:3px 18px;display:flex;gap:20px;align-items:center;
-  font-size:8px;color:var(--text3);letter-spacing:1px;flex-wrap:wrap;
+  background:rgba(0,0,0,.4);border-top:1px solid var(--border);
+  padding:4px 20px;display:flex;gap:20px;align-items:center;
+  font-size:10px;color:var(--text3);flex-wrap:wrap;
 }
 .status-item{display:flex;align-items:center;gap:5px}
 .status-dot{width:5px;height:5px;border-radius:50%}
-.status-dot.ok  {background:var(--green);box-shadow:0 0 4px var(--green)}
+.status-dot.ok  {background:var(--teal);box-shadow:0 0 4px rgba(16,185,129,.5)}
 .status-dot.warn{background:var(--yellow)}
 .status-dot.err {background:var(--red)}
-.status-ts{margin-left:auto;color:var(--amber2);font-weight:600}
+.status-ts{margin-left:auto;color:var(--text2);font-weight:600;font-family:'DM Mono',monospace;font-size:10px}
 
 /* ── RESPONSIVE ── */
 @media(max-width:1100px){
-  .main{grid-template-columns:180px 1fr}
-  .stat-val{font-size:18px}
+  .main{grid-template-columns:200px 1fr}
+  .stat-val{font-size:22px}
   .stats-bar{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:860px){
@@ -1630,23 +1641,21 @@ footer{
 }
 @media(max-width:600px){
   .stats-bar{grid-template-columns:repeat(2,1fr)}
-  .tbl-wrap{padding:8px}
-  .h-brand{padding:8px 12px}
-  .h-logo{font-size:16px}
-  footer{font-size:7px}
-  table{min-width:700px}
+  .cards-wrap{padding:8px}
+  .h-brand{padding:10px 14px}
+  footer{font-size:10px}
 }
 """
 
     # ══════════════════════════════════════════════════════════════════════════
-    #  HTML TEMPLATE
+    #  HTML TEMPLATE — Stealth Slate
     # ══════════════════════════════════════════════════════════════════════════
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FII/DII Pulse &#x2014; Bloomberg Terminal &#x2014; {date_str}</title>
+<title>FII/DII Pulse &mdash; Institutional Intelligence &mdash; {date_str}</title>
 <style>{css}</style>
 </head>
 <body>
@@ -1656,8 +1665,12 @@ footer{
 <header>
   <div class="h-brand">
     <div>
-      <div class="h-logo">FII<span>//</span>DII</div>
-      <div class="h-tagline">Institutional Intelligence Terminal &middot; v8 &middot; Bloomberg</div>
+      <div class="h-logo">
+        <span class="h-logo-fii">FII</span>
+        <span class="h-logo-sep">/</span>
+        <span class="h-logo-dii">DII</span>
+      </div>
+      <div class="h-tagline">Institutional Intelligence Dashboard &middot; Stealth Slate &middot; NSE Bulk/Block CSV API &middot; v8</div>
     </div>
   </div>
   <div class="h-nav">
@@ -1670,10 +1683,6 @@ footer{
   </div>
   <div class="h-meta">
     <div class="h-meta-item">
-      <div class="h-meta-label">Source</div>
-      <div class="h-meta-val">{source[:18]}</div>
-    </div>
-    <div class="h-meta-item">
       <div class="h-meta-label">Range</div>
       <div class="h-meta-val">{date_range_label or date_str}</div>
     </div>
@@ -1682,7 +1691,7 @@ footer{
       <div class="h-meta-val">{date_str}</div>
     </div>
     <div class="h-live">
-      <div class="led"></div>LIVE
+      <div class="led"></div>Live
     </div>
   </div>
 </header>
@@ -1705,24 +1714,24 @@ footer{
     <div class="stat-chg {xc}">{xa} {abs(market['sensex_chg']):.2f}%</div>
   </div>
   <div class="stat">
-    <div class="stat-lbl">Stocks Tracked</div>
+    <div class="stat-lbl">Tracked</div>
     <div class="stat-val">{len(stocks)}</div>
-    <div class="stat-chg neu">FII:{fb} &middot; DII:{db} &middot; Both:{bb}</div>
+    <div class="stat-chg neu">Securities</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl">FII Buy</div>
+    <div class="stat-val teal">{fb}</div>
+    <div class="stat-chg up">▲ Active</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl">DII Buy</div>
+    <div class="stat-val teal">{db}</div>
+    <div class="stat-chg up">▲ Active</div>
   </div>
   <div class="stat">
     <div class="stat-lbl">Strong Buy</div>
-    <div class="stat-val green">{st}</div>
-    <div class="stat-chg up">&#9889; High conviction</div>
-  </div>
-  <div class="stat">
-    <div class="stat-lbl">Both Sell</div>
-    <div class="stat-val {'red' if sel > 0 else 'green'}">{sel}</div>
-    <div class="stat-chg {'dn' if sel > 0 else 'neu'}">{'&#9660; Caution' if sel > 0 else '&#8212; Clear'}</div>
-  </div>
-  <div class="stat">
-    <div class="stat-lbl">Data Range</div>
-    <div class="stat-val" style="font-size:13px;color:var(--amber)">{date_range_label or date_str}</div>
-    <div class="stat-chg neu">NSE Bulk/Block CSV</div>
+    <div class="stat-val teal">{st}</div>
+    <div class="stat-chg up">⚡ Signals</div>
   </div>
 </div>
 
@@ -1732,64 +1741,51 @@ footer{
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sb-section">
-      <div class="sb-title">Sector Index</div>
+      <div class="sb-title">Sectors</div>
       {sidebar_items}
     </div>
     <div class="sb-section">
-      <div class="sb-title">Signal Legend</div>
+      <div class="sb-title">Signal Guide</div>
       <div class="sb-legend">
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--green)"></div>&#9889; Strong Buy</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--amber2)"></div>&#9650; Buy</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--blue)"></div>&#9632; Bulk/Block</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--text3)"></div>&mdash; Neutral</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--yellow)"></div>&#9888; Caution</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>&#9660; Sell</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--teal)"></div>⚡ Strong Buy</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--blue)"></div>▲ Buy</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--purple)"></div>■ Bulk/Block</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--text3)"></div>— Neutral</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--yellow)"></div>⚠ Caution</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>▼ Sell</div>
       </div>
     </div>
     <div class="sb-section">
       <div class="sb-title">RSI Guide</div>
       <div class="sb-legend">
         <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>&gt;70 Overbought</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--yellow)"></div>40&ndash;70 Mid zone</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--green)"></div>&lt;40 Oversold</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--yellow)"></div>40–70 Mid zone</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--teal)"></div>&lt;40 Oversold</div>
       </div>
     </div>
     <div class="sb-section">
       <div class="sb-title">Flow Key</div>
       <div class="sb-legend">
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--green)"></div>FII Buying</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--amber2)"></div>DII Buying</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>FII / DII Sell</div>
-        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--muted)"></div>No activity</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--teal)"></div>FII Buying</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--blue)"></div>DII Buying</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>Selling</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--text3)"></div>No activity</div>
       </div>
     </div>
   </div>
 
   <!-- CONTENT -->
   <div class="content">
-    <div class="panel-bar">
-      <div class="panel-bar-title">Sector-wise Institutional Flow &middot; Strong Buy &#8594; Sell</div>
-      {drb_html}
-      <div class="panel-bar-src">&#128225; {source} &middot; yfinance technicals</div>
+    <div class="content-hdr">
+      <div class="content-hdr-title">
+        Sector-wise Institutional Flow &mdash; Strong Buy &rarr; Sell
+      </div>
+      {f'<span class="content-hdr-range">📅 {date_range_label}</span>' if date_range_label else ''}
+      <div class="content-hdr-src">📡 {source} &middot; yfinance technicals</div>
     </div>
 
-    <div class="tbl-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Stock</th>
-            <th class="th-r">Price / Trend</th>
-            <th class="th-c">RSI (14)</th>
-            <th class="th-c">Support / Resistance</th>
-            <th class="th-c">MACD / EMA</th>
-            <th class="th-c">Inst. Flow</th>
-            <th class="th-c">Signal</th>
-          </tr>
-        </thead>
-        <tbody>
-{rows}
-        </tbody>
-      </table>
+    <div class="cards-wrap">
+      {sector_cards}
     </div>
   </div><!-- /content -->
 
@@ -1798,11 +1794,11 @@ footer{
 <!-- ═══ FOOTER ═══ -->
 <footer>
   <div>
-    <span class="footer-brand">FII//DII PULSE</span>
-    &middot; Bloomberg Terminal &middot; v8 &middot; {source} &middot; yfinance &middot; {date_str}
+    <span class="footer-brand">FII/DII PULSE</span>
+    &middot; Stealth Slate &middot; v8 &middot; {source} &middot; {date_str}
   </div>
-  <div>Sectors sorted: Strong Buy &#8594; Buy &#8594; Neutral &#8594; Caution &#8594; Sell</div>
-  <div class="footer-warn">&#9888; NOT FINANCIAL ADVICE &middot; EDUCATIONAL ONLY &middot; DYOR</div>
+  <div>Sorted: Strong Buy &rarr; Buy &rarr; Neutral &rarr; Caution &rarr; Sell</div>
+  <div class="footer-warn">⚠ NOT FINANCIAL ADVICE &middot; EDUCATIONAL ONLY &middot; DYOR</div>
 </footer>
 
 <!-- ═══ STATUS BAR ═══ -->
@@ -1820,7 +1816,7 @@ footer{
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  EMAIL  (unchanged)
+#  EMAIL
 # ─────────────────────────────────────────────────────────────────────────────
 
 def send_email(html_path: Path, date_str: str, source: str,
@@ -1839,12 +1835,12 @@ def send_email(html_path: Path, date_str: str, source: str,
     full_html = html_path.read_text(encoding="utf-8")
 
     msg            = MIMEMultipart("alternative")
-    msg["Subject"] = f"📊 FII/DII Pulse · Bloomberg Terminal — {date_str}"
+    msg["Subject"] = f"📊 FII/DII Pulse · Stealth Slate — {date_str}"
     msg["From"]    = f"FII/DII Pulse <{user}>"
     msg["To"]      = ", ".join(to_list)
 
     plain = (
-        f"FII/DII Pulse — Bloomberg Terminal Theme\n"
+        f"FII/DII Pulse — Stealth Slate Theme\n"
         f"Date: {date_str}\n"
         f"Source: {source}\n"
         f"Date range: {date_range_label}\n"
@@ -1869,7 +1865,7 @@ def send_email(html_path: Path, date_str: str, source: str,
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  MAIN  (unchanged)
+#  MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
@@ -1879,7 +1875,7 @@ def main():
     date_file= now_ist.strftime("%Y-%m-%d")
 
     log.info("=" * 65)
-    log.info(f"  📊 FII/DII Pulse v8 Bloomberg Terminal — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
+    log.info(f"  📊 FII/DII Pulse v8 Stealth Slate — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
     log.info("=" * 65)
 
     try:
