@@ -3,406 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FII/DII Pulse — Jade Garden — 18 Feb 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>FII/DII Pulse — 18 Feb 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-
 :root{
-  --jade:#2d6a4f;
-  --jade2:#1b4332;
-  --sage:#3d9970;
-  --mint:#52b788;
-  --foam:#d8f3dc;
-  --foam2:#b7e4c7;
-  --ivory:#f4f9f5;
-  --paper:#ffffff;
-  --ink:#1b3a2d;
-  --mist:#5a8a6e;
-  --coral:#d64045;
-  --sand:#e98a4e;
-  --sky:#457b9d;
-  --border:#c8e6c9;
-  --border2:#e8f5e9;
-  --shadow:0 1px 3px rgba(45,106,79,.08),0 4px 16px rgba(45,106,79,.06);
-  --shadow-sm:0 1px 4px rgba(45,106,79,.1);
+  --bg:#050c14;--sur:#0b1623;--bdr:#1a3050;
+  --fi:#00d4aa;--di:#ff8c42;--bo:#a78bfa;
+  --se:#ff4d6d;--tx:#e2eaf4;--mu:#5a7a99;--go:#f0c060;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-
-body{
-  background:var(--ivory);
-  color:var(--ink);
-  font-family:'DM Sans',system-ui,sans-serif;
-  min-height:100vh;
-  line-height:1.5;
-}
-
-/* Subtle leaf-vein texture overlay */
+body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;min-height:100vh}
 body::before{
-  content:'';
-  position:fixed;inset:0;
-  background-image:
-    radial-gradient(ellipse 800px 600px at 10% 20%,rgba(82,183,136,.06),transparent),
-    radial-gradient(ellipse 600px 800px at 90% 80%,rgba(45,106,79,.04),transparent);
-  pointer-events:none;z-index:0;
+  content:'';position:fixed;inset:0;
+  background:
+    linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0;
 }
-
 .w{position:relative;z-index:1}
 
-/* ── HEADER ── */
+/* ── HEADER ─────────────────────────────────────────────── */
 header{
-  background:var(--jade2);
-  border-bottom:3px solid var(--sage);
-  padding:14px 24px;
+  background:linear-gradient(135deg,#050c14,#0a1930,#050c14);
+  border-bottom:1px solid var(--bdr);padding:14px 20px;
   display:flex;align-items:center;justify-content:space-between;
   flex-wrap:wrap;gap:10px;
-  position:sticky;top:0;z-index:99;
-  box-shadow:0 2px 12px rgba(27,67,50,.25);
+  position:sticky;top:0;z-index:99;backdrop-filter:blur(8px);
 }
-
-.lg{display:flex;align-items:center;gap:14px}
-
+.lg{display:flex;align-items:center;gap:12px}
 .logo-icon{
-  width:42px;height:42px;min-width:42px;
-  background:linear-gradient(135deg,var(--sage),var(--mint));
-  border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;
-  box-shadow:0 2px 10px rgba(82,183,136,.35);
+  width:40px;height:40px;min-width:40px;
+  background:linear-gradient(135deg,var(--fi),var(--bo));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 0 18px rgba(0,212,170,.4);
 }
-
-.lt{font-size:17px;font-weight:700;letter-spacing:.3px;color:#fff}
-.lt span{color:var(--mint)}
-.ls2{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:1.5px;margin-top:2px;text-transform:uppercase}
-
+.lt{font-size:16px;font-weight:800;letter-spacing:1px}
+.lt span{color:var(--fi)}
+.ls2{font-size:9px;color:var(--mu);letter-spacing:1px;margin-top:2px}
 .hm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-
 .lv{
   display:flex;align-items:center;gap:6px;
-  background:rgba(82,183,136,.2);
-  border:1px solid rgba(82,183,136,.4);
-  padding:4px 12px;border-radius:20px;
-  font-size:10px;font-weight:600;color:var(--mint);letter-spacing:1px;
+  background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);
+  padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;color:var(--fi);letter-spacing:1px;
 }
-.led{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--mint);
-  animation:pulse 1.8s infinite;
-}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
-
+.led{width:7px;height:7px;border-radius:50%;background:var(--fi);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 .src{
-  font-size:10px;color:rgba(255,255,255,.65);
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.15);
-  padding:4px 12px;border-radius:20px;
+  font-size:10px;color:var(--bo);
+  background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);
+  padding:4px 10px;border-radius:12px;
 }
-
 .drb{
-  font-size:10px;color:var(--mint);
-  background:rgba(82,183,136,.15);
-  border:1px solid rgba(82,183,136,.3);
-  padding:4px 12px;border-radius:20px;
-  font-family:'DM Mono',monospace;
+  font-size:10px;color:var(--go);
+  background:rgba(240,192,96,.1);border:1px solid rgba(240,192,96,.25);
+  padding:4px 10px;border-radius:12px;font-family:'Space Mono',monospace;
 }
+.dt{font-family:'Space Mono',monospace;font-size:10px;color:var(--mu)}
 
-.dt{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.4)}
-
-/* ── SUMMARY STRIP ── */
+/* ── SUMMARY GRID ───────────────────────────────────────── */
 .sum{
   display:grid;grid-template-columns:repeat(4,1fr);
-  gap:1px;
-  background:var(--border);
-  border-bottom:1px solid var(--border);
+  gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr);
 }
+.sc2{background:var(--sur);padding:14px 16px}
+.sl{font-size:9px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px}
+.sv{font-family:'Space Mono',monospace;font-size:18px;font-weight:700}
+.sb2{font-size:10px;color:var(--mu);margin-top:3px}
 
-.sc2{
-  background:var(--paper);
-  padding:16px 20px;
-  transition:background .2s;
-}
-.sc2:hover{background:var(--foam2)}
+.up{color:var(--fi)}.dn{color:var(--se)}
+.cfi{color:var(--fi)}.cdi{color:var(--di)}.cbo{color:var(--bo)}.cgo{color:var(--go)}
 
-.sl{
-  font-size:9px;letter-spacing:2px;color:var(--mist);
-  text-transform:uppercase;margin-bottom:6px;font-weight:500;
-}
-
-.sv{
-  font-family:'DM Mono',monospace;
-  font-size:20px;font-weight:700;
-  color:var(--ink);
-}
-
-.sb2{font-size:10px;color:var(--mist);margin-top:4px;font-weight:500}
-
-.up{color:var(--sage)!important}
-.dn{color:var(--coral)!important}
-
-/* ── SECTOR NAV ── */
-.snav{
-  padding:10px 24px;
-  display:flex;gap:8px;flex-wrap:wrap;
-  background:var(--paper);
-  border-bottom:1px solid var(--border);
-  position:sticky;top:70px;z-index:90;
-  box-shadow:var(--shadow-sm);
-  overflow-x:auto;
-}
-
-.snav-link{
-  font-size:10px;font-weight:600;
-  color:var(--jade);
-  text-decoration:none;
-  padding:4px 12px;border-radius:20px;
-  border:1px solid var(--border);
-  background:var(--foam);
-  white-space:nowrap;
-  transition:all .2s;
-}
-.snav-link:hover{
-  background:var(--jade);color:#fff;
-  border-color:var(--jade);
-}
-
-/* ── TABLE WRAPPER ── */
-.tw{padding:20px 24px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-
+/* ── TABLE WRAPPER ──────────────────────────────────────── */
+.tw{padding:16px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tt{
-  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--mist);margin-bottom:14px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:600;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mu);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
 }
-.tt::before{
-  content:'';width:3px;height:14px;
-  background:linear-gradient(var(--sage),var(--mint));
-  border-radius:2px;flex-shrink:0;
-}
+.tt::before{content:'';width:3px;height:14px;background:var(--fi);border-radius:2px;flex-shrink:0}
 
-/* ── TABLE ── */
-table{
-  width:100%;border-collapse:separate;border-spacing:0;
-  min-width:860px;
-  background:var(--paper);
-  border-radius:16px;
-  border:1px solid var(--border);
-  overflow:hidden;
-  box-shadow:var(--shadow);
-}
-
-thead tr{border-bottom:2px solid var(--border)}
-
+/* ── TABLE ──────────────────────────────────────────────── */
+table{width:100%;border-collapse:collapse;min-width:860px}
+thead tr{border-bottom:2px solid var(--bdr)}
 th{
-  padding:11px 14px;text-align:left;
-  font-size:9px;letter-spacing:1.5px;
-  color:var(--mist);text-transform:uppercase;font-weight:700;
-  white-space:nowrap;background:var(--foam);
+  padding:9px 10px;text-align:left;
+  font-size:9px;letter-spacing:1.5px;color:var(--mu);
+  text-transform:uppercase;font-weight:600;white-space:nowrap;
 }
 th:not(:first-child){text-align:center}
-
-tbody tr:not(.sec-hdr){
-  border-bottom:1px solid var(--border2);
-  animation:si .35s ease both;
-  opacity:0;
-  transition:background .15s;
+tbody tr{
+  border-bottom:1px solid rgba(26,48,80,.4);
+  animation:si .4s ease both;opacity:0;transition:background .15s;
 }
-
-@keyframes si{
-  from{opacity:0;transform:translateY(4px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-tbody tr:not(.sec-hdr):hover{background:var(--foam)}
-
-td{
-  padding:12px 14px;font-size:12px;
-  vertical-align:middle;text-align:center;
-  color:var(--ink);
-}
+@keyframes si{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+tbody tr:hover{background:rgba(0,212,170,.03)}
+td{padding:10px;font-size:12px;vertical-align:middle;text-align:center}
 td:first-child{text-align:left}
 
-.sn{font-weight:700;font-size:13px;line-height:1.3;color:var(--ink)}
-.sy{
-  font-size:9px;color:var(--mist);
-  font-family:'DM Mono',monospace;margin-top:2px;
-  letter-spacing:.5px;
-}
+.sn{font-weight:700;font-size:13px;line-height:1.3}
+.sy{font-size:9px;color:var(--mu);font-family:'Space Mono',monospace;margin-top:2px}
+.pv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+.sp{margin-top:4px}
 
-.pv{
-  font-family:'DM Mono',monospace;
-  font-size:13px;font-weight:700;color:var(--ink);
+.b{
+  display:inline-block;padding:4px 9px;
+  border-radius:5px;font-size:10px;font-weight:800;
+  letter-spacing:.5px;white-space:nowrap;
 }
-.sp{margin-top:5px}
+.bf{background:rgba(0,212,170,.12);color:var(--fi);border:1px solid rgba(0,212,170,.3)}
+.bd{background:rgba(255,140,66,.12);color:var(--di);border:1px solid rgba(255,140,66,.3)}
+.bx{background:rgba(255,77,109,.1);color:var(--se);border:1px solid rgba(255,77,109,.25)}
 
-/* RSI */
-.rv{font-family:'DM Mono',monospace;font-size:13px;font-weight:700}
-.rb2{
-  width:78px;height:4px;
-  background:var(--border);border-radius:2px;
-  margin:5px auto 0;overflow:hidden;
-}
+.rv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+.rb2{width:78px;height:4px;background:var(--bdr);border-radius:2px;margin:5px auto 0;overflow:hidden}
 .rf2{height:100%;border-radius:2px}
-.ro .rf2{background:var(--coral)}
-.rn2 .rf2{background:var(--sand)}
-.rs2 .rf2{background:var(--sage)}
+.ro .rf2{background:var(--se)}.rn2 .rf2{background:var(--go)}.rs2 .rf2{background:var(--fi)}
 
-/* Levels */
+.im{display:flex;justify-content:center;gap:5px;font-size:10px;margin-bottom:2px}
+.il{color:var(--mu);font-size:9px;min-width:30px;text-align:right}
+
 .sr{
-  font-size:10px;font-family:'DM Mono',monospace;
-  display:flex;align-items:center;gap:5px;
-  justify-content:center;margin-bottom:3px;
+  font-size:10px;font-family:'Space Mono',monospace;
+  display:flex;align-items:center;gap:4px;justify-content:center;margin-bottom:2px;
 }
-.sr-r{
-  font-size:8px;padding:1px 5px;border-radius:4px;font-weight:700;
-  background:rgba(214,64,69,.1);color:var(--coral);
-}
-.sr-s{
-  font-size:8px;padding:1px 5px;border-radius:4px;font-weight:700;
-  background:rgba(61,153,112,.12);color:var(--sage);
-}
+.sr-r{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(255,77,109,.2);color:var(--se)}
+.sr-s{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700;
+  background:rgba(0,212,170,.15);color:var(--fi)}
 
-/* ── SECTOR HEADER ROWS ── */
-tr.sec-hdr td{
-  background:linear-gradient(90deg,var(--foam),rgba(216,243,220,.4),transparent);
-  border-top:2px solid var(--border);
-  border-bottom:1px solid var(--foam2);
-  padding:10px 14px;
-}
-.sec-hdr-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.sec-icon{font-size:16px}
-.sec-name{
-  font-size:13px;font-weight:700;letter-spacing:.2px;
-  color:var(--jade);
-}
-.sec-count{
-  font-size:10px;color:var(--mist);font-weight:600;
-  background:var(--foam2);
-  padding:2px 10px;border-radius:20px;
-  border:1px solid var(--border);
-}
-.sec-pills{display:flex;gap:6px;flex-wrap:wrap;margin-left:2px}
-.sec-pill{
-  font-size:9px;font-weight:700;
-  padding:2px 9px;border-radius:20px;letter-spacing:.3px;
-}
-
-/* ── SIGNAL BADGES ── */
 .sig{
-  display:inline-block;padding:5px 12px;border-radius:8px;
-  font-size:9px;font-weight:700;letter-spacing:.6px;
-  white-space:nowrap;
+  display:inline-block;padding:4px 10px;border-radius:5px;
+  font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;
 }
+.sbs{background:rgba(0,212,170,.2);color:var(--fi);border:1px solid rgba(0,212,170,.5);
+  box-shadow:0 0 8px rgba(0,212,170,.2)}
+.sbuy{background:rgba(0,245,212,.1);color:#4ad9c8;border:1px solid rgba(0,245,212,.3)}
+.sna{background:rgba(240,192,96,.1);color:var(--go);border:1px solid rgba(240,192,96,.25)}
+.sca{background:rgba(255,140,66,.1);color:var(--di);border:1px solid rgba(255,140,66,.3)}
+.sse{background:rgba(255,77,109,.12);color:var(--se);border:1px solid rgba(255,77,109,.3)}
 
-/* Strong Buy — jade green filled */
-.sbs{
-  background:var(--jade);color:#fff;
-  box-shadow:0 2px 8px rgba(45,106,79,.25);
-}
-/* Buy — sage outline */
-.sbuy{
-  background:var(--foam);color:var(--jade);
-  border:1.5px solid var(--sage);
-}
-/* DII Buy — amber */
-.sdii{
-  background:rgba(233,138,78,.1);color:#c06a1f;
-  border:1.5px solid rgba(233,138,78,.4);
-}
-/* Bulk/Block — sky blue */
-.sblk{
-  background:rgba(69,123,157,.08);color:var(--sky);
-  border:1.5px solid rgba(69,123,157,.3);
-}
-/* Neutral — warm sand */
-.sna{
-  background:rgba(233,138,78,.08);color:#a0622a;
-  border:1.5px solid rgba(233,138,78,.25);
-}
-/* Caution — light coral outline */
-.sca{
-  background:rgba(214,64,69,.07);color:var(--coral);
-  border:1.5px solid rgba(214,64,69,.25);
-}
-/* Sell — coral filled */
-.sse{
-  background:var(--coral);color:#fff;
-  box-shadow:0 2px 8px rgba(214,64,69,.2);
-}
+/* ── LEGEND ─────────────────────────────────────────────── */
+.leg{padding:0 20px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.li2{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mu)}
+.ld2{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
-/* Sector pill reuses same classes */
-.sec-pill.sbs{background:rgba(45,106,79,.15);color:var(--jade);border:1px solid rgba(45,106,79,.3)}
-.sec-pill.sbuy{background:rgba(61,153,112,.12);color:var(--sage);border:1px solid rgba(61,153,112,.3)}
-.sec-pill.sse{background:rgba(214,64,69,.1);color:var(--coral);border:1px solid rgba(214,64,69,.25)}
-
-/* ── LEGEND ── */
-.leg{
-  padding:0 24px 20px;
-  display:flex;gap:14px;flex-wrap:wrap;align-items:center;
-}
-.li2{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mist);font-weight:500}
-.ld2{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-
-/* ── FOOTER ── */
+/* ── FOOTER ─────────────────────────────────────────────── */
 footer{
-  background:var(--jade2);
-  border-top:2px solid var(--sage);
-  padding:14px 24px;
-  display:flex;justify-content:space-between;
-  font-size:10px;color:rgba(255,255,255,.45);
-  flex-wrap:wrap;gap:8px;
-  font-weight:500;letter-spacing:.3px;
+  background:var(--sur);border-top:1px solid var(--bdr);
+  padding:12px 20px;display:flex;justify-content:space-between;
+  font-size:10px;color:var(--mu);flex-wrap:wrap;gap:8px;
 }
 
-/* ── RESPONSIVE ── */
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET (≤900px)
+══════════════════════════════════════════════════════════════ */
 @media(max-width:900px){
-  .sum{grid-template-columns:repeat(2,1fr)}.sv{font-size:17px}
-  .lt{font-size:15px}.ls2{display:none}
+  .sum{grid-template-columns:repeat(2,1fr)}
+  .sv{font-size:16px}
+  .lt{font-size:14px}
+  .ls2{display:none}
 }
 
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤600px) — card layout
+══════════════════════════════════════════════════════════════ */
 @media(max-width:600px){
-  header{padding:10px 16px}.lt{font-size:13px}
-  .lv,.src{font-size:9px;padding:3px 9px}.dt{display:none}.ls2{display:none}
-  .sum{grid-template-columns:repeat(2,1fr)}.sc2{padding:12px 14px}
-  .sv{font-size:16px}.sl{font-size:8px}.sb2{font-size:9px}
-  .tw{padding:12px;overflow-x:visible}
+  header{padding:10px 14px}
+  .lt{font-size:13px}
+  .lv,.src{font-size:9px;padding:3px 8px}
+  .dt{display:none}
+  .ls2{display:none}
+
+  .sum{grid-template-columns:repeat(2,1fr)}
+  .sc2{padding:10px 12px}
+  .sv{font-size:15px}
+  .sl{font-size:8px}
+  .sb2{font-size:9px}
+
+  .tw{padding:10px;overflow-x:visible}
   table,thead,tbody,th,td,tr{display:block}
   thead{display:none}
-  tr.sec-hdr{display:block;margin-top:14px}
-  tr.sec-hdr td{border-radius:10px;padding:10px 12px}
-  .sec-hdr-inner{gap:6px}.sec-name{font-size:12px}
-  tbody tr:not(.sec-hdr){
-    background:var(--paper);
-    border:1px solid var(--border);
-    border-radius:12px;margin-bottom:10px;padding:14px;
-    animation:si .35s ease both;
-    box-shadow:var(--shadow-sm);
+
+  tbody tr{
+    background:var(--sur);border:1px solid var(--bdr);
+    border-radius:10px;margin-bottom:10px;padding:12px;
+    animation:si .4s ease both;
   }
-  tbody tr:not(.sec-hdr):hover{background:var(--foam)}
+  tbody tr:hover{background:rgba(0,212,170,.04)}
+
   td{
     text-align:left;padding:5px 0;border:none;
-    display:flex;align-items:center;
-    justify-content:space-between;gap:8px;font-size:12px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:8px;font-size:12px;
   }
   td:first-child{
     flex-direction:column;align-items:flex-start;
-    margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:10px;
+    margin-bottom:6px;border-bottom:1px solid var(--bdr);padding-bottom:8px;
   }
   td::before{
-    content:attr(data-label);font-size:9px;letter-spacing:1px;
-    text-transform:uppercase;color:var(--mist);flex-shrink:0;min-width:80px;
-    font-weight:600;
+    content:attr(data-label);
+    font-size:9px;letter-spacing:1px;text-transform:uppercase;
+    color:var(--mu);flex-shrink:0;min-width:80px;
   }
   td:first-child::before{display:none}
-  .rb2{margin:4px 0 0}.sr{justify-content:flex-end}
-  .leg{padding:0 12px 14px;gap:10px}.li2{font-size:10px}
-  footer{padding:10px 16px;font-size:9px}
-  .tt{font-size:9px}.drb{font-size:9px;padding:3px 9px}
-  .snav{top:66px;padding:8px 14px}
-}
 
+  .rb2{margin:4px 0 0}
+  .im,.sr{justify-content:flex-end}
+
+  .leg{padding:0 10px 12px;gap:8px}
+  .li2{font-size:10px}
+  footer{padding:10px 14px;font-size:9px}
+  .tt{font-size:9px}
+  .drb{font-size:9px;padding:3px 8px}
+}
 </style>
 </head>
 <body>
@@ -413,2561 +228,330 @@ footer{
     <div class="logo-icon">📊</div>
     <div>
       <div class="lt">FII<span>/DII</span> PULSE</div>
-      <div class="ls2">Institutional Intelligence · Sector-wise · Jade Garden</div>
+      <div class="ls2">INSTITUTIONAL INTELLIGENCE DASHBOARD · AUTO-GENERATED</div>
     </div>
   </div>
   <div class="hm">
-    <div class="drb">🗓 11-02-2026 → 18-02-2026</div>
-    <div class="src">📡 NSE Bulk Deals CSV API</div>
+    <div class="drb">🗓 10-02-2026 → 17-02-2026</div>
+    <div class="src">📡 NSE Bulk Deals API</div>
     <div class="lv"><div class="led"></div>LIVE</div>
     <div class="dt">18 Feb 2026</div>
   </div>
 </header>
 
-<div class="snav"><a href="#Others" class="snav-link">🔷 Others</a><a href="#Auto_and_Auto_Ancillaries" class="snav-link">🚗 Auto & Auto Ancillaries</a><a href="#Insurance" class="snav-link">🛡️ Insurance</a></div>
-
 <div class="sum">
   <div class="sc2">
     <div class="sl">Nifty 50</div>
-    <div class="sv">₹25,819.35</div>
-    <div class="sb2 up">▲ 0.37%</div>
+    <div class="sv cfi">₹25,674.40</div>
+    <div class="sb2 dn">▼ -0.2%</div>
   </div>
   <div class="sc2">
     <div class="sl">Sensex</div>
-    <div class="sv">₹83,734.25</div>
-    <div class="sb2 up">▲ 0.34%</div>
+    <div class="sv cdi">₹83,231.77</div>
+    <div class="sb2 dn">▼ -0.26%</div>
   </div>
   <div class="sc2">
     <div class="sl">Stocks Tracked</div>
-    <div class="sv">117</div>
-    <div class="sb2">FII: 6 · DII: 7 · Both: 1</div>
+    <div class="sv cbo">8</div>
+    <div class="sb2">FII Buys: 1 · DII Buys: 7 · Both: 1</div>
   </div>
   <div class="sc2">
-    <div class="sl">Strong Buy</div>
-    <div class="sv">15</div>
-    <div class="sb2">Stocks signalled</div>
+    <div class="sl">Strong Buy Signals</div>
+    <div class="sv cgo">1</div>
+    <div class="sb2">Stocks with STRONG BUY</div>
   </div>
 </div>
 
 <div class="tw">
   <div class="tt">
-    Sector-wise Institutional Activity · Strong Buy → Buy → Neutral → Sell ·
-    <span style="color:var(--jade);font-family:'DM Mono',monospace;font-weight:600">
-      11-02-2026 → 18-02-2026
+    Institutional Activity · Technical Analysis ·
+    <span style="color:var(--go);font-family:'Space Mono',monospace">
+      10-02-2026 → 17-02-2026
     </span>
   </div>
   <table>
     <thead><tr>
       <th>Stock</th>
       <th>Price / Trend</th>
+      <th>FII Cash</th>
+      <th>DII Cash</th>
       <th>RSI(14)</th>
+      <th>MACD · EMA · ADX · BB · StRSI</th>
       <th>Support / Resistance (6M)</th>
       <th>Signal</th>
     </tr></thead>
     <tbody>
-    <tr class="sec-hdr">
-      <td colspan="5">
-        <div class="sec-hdr-inner">
-          <span class="sec-icon">🔷</span>
-          <span class="sec-name">Others</span>
-          <span class="sec-count">115 stocks</span>
-          <span class="sec-pills"><span class="sec-pill sbs">⚡ 15 STRONG BUY</span><span class="sec-pill sbuy">▲ 49 BUY</span></span>
-        </div>
-      </td>
-    </tr>
-    <tr style="animation-delay:0.00s">
-      <td data-label="Stock">
-        <div class="sn">Laxmi Cotspin Limited</div>
-        <div class="sy">LAXMICOT</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹19.86</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,14.8 23.3,7.7 35.0,0.0 46.7,8.5 58.3,12.4 70.0,16.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">58.2</div>
-        <div class="rb2"><div class="rf2" style="width:58%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹19.86</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹19.86</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹26.98</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹12.16</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.04s">
-      <td data-label="Stock">
-        <div class="sn">Man Industries (I) Ltd</div>
-        <div class="sy">MANINDS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹418.60</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,0.0 23.3,2.4 35.0,4.9 46.7,8.4 58.3,2.6 70.0,7.4" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">61.7</div>
-        <div class="rb2"><div class="rf2" style="width:62%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹428.68</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹411.83</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹491.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹302.05</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.08s">
-      <td data-label="Stock">
-        <div class="sn">Quest Laboratories Ltd</div>
-        <div class="sy">QUESTLAB</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹128.70</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,21.5 23.3,4.1 35.0,0.0 46.7,4.7 58.3,9.6 70.0,4.6" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">68.1</div>
-        <div class="rb2"><div class="rf2" style="width:68%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹130.93</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹124.23</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹140.35</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹84.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.12s">
-      <td data-label="Stock">
-        <div class="sn">TVS Supply Chain Sol L</div>
-        <div class="sy">TVSSCS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹123.71</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,9.5 23.3,6.2 35.0,0.0 46.7,6.4 58.3,4.9 70.0,8.3" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">64.7</div>
-        <div class="rb2"><div class="rf2" style="width:65%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹126.05</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹121.95</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹138.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹92.16</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.16s">
-      <td data-label="Stock">
-        <div class="sn">Apex Frozen Foods Limited</div>
-        <div class="sy">APEX</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹434.60</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,24.9 23.3,0.0 35.0,3.9 46.7,6.1 58.3,9.3 70.0,3.2" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">69.8</div>
-        <div class="rb2"><div class="rf2" style="width:70%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹450.40</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹420.40</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹487.95</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹207.06</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.20s">
-      <td data-label="Stock">
-        <div class="sn">Happy Forgings Limited</div>
-        <div class="sy">HAPPYFORGE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹1,268.90</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,22.6 23.3,2.3 35.0,0.0 46.7,3.2 58.3,5.6 70.0,5.4" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">69.0</div>
-        <div class="rb2"><div class="rf2" style="width:69%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹1,289.27</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹1,253.27</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,339.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹862.05</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.24s">
-      <td data-label="Stock">
-        <div class="sn">Krystal Integrated Ser L</div>
-        <div class="sy">KRYSTAL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹615.85</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,3.0 11.7,17.6 23.3,0.0 35.0,16.1 46.7,20.3 58.3,26.0 70.0,23.1" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">54.6</div>
-        <div class="rb2"><div class="rf2" style="width:55%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹620.40</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹611.45</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹729.50</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹500.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.28s">
-      <td data-label="Stock">
-        <div class="sn">Chaman Lal Setia Exp Ltd</div>
-        <div class="sy">CLSEL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹275.36</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,24.6 11.7,26.0 23.3,21.4 35.0,0.0 46.7,18.4 58.3,22.0 70.0,20.7" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">57.4</div>
-        <div class="rb2"><div class="rf2" style="width:57%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹284.54</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹269.64</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹321.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹228.80</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.32s">
-      <td data-label="Stock">
-        <div class="sn">Engineers India Ltd.</div>
-        <div class="sy">ENGINERSIN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹214.64</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,24.6 11.7,24.1 23.3,26.0 35.0,14.2 46.7,0.0 58.3,6.5 70.0,6.8" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">65.5</div>
-        <div class="rb2"><div class="rf2" style="width:66%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹220.52</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹209.13</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹236.65</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹163.55</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.36s">
-      <td data-label="Stock">
-        <div class="sn">Honasa Consumer Limited</div>
-        <div class="sy">HONASA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹301.45</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,17.5 11.7,26.0 23.3,12.6 35.0,8.6 46.7,0.0 58.3,10.6 70.0,8.6" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">63.1</div>
-        <div class="rb2"><div class="rf2" style="width:63%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹304.27</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹298.12</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹319.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹248.40</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.40s">
-      <td data-label="Stock">
-        <div class="sn">Bharat Seats Limited</div>
-        <div class="sy">BHARATSE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹194.94</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.4 11.7,22.1 23.3,23.4 35.0,26.0 46.7,8.4 58.3,0.0 70.0,9.1" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">64.0</div>
-        <div class="rb2"><div class="rf2" style="width:64%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹205.23</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹188.83</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹239.45</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹129.87</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.44s">
-      <td data-label="Stock">
-        <div class="sn">Ganesh Consumer Product L</div>
-        <div class="sy">GANESHCP</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹190.93</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,2.9 23.3,15.1 35.0,19.1 46.7,26.0 58.3,18.0 70.0,16.6" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">39.9</div>
-        <div class="rb2"><div class="rf2" style="width:40%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹193.14</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹187.88</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹307.31</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹185.21</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.48s">
-      <td data-label="Stock">
-        <div class="sn">InfoBeans Techno. Ltd.</div>
-        <div class="sy">INFOBEAN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹900.65</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,7.6 11.7,17.6 23.3,12.7 35.0,25.3 46.7,26.0 58.3,0.0 70.0,10.6" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">54.7</div>
-        <div class="rb2"><div class="rf2" style="width:55%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹935.35</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹878.55</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,030.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹466.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.52s">
-      <td data-label="Stock">
-        <div class="sn">E2E Networks Limited</div>
-        <div class="sy">E2E</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹2,850.40</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.2 11.7,15.5 23.3,21.3 35.0,26.0 46.7,19.0 58.3,20.9 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">69.0</div>
-        <div class="rb2"><div class="rf2" style="width:69%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹3,092.40</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹2,584.20</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹3,894.70</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹1,833.60</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.56s">
-      <td data-label="Stock">
-        <div class="sn">Mindspace Business P REIT</div>
-        <div class="sy">MINDSPACE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹487.57</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.0 11.7,6.4 23.3,5.7 35.0,0.0 46.7,13.7 58.3,22.0 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹491.69</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹484.74</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹511.68</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹406.89</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.60s">
-      <td data-label="Stock">
-        <div class="sn">Ather Energy Limited</div>
-        <div class="sy">ATHERENERG</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹728.50</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,1.2 11.7,15.7 23.3,3.5 35.0,26.0 46.7,25.1 58.3,2.8 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">61.9</div>
-        <div class="rb2"><div class="rf2" style="width:62%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹737.08</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹716.68</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹790.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹421.60</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.64s">
-      <td data-label="Stock">
-        <div class="sn">Bodhi Tree Multimedia Ltd</div>
-        <div class="sy">BTML</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹7.69</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,10.3 11.7,22.9 23.3,26.0 35.0,0.0 46.7,18.8 58.3,20.2 70.0,19.3" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">46.7</div>
-        <div class="rb2"><div class="rf2" style="width:47%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹7.89</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹7.55</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹10.50</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹7.11</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.68s">
-      <td data-label="Stock">
-        <div class="sn">Coffee Day Enterprise Ltd</div>
-        <div class="sy">COFFEEDAY</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹33.07</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,15.1 11.7,20.7 23.3,26.0 35.0,8.9 46.7,0.0 58.3,3.2 70.0,9.9" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">52.3</div>
-        <div class="rb2"><div class="rf2" style="width:52%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹33.82</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹32.56</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹51.46</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹29.67</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.72s">
-      <td data-label="Stock">
-        <div class="sn">DELPHI WORLD MONEY LTD</div>
-        <div class="sy">DELPHIFX</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹13.47</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,10.9 11.7,8.9 23.3,12.0 35.0,0.0 46.7,20.3 58.3,22.8 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">37.3</div>
-        <div class="rb2"><div class="rf2" style="width:37%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹13.95</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹13.20</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹18.25</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹12.05</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.76s">
-      <td data-label="Stock">
-        <div class="sn">DHARAN INFRA-EPC LIMITED</div>
-        <div class="sy">DHARAN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹0.16</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,8.7 23.3,8.7 35.0,17.3 46.7,17.3 58.3,26.0 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">25.7</div>
-        <div class="rb2"><div class="rf2" style="width:26%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹0.17</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹0.15</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹0.61</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹0.15</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.80s">
-      <td data-label="Stock">
-        <div class="sn">Motor & Gen Fin Ltd</div>
-        <div class="sy">MOTOGENFIN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹21.50</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,10.8 11.7,4.5 23.3,0.0 35.0,17.1 46.7,19.8 58.3,19.8 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">43.1</div>
-        <div class="rb2"><div class="rf2" style="width:43%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹22.08</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹21.14</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹31.80</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹20.56</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.84s">
-      <td data-label="Stock">
-        <div class="sn">Praxis Home Retail Ltd</div>
-        <div class="sy">PRAXIS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹8.12</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,5.7 11.7,11.0 23.3,0.0 35.0,4.7 46.7,14.7 58.3,19.0 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">47.1</div>
-        <div class="rb2"><div class="rf2" style="width:47%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹8.40</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹7.93</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹14.44</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹6.66</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.88s">
-      <td data-label="Stock">
-        <div class="sn">Rico Auto Industries Ltd</div>
-        <div class="sy">RICOAUTO</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹124.34</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,15.4 11.7,0.0 23.3,13.1 35.0,26.0 46.7,14.2 58.3,20.8 70.0,20.6" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">49.7</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹125.68</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹122.76</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹142.40</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹78.92</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.92s">
-      <td data-label="Stock">
-        <div class="sn">Sterlite Technologies Ltd</div>
-        <div class="sy">STLTECH</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹158.52</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,7.7 11.7,26.0 23.3,11.6 35.0,10.1 46.7,12.5 58.3,0.0 70.0,6.3" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">70.8</div>
-        <div class="rb2"><div class="rf2" style="width:71%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹163.22</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹155.58</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹164.99</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹84.60</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:0.96s">
-      <td data-label="Stock">
-        <div class="sn">Supreme Power Equipment L</div>
-        <div class="sy">SUPREMEPWR</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹145.95</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,10.6 23.3,22.8 35.0,19.8 46.7,22.8 58.3,26.0 70.0,22.3" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">39.0</div>
-        <div class="rb2"><div class="rf2" style="width:39%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹148.90</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹141.50</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹240.05</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹131.35</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.00s">
-      <td data-label="Stock">
-        <div class="sn">Advance Agrolife Limited</div>
-        <div class="sy">ADVANCE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹140.08</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,20.9 11.7,26.0 23.3,7.8 35.0,7.1 46.7,21.3 58.3,9.1 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">61.4</div>
-        <div class="rb2"><div class="rf2" style="width:61%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹142.89</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹137.29</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹154.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹102.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.04s">
-      <td data-label="Stock">
-        <div class="sn">Asian Granito India Limit</div>
-        <div class="sy">ASIANTILES</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹72.98</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.4 11.7,9.6 23.3,9.7 35.0,26.0 46.7,23.0 58.3,9.1 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">53.2</div>
-        <div class="rb2"><div class="rf2" style="width:53%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹74.55</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹70.75</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹78.80</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹55.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.08s">
-      <td data-label="Stock">
-        <div class="sn">Crown Lifters Ltd</div>
-        <div class="sy">CROWN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹135.14</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.4 11.7,26.0 23.3,0.0 35.0,20.9 46.7,24.4 58.3,21.1 70.0,20.4" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">54.4</div>
-        <div class="rb2"><div class="rf2" style="width:54%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹139.29</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹132.70</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹191.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹108.45</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.12s">
-      <td data-label="Stock">
-        <div class="sn">Dam Capital Advisors Ltd</div>
-        <div class="sy">DAMCAPITAL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹168.29</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,17.3 23.3,21.2 35.0,26.0 46.7,9.3 58.3,6.5 70.0,12.7" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">38.9</div>
-        <div class="rb2"><div class="rf2" style="width:39%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹171.01</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹166.24</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹286.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹161.27</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.16s">
-      <td data-label="Stock">
-        <div class="sn">Hikal Limited</div>
-        <div class="sy">HIKAL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹205.89</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,24.5 23.3,0.0 35.0,1.5 46.7,5.4 58.3,10.5 70.0,9.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">51.6</div>
-        <div class="rb2"><div class="rf2" style="width:52%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹209.59</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹202.89</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹282.43</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹177.18</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.20s">
-      <td data-label="Stock">
-        <div class="sn">Lincoln Pharma Ltd</div>
-        <div class="sy">LINCOLN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹634.60</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,24.7 11.7,26.0 23.3,8.0 35.0,0.0 46.7,6.4 58.3,8.0 70.0,4.1" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">73.2</div>
-        <div class="rb2"><div class="rf2" style="width:73%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹647.30</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹620.40</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹677.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹440.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.24s">
-      <td data-label="Stock">
-        <div class="sn">Magson Retail And Dist L</div>
-        <div class="sy">MAGSON</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹138.00</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,0.6 23.3,26.0 35.0,13.0 46.7,0.0 58.3,0.0 70.0,13.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">58.7</div>
-        <div class="rb2"><div class="rf2" style="width:59%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹138.00</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹138.00</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹140.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹100.50</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.28s">
-      <td data-label="Stock">
-        <div class="sn">Mufin Green Finance Ltd</div>
-        <div class="sy">MUFIN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹118.61</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,15.5 11.7,0.0 23.3,7.0 35.0,26.0 46.7,24.0 58.3,23.5 70.0,10.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">56.7</div>
-        <div class="rb2"><div class="rf2" style="width:57%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹119.72</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹116.77</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹126.34</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹82.99</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.32s">
-      <td data-label="Stock">
-        <div class="sn">Pramara Promotions Ltd</div>
-        <div class="sy">PRAMARA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹348.65</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,24.6 23.3,26.0 35.0,8.8 46.7,22.3 58.3,21.8 70.0,19.5" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">48.4</div>
-        <div class="rb2"><div class="rf2" style="width:48%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹350.37</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹346.47</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹367.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹242.50</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.36s">
-      <td data-label="Stock">
-        <div class="sn">Ratnaveer Precision Eng L</div>
-        <div class="sy">RATNAVEER</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹155.13</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,6.3 11.7,13.0 23.3,9.8 35.0,26.0 46.7,14.0 58.3,3.0 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">54.1</div>
-        <div class="rb2"><div class="rf2" style="width:54%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹158.42</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹152.12</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹171.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹134.11</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.40s">
-      <td data-label="Stock">
-        <div class="sn">Apollo Pipes Limited</div>
-        <div class="sy">APOLLOPIPE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹332.75</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,14.3 11.7,26.0 23.3,20.7 35.0,16.0 46.7,5.3 58.3,7.8 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">65.1</div>
-        <div class="rb2"><div class="rf2" style="width:65%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹337.02</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹325.37</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹418.58</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹252.10</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.44s">
-      <td data-label="Stock">
-        <div class="sn">Avanti Feeds Limited</div>
-        <div class="sy">AVANTIFEED</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹1,361.55</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,20.5 23.3,0.9 35.0,0.0 46.7,6.7 58.3,5.8 70.0,5.6" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">76.3</div>
-        <div class="rb2"><div class="rf2" style="width:76%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹1,398.80</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹1,334.15</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,489.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹614.25</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.48s">
-      <td data-label="Stock">
-        <div class="sn">Dhruv Consultancy Ser Ltd</div>
-        <div class="sy">DHRUV</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹24.57</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,1.2 23.3,13.3 35.0,15.7 46.7,25.8 58.3,25.5 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">12.3</div>
-        <div class="rb2"><div class="rf2" style="width:12%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹25.39</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹23.87</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹68.95</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹23.98</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.52s">
-      <td data-label="Stock">
-        <div class="sn">GE Power India Limited</div>
-        <div class="sy">GVPIL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹496.85</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,24.9 11.7,26.0 23.3,18.1 35.0,8.6 46.7,6.0 58.3,0.0 70.0,6.6" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">71.9</div>
-        <div class="rb2"><div class="rf2" style="width:72%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹522.98</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹483.78</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹552.05</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹270.90</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.56s">
-      <td data-label="Stock">
-        <div class="sn">AKG Exim Limited</div>
-        <div class="sy">AKG</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹14.40</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,15.0 23.3,16.0 35.0,26.0 46.7,13.0 58.3,16.0 70.0,24.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">67.8</div>
-        <div class="rb2"><div class="rf2" style="width:68%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹14.79</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹14.01</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹15.07</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹11.25</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.60s">
-      <td data-label="Stock">
-        <div class="sn">Hilton Metal Forging Limi</div>
-        <div class="sy">HILTON</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹23.58</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,0.9 23.3,0.9 35.0,3.2 46.7,21.0 58.3,22.4 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">27.0</div>
-        <div class="rb2"><div class="rf2" style="width:27%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹24.46</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹22.92</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹56.65</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹23.15</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.64s">
-      <td data-label="Stock">
-        <div class="sn">Markolines Pavement Tec L</div>
-        <div class="sy">MARKOLINES</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹161.17</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,8.9 11.7,8.2 23.3,10.0 35.0,15.4 46.7,0.0 58.3,26.0 70.0,7.1" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">58.5</div>
-        <div class="rb2"><div class="rf2" style="width:58%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹164.03</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹156.18</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹188.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹131.65</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.68s">
-      <td data-label="Stock">
-        <div class="sn">Narmada Agrobase Limited</div>
-        <div class="sy">NARMADA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹32.38</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,10.6 23.3,10.1 35.0,16.8 46.7,23.1 58.3,22.9 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">68.8</div>
-        <div class="rb2"><div class="rf2" style="width:69%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹33.08</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹31.70</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹35.99</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹19.90</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.72s">
-      <td data-label="Stock">
-        <div class="sn">Precision Wires India Ltd</div>
-        <div class="sy">PRECWIRE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹295.52</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,22.1 23.3,12.9 35.0,24.4 46.7,0.0 58.3,6.2 70.0,1.7" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">65.2</div>
-        <div class="rb2"><div class="rf2" style="width:65%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹305.08</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹285.79</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹307.63</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹169.72</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.76s">
-      <td data-label="Stock">
-        <div class="sn">Quadrant Future Tek Ltd</div>
-        <div class="sy">QUADFUTURE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹308.30</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,4.1 11.7,23.2 23.3,25.0 35.0,26.0 46.7,7.2 58.3,0.0 70.0,7.3" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">51.5</div>
-        <div class="rb2"><div class="rf2" style="width:52%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹313.40</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹304.95</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹502.40</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹248.55</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.80s">
-      <td data-label="Stock">
-        <div class="sn">Sintercom India Limited</div>
-        <div class="sy">SINTERCOM</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹87.07</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,7.6 23.3,7.1 35.0,26.0 46.7,23.6 58.3,24.1 70.0,20.2" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">38.3</div>
-        <div class="rb2"><div class="rf2" style="width:38%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹88.87</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹85.63</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹130.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹82.85</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.84s">
-      <td data-label="Stock">
-        <div class="sn">Vardhman Polytex Limited</div>
-        <div class="sy">VARDMNPOLY</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹7.95</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,22.3 11.7,26.0 23.3,15.8 35.0,10.5 46.7,2.5 58.3,0.0 70.0,2.2" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">69.1</div>
-        <div class="rb2"><div class="rf2" style="width:69%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹8.25</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹7.70</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹9.49</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹5.10</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.88s">
-      <td data-label="Stock">
-        <div class="sn">Atal Realtech Limited</div>
-        <div class="sy">ATALREAL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹26.03</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,3.4 23.3,4.4 35.0,26.0 46.7,21.6 58.3,23.2 70.0,21.3" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">46.7</div>
-        <div class="rb2"><div class="rf2" style="width:47%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹26.36</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹25.67</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹29.20</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹17.75</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.92s">
-      <td data-label="Stock">
-        <div class="sn">Davangere Sugar Company L</div>
-        <div class="sy">DAVANGERE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹4.30</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,2.2 11.7,0.0 23.3,8.9 35.0,17.1 46.7,18.6 58.3,26.0 70.0,23.8" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">46.4</div>
-        <div class="rb2"><div class="rf2" style="width:46%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹4.41</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹4.24</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹5.50</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹3.03</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:1.96s">
-      <td data-label="Stock">
-        <div class="sn">Newgen Software Tech Ltd</div>
-        <div class="sy">NEWGEN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹531.55</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,5.7 23.3,13.2 35.0,21.3 46.7,26.0 58.3,7.5 70.0,6.4" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">36.2</div>
-        <div class="rb2"><div class="rf2" style="width:36%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹549.78</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹509.18</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,041.95</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹458.65</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.00s">
-      <td data-label="Stock">
-        <div class="sn">RACL Geartech Limited</div>
-        <div class="sy">RACLGEAR</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹1,541.20</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,24.9 23.3,22.1 35.0,23.8 46.7,10.5 58.3,0.0 70.0,5.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">74.1</div>
-        <div class="rb2"><div class="rf2" style="width:74%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹1,611.07</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹1,492.07</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,691.90</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹885.20</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.04s">
-      <td data-label="Stock">
-        <div class="sn">Stylam Industries Limited</div>
-        <div class="sy">STYLAMIND</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹2,231.30</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,17.9 11.7,20.5 23.3,26.0 35.0,13.6 46.7,13.1 58.3,12.2 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">59.3</div>
-        <div class="rb2"><div class="rf2" style="width:59%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹2,240.03</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹2,223.63</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹2,430.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹1,594.10</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.08s">
-      <td data-label="Stock">
-        <div class="sn">Yatra Online Limited</div>
-        <div class="sy">YATRA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹158.60</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,23.7 23.3,1.1 35.0,0.0 46.7,7.1 58.3,15.7 70.0,11.6" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">52.1</div>
-        <div class="rb2"><div class="rf2" style="width:52%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹164.53</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹152.14</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹202.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹135.83</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.12s">
-      <td data-label="Stock">
-        <div class="sn">Auri Grow India Limited</div>
-        <div class="sy">AURIGROW</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹0.31</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,4.3 23.3,8.7 35.0,13.0 46.7,17.3 58.3,21.7 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">15.2</div>
-        <div class="rb2"><div class="rf2" style="width:15%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹0.32</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹0.31</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹0.31</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.16s">
-      <td data-label="Stock">
-        <div class="sn">Cohance Lifesciences Ltd</div>
-        <div class="sy">COHANCE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹325.85</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.9 11.7,0.0 23.3,2.4 35.0,21.2 46.7,26.0 58.3,24.9 70.0,15.7" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">28.5</div>
-        <div class="rb2"><div class="rf2" style="width:28%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹339.67</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹314.27</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,038.90</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹303.05</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.20s">
-      <td data-label="Stock">
-        <div class="sn">Filatex Fashions Limited</div>
-        <div class="sy">FILATFASH</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹0.27</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,8.7 23.3,13.0 35.0,13.0 46.7,17.3 58.3,17.3 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">34.7</div>
-        <div class="rb2"><div class="rf2" style="width:35%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹0.29</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹0.25</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹0.68</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹0.25</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.24s">
-      <td data-label="Stock">
-        <div class="sn">Kandarp Dg Smart Bpo Ltd</div>
-        <div class="sy">KANDARP</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹145.00</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,2.5 11.7,26.0 23.3,6.2 35.0,0.0 46.7,9.1 58.3,11.2 70.0,9.1" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">49.3</div>
-        <div class="rb2"><div class="rf2" style="width:49%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹145.00</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹145.00</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹160.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹94.65</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.28s">
-      <td data-label="Stock">
-        <div class="sn">Mcon Rasayan India Ltd</div>
-        <div class="sy">MCON</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹45.95</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,2.3 23.3,8.2 35.0,20.7 46.7,23.7 58.3,20.2 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">25.1</div>
-        <div class="rb2"><div class="rf2" style="width:25%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹47.75</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹44.40</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹94.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹44.60</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.32s">
-      <td data-label="Stock">
-        <div class="sn">Osia Hyper Retail Ltd</div>
-        <div class="sy">OSIAHYPER</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹11.39</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,0.6 23.3,1.3 35.0,4.9 46.7,9.8 58.3,14.7 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">21.3</div>
-        <div class="rb2"><div class="rf2" style="width:21%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹12.66</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹10.75</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹33.08</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹11.39</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.36s">
-      <td data-label="Stock">
-        <div class="sn">Sonu Infratech Limited</div>
-        <div class="sy">SONUINFRA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹72.50</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,1.6 23.3,1.6 35.0,8.0 46.7,26.0 58.3,16.0 70.0,16.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">43.4</div>
-        <div class="rb2"><div class="rf2" style="width:43%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹72.50</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹72.50</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹115.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹68.60</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.40s">
-      <td data-label="Stock">
-        <div class="sn">Sunrest Lifescience Ltd</div>
-        <div class="sy">SUNREST</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹36.25</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,26.0 23.3,26.0 35.0,26.0 46.7,26.0 58.3,26.0 70.0,26.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.3</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹36.25</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹36.25</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹54.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹29.55</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.44s">
-      <td data-label="Stock">
-        <div class="sn">Viji Finance Limited</div>
-        <div class="sy">VIJIFIN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹2.01</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,1.0 11.7,0.0 23.3,9.4 35.0,6.2 46.7,16.6 58.3,15.6 70.0,26.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">29.0</div>
-        <div class="rb2"><div class="rf2" style="width:29%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹2.14</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹1.94</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹3.66</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹2.01</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.48s">
-      <td data-label="Stock">
-        <div class="sn">Deepak Nitrite Ltd</div>
-        <div class="sy">DEEPAKNTR</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹1,644.70</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,11.0 23.3,15.7 35.0,20.3 46.7,26.0 58.3,17.5 70.0,19.4" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">52.1</div>
-        <div class="rb2"><div class="rf2" style="width:52%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹1,659.27</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹1,628.17</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,904.40</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹1,514.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.52s">
-      <td data-label="Stock">
-        <div class="sn">Safari Ind (India) Ltd</div>
-        <div class="sy">SAFARI</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹1,801.50</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,11.1 23.3,19.9 35.0,24.6 46.7,26.0 58.3,20.3 70.0,22.3" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">35.4</div>
-        <div class="rb2"><div class="rf2" style="width:35%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹1,828.73</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹1,772.53</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹2,507.10</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹1,725.50</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr style="animation-delay:2.56s">
-      <td data-label="Stock">
-        <div class="sn">Aarey Drugs & Pharm Ltd</div>
-        <div class="sy">AAREYDRUGS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹71.27</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,14.4 23.3,1.4 35.0,18.8 46.7,21.2 58.3,18.2 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">56.0</div>
-        <div class="rb2"><div class="rf2" style="width:56%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹73.38</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹67.73</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹100.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹57.50</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.60s">
-      <td data-label="Stock">
-        <div class="sn">Bliss GVS Pharma Ltd</div>
-        <div class="sy">BLISSGVS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹230.01</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,19.1 23.3,14.6 35.0,15.0 46.7,10.4 58.3,0.0 70.0,0.8" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">77.3</div>
-        <div class="rb2"><div class="rf2" style="width:77%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹235.66</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹225.68</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹243.37</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹117.74</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.64s">
-      <td data-label="Stock">
-        <div class="sn">Kaynes Technology Ind Ltd</div>
-        <div class="sy">KAYNES</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹4,057.50</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,24.1 11.7,0.0 23.3,8.3 35.0,26.0 46.7,23.0 58.3,25.0 70.0,11.9" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">58.3</div>
-        <div class="rb2"><div class="rf2" style="width:58%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹4,120.00</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹3,950.00</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹7,705.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹3,294.90</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.68s">
-      <td data-label="Stock">
-        <div class="sn">Lexus Granito (India) Ltd</div>
-        <div class="sy">LEXUS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹35.37</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,2.8 23.3,18.1 35.0,12.4 46.7,16.4 58.3,20.7 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">73.6</div>
-        <div class="rb2"><div class="rf2" style="width:74%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹36.91</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹33.28</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹38.90</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹22.33</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.72s">
-      <td data-label="Stock">
-        <div class="sn">Oneclick Logistics Ind L</div>
-        <div class="sy">OLIL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹290.00</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,3.7 11.7,0.0 23.3,18.2 35.0,16.3 46.7,26.0 58.3,11.2 70.0,10.6" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">44.9</div>
-        <div class="rb2"><div class="rf2" style="width:45%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹299.33</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹281.33</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹355.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹210.50</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.76s">
-      <td data-label="Stock">
-        <div class="sn">PCBL Chemical Limited</div>
-        <div class="sy">PCBL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹314.10</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,0.0 23.3,4.3 35.0,18.4 46.7,18.9 58.3,1.5 70.0,5.1" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">58.5</div>
-        <div class="rb2"><div class="rf2" style="width:58%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹317.43</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹311.03</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹419.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹254.50</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.80s">
-      <td data-label="Stock">
-        <div class="sn">R&B Denims Limited</div>
-        <div class="sy">RNBDENIMS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹187.59</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,22.4 23.3,19.0 35.0,15.9 46.7,10.2 58.3,5.1 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">81.2</div>
-        <div class="rb2"><div class="rf2" style="width:81%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹188.29</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹186.34</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹187.75</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹97.55</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.84s">
-      <td data-label="Stock">
-        <div class="sn">Srivari Spices N Foods L</div>
-        <div class="sy">SSFL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹137.40</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,24.3 23.3,13.9 35.0,9.4 46.7,0.8 58.3,0.0 70.0,1.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">66.5</div>
-        <div class="rb2"><div class="rf2" style="width:66%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹141.23</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹134.33</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹168.85</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹86.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.88s">
-      <td data-label="Stock">
-        <div class="sn">Netweb Tech India Ltd</div>
-        <div class="sy">NETWEB</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹3,374.40</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,16.6 11.7,18.7 23.3,14.6 35.0,23.5 46.7,26.0 58.3,23.3 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">60.4</div>
-        <div class="rb2"><div class="rf2" style="width:60%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹3,561.93</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹3,159.93</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹4,479.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹2,190.70</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.92s">
-      <td data-label="Stock">
-        <div class="sn">Shringar Hou of Mangals L</div>
-        <div class="sy">SHRINGARMS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹261.86</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.8 11.7,26.0 23.3,22.5 35.0,25.8 46.7,24.4 58.3,7.4 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">70.4</div>
-        <div class="rb2"><div class="rf2" style="width:70%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹265.57</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹256.57</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹264.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹177.51</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:2.96s">
-      <td data-label="Stock">
-        <div class="sn">Motisons Jewellers Ltd</div>
-        <div class="sy">MOTISONS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹15.83</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,26.0 23.3,2.2 35.0,4.9 46.7,1.6 58.3,3.0 70.0,7.1" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">64.7</div>
-        <div class="rb2"><div class="rf2" style="width:65%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹16.05</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹15.64</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹20.45</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹10.62</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.00s">
-      <td data-label="Stock">
-        <div class="sn">SG Finserve Limited</div>
-        <div class="sy">SGFIN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹404.30</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,25.5 23.3,0.0 35.0,10.5 46.7,7.3 58.3,5.3 70.0,11.8" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">57.6</div>
-        <div class="rb2"><div class="rf2" style="width:58%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹412.62</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹399.02</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹452.80</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹323.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.04s">
-      <td data-label="Stock">
-        <div class="sn">Agi Infra Limited</div>
-        <div class="sy">AGIIL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹261.80</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.0 11.7,16.1 23.3,22.5 35.0,26.0 46.7,15.1 58.3,22.1 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">53.7</div>
-        <div class="rb2"><div class="rf2" style="width:54%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹277.73</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹245.38</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹308.80</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹224.70</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.08s">
-      <td data-label="Stock">
-        <div class="sn">Easy Trip Planners Ltd</div>
-        <div class="sy">EASEMYTRIP</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹9.63</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,22.7 11.7,23.2 23.3,24.5 35.0,26.0 46.7,14.7 58.3,1.1 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">81.6</div>
-        <div class="rb2"><div class="rf2" style="width:82%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹10.36</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹9.14</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹10.60</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹6.12</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.12s">
-      <td data-label="Stock">
-        <div class="sn">Synergy Green Ind. Ltd</div>
-        <div class="sy">SGIL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹510.70</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,26.0 23.3,16.0 35.0,18.1 46.7,8.4 58.3,12.3 70.0,10.0" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">48.9</div>
-        <div class="rb2"><div class="rf2" style="width:49%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹520.18</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹496.28</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹632.14</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹420.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.16s">
-      <td data-label="Stock">
-        <div class="sn">Suyog Telematics Limited</div>
-        <div class="sy">SUYOG</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹678.75</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,8.6 23.3,0.0 35.0,4.4 46.7,16.9 58.3,5.1 70.0,2.5" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">65.9</div>
-        <div class="rb2"><div class="rf2" style="width:66%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹691.70</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹658.10</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹880.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹528.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.20s">
-      <td data-label="Stock">
-        <div class="sn">Vipul Limited</div>
-        <div class="sy">VIPULLTD</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹10.14</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,18.8 11.7,22.7 23.3,13.0 35.0,0.0 46.7,13.0 58.3,26.0 70.0,13.6" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rs2">
-        <div class="rv up">39.7</div>
-        <div class="rb2"><div class="rf2" style="width:40%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹10.27</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹9.89</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹13.10</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹7.38</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.24s">
-      <td data-label="Stock">
-        <div class="sn">Bartronics India Limited</div>
-        <div class="sy">ASMS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹11.25</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,2.6 11.7,25.8 23.3,0.0 35.0,20.0 46.7,23.2 58.3,26.0 70.0,21.1" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">46.8</div>
-        <div class="rb2"><div class="rf2" style="width:47%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹11.46</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹11.07</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹17.60</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹10.10</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.28s">
-      <td data-label="Stock">
-        <div class="sn">MIC Electronics Ltd</div>
-        <div class="sy">MICEL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹42.98</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,23.0 11.7,10.5 23.3,25.8 35.0,17.5 46.7,26.0 58.3,19.5 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">56.4</div>
-        <div class="rb2"><div class="rf2" style="width:56%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹44.02</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹42.02</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹82.97</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹33.31</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.32s">
-      <td data-label="Stock">
-        <div class="sn">Praj Industries Ltd</div>
-        <div class="sy">PRAJIND</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹327.45</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,7.9 23.3,7.6 35.0,22.1 46.7,26.0 58.3,5.9 70.0,9.6" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">56.7</div>
-        <div class="rb2"><div class="rf2" style="width:57%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹335.82</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹322.07</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹433.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹273.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.36s">
-      <td data-label="Stock">
-        <div class="sn">Aeroflex Industries Ltd</div>
-        <div class="sy">AEROFLEX</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹226.72</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,20.5 11.7,22.5 23.3,21.6 35.0,26.0 46.7,22.3 58.3,12.9 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">72.8</div>
-        <div class="rb2"><div class="rf2" style="width:73%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹237.19</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹210.87</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹231.82</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹158.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.40s">
-      <td data-label="Stock">
-        <div class="sn">Bharat Wire Ropes Ltd.</div>
-        <div class="sy">BHARATWIRE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹186.96</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.4 11.7,24.3 23.3,24.5 35.0,26.0 46.7,25.2 58.3,26.0 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">63.5</div>
-        <div class="rb2"><div class="rf2" style="width:64%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹197.57</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹175.78</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹229.43</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹154.11</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.44s">
-      <td data-label="Stock">
-        <div class="sn">BLB Limited</div>
-        <div class="sy">BLBLIMITED</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹18.28</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,24.9 11.7,26.0 23.3,24.8 35.0,24.0 46.7,21.3 58.3,17.2 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">78.9</div>
-        <div class="rb2"><div class="rf2" style="width:79%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹19.28</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹16.45</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹19.34</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹12.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.48s">
-      <td data-label="Stock">
-        <div class="sn">Kotyark Industries Ltd</div>
-        <div class="sy">KOTYARK</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹238.80</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,23.7 23.3,15.5 35.0,14.8 46.7,2.8 58.3,12.1 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">62.6</div>
-        <div class="rb2"><div class="rf2" style="width:63%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹243.83</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹231.88</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹360.81</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹191.20</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.52s">
-      <td data-label="Stock">
-        <div class="sn">Transformers And Rectifie</div>
-        <div class="sy">TARIL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹299.81</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,15.8 11.7,11.6 23.3,17.0 35.0,25.5 46.7,26.0 58.3,22.9 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">62.3</div>
-        <div class="rb2"><div class="rf2" style="width:62%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹312.75</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹280.44</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹552.00</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹224.05</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.56s">
-      <td data-label="Stock">
-        <div class="sn">Unicommerce Esolutions L</div>
-        <div class="sy">UNIECOM</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹116.60</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,20.3 11.7,20.6 23.3,25.0 35.0,23.2 46.7,26.0 58.3,0.0 70.0,2.7" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">62.4</div>
-        <div class="rb2"><div class="rf2" style="width:62%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹127.88</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹109.83</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹155.80</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹95.40</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.60s">
-      <td data-label="Stock">
-        <div class="sn">PNB Housing Fin Ltd.</div>
-        <div class="sy">PNBHOUSING</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹865.20</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,9.3 11.7,9.2 23.3,11.0 35.0,26.0 46.7,14.1 58.3,1.4 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">47.6</div>
-        <div class="rb2"><div class="rf2" style="width:48%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹871.07</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹859.22</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹1,015.75</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹750.30</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">NEUTRAL</span></td>
-    </tr>
-    <tr style="animation-delay:3.64s">
-      <td data-label="Stock">
-        <div class="sn">Arshiya Limited</div>
-        <div class="sy">ARSHIYA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹1.63</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,22.4 23.3,19.5 35.0,15.2 46.7,10.1 58.3,5.1 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="ro">
-        <div class="rv dn">75.6</div>
-        <div class="rb2"><div class="rf2" style="width:76%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹1.63</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹1.63</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹2.59</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹1.14</div>
-      </td>
-      <td data-label="Signal"><span class="sig sca">CAUTION</span></td>
-    </tr>
-    <tr style="animation-delay:3.68s">
-      <td data-label="Stock">
-        <div class="sn">ARC Insulation & Insu Ltd</div>
-        <div class="sy">ARCIIL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:3.72s">
-      <td data-label="Stock">
-        <div class="sn">Brandman Retail Limited</div>
-        <div class="sy">BRANDMAN</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:3.76s">
-      <td data-label="Stock">
-        <div class="sn">C K K Retail Mart Limited</div>
-        <div class="sy">CKKRETAIL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:3.80s">
-      <td data-label="Stock">
-        <div class="sn">Flywings Simulat T C Ltd</div>
-        <div class="sy">FWSTC</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:3.84s">
-      <td data-label="Stock">
-        <div class="sn">Grover Jewells Limited</div>
-        <div class="sy">GJL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:3.88s">
-      <td data-label="Stock">
-        <div class="sn">Silky Overseas Limited</div>
-        <div class="sy">SILKY</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:3.92s">
-      <td data-label="Stock">
-        <div class="sn">Vijaypd Ceutical Limited</div>
-        <div class="sy">VIJAYPD</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:3.96s">
-      <td data-label="Stock">
-        <div class="sn">Invicta Diagnostic Ltd</div>
-        <div class="sy">INVICTA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.00s">
-      <td data-label="Stock">
-        <div class="sn">United Heat Transfer Ltd</div>
-        <div class="sy">UHTL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.04s">
-      <td data-label="Stock">
-        <div class="sn">Biopol Chemicals Limited</div>
-        <div class="sy">BIOPOL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.08s">
-      <td data-label="Stock">
-        <div class="sn">TechD Cybersecurity Ltd</div>
-        <div class="sy">TECHD</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.12s">
-      <td data-label="Stock">
-        <div class="sn">Aye Finance Limited</div>
-        <div class="sy">AYE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.16s">
-      <td data-label="Stock">
-        <div class="sn">Greenleaf Envirotech Ltd</div>
-        <div class="sy">GREENLEAF</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.20s">
-      <td data-label="Stock">
-        <div class="sn">Sheel Biotech Limited</div>
-        <div class="sy">SHEEL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.24s">
-      <td data-label="Stock">
-        <div class="sn">Shivashrit Foods Limited</div>
-        <div class="sy">SHIVASHRIT</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.28s">
-      <td data-label="Stock">
-        <div class="sn">Snehaa Organics Limited</div>
-        <div class="sy">SNEHAA</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.32s">
-      <td data-label="Stock">
-        <div class="sn">Blue Water Logistics Ltd</div>
-        <div class="sy">BLUEWATER</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.36s">
-      <td data-label="Stock">
-        <div class="sn">Cedaar Textile Limited</div>
-        <div class="sy">CEDAAR</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.40s">
-      <td data-label="Stock">
-        <div class="sn">Arisinfra Solutions Ltd</div>
-        <div class="sy">ARIS</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.44s">
-      <td data-label="Stock">
-        <div class="sn">B.A.G.Convergence Limited</div>
-        <div class="sy">BAGDIGITAL</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.48s">
-      <td data-label="Stock">
-        <div class="sn">Exim Routes Limited</div>
-        <div class="sy">EXIMROUTES</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.52s">
-      <td data-label="Stock">
-        <div class="sn">Presstonic Engineering L</div>
-        <div class="sy">PRESS-RE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr style="animation-delay:4.56s">
-      <td data-label="Stock">
-        <div class="sn">Prime Cable Industries L</div>
-        <div class="sy">PRIMECAB</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">N/A</div>
-        <div class="sp"></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">50.0</div>
-        <div class="rb2"><div class="rf2" style="width:50%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> N/A</div>
-        <div class="sr"><span class="sr-s">S1</span> N/A</div>
-        <div class="sr"><span class="sr-r">6mH</span> N/A</div>
-        <div class="sr"><span class="sr-s">6mL</span> N/A</div>
-      </td>
-      <td data-label="Signal"><span class="sig sna">N/A</span></td>
-    </tr>
-    <tr class="sec-hdr">
-      <td colspan="5">
-        <div class="sec-hdr-inner">
-          <span class="sec-icon">🚗</span>
-          <span class="sec-name">Auto & Auto Ancillaries</span>
-          <span class="sec-count">1 stocks</span>
-          <span class="sec-pills"><span class="sec-pill sbuy">▲ 1 BUY</span></span>
-        </div>
-      </td>
-    </tr>
-    <tr style="animation-delay:4.60s">
-      <td data-label="Stock">
-        <div class="sn">Mah & Mah Ltd.</div>
-        <div class="sy">M&M</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹3,530.50</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,0.1 23.3,11.5 35.0,19.8 46.7,23.1 58.3,26.0 70.0,20.2" fill="none" stroke="#e05c5c" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv up">45.8</div>
-        <div class="rb2"><div class="rf2" style="width:46%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹3,555.93</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹3,494.13</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹3,839.90</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹3,187.00</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr>
-    <tr class="sec-hdr">
-      <td colspan="5">
-        <div class="sec-hdr-inner">
-          <span class="sec-icon">🛡️</span>
-          <span class="sec-name">Insurance</span>
-          <span class="sec-count">1 stocks</span>
-          <span class="sec-pills"><span class="sec-pill sbuy">▲ 1 BUY</span></span>
-        </div>
-      </td>
-    </tr>
-    <tr style="animation-delay:4.64s">
-      <td data-label="Stock">
-        <div class="sn">SBI Life Insurance Co Ltd</div>
-        <div class="sy">SBILIFE</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">₹2,059.60</div>
-        <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,21.0 23.3,23.6 35.0,16.0 46.7,10.8 58.3,12.7 70.0,0.0" fill="none" stroke="#3d9970" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-      </td>
-      <td data-label="RSI(14)" class="rn2">
-        <div class="rv dn">57.0</div>
-        <div class="rb2"><div class="rf2" style="width:57%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> ₹2,069.87</div>
-        <div class="sr"><span class="sr-s">S1</span> ₹2,041.87</div>
-        <div class="sr"><span class="sr-r">6mH</span> ₹2,109.60</div>
-        <div class="sr"><span class="sr-s">6mL</span> ₹1,757.70</div>
-      </td>
-      <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
-    </tr></tbody>
+      <tr style="animation-delay:0.00s">
+        <td data-label="Stock">
+          <div class="sn">Ather Energy Limited</div>
+          <div class="sy">ATHERENERG</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹726.35</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,2.0 11.7,0.0 23.3,15.2 35.0,2.4 46.7,26.0 58.3,25.1 70.0,1.6" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bf">▲ BUY</span></td>
+        <td data-label="DII Cash"><span class="b bd">▲ BUY</span></td>
+        <td data-label="RSI(14)" class="rn2">
+          <div class="rv dn">61.5</div>
+          <div class="rb2"><div class="rf2" style="width:62%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+7.28</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>25.7</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.9</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹737.72</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹709.22</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹790.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹413.30</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.05s">
+        <td data-label="Stock">
+          <div class="sn">Deepak Nitrite Ltd</div>
+          <div class="sy">DEEPAKNTR</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹1,651.10</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,9.5 11.7,0.0 23.3,11.0 35.0,15.7 46.7,20.3 58.3,26.0 70.0,17.5" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="DII Cash"><span class="b bd">▲ BUY</span></td>
+        <td data-label="RSI(14)" class="rn2">
+          <div class="rv up">53.2</div>
+          <div class="rb2"><div class="rf2" style="width:53%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+3.25</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>19.0</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.43</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹1,672.87</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,620.67</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,904.40</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹1,514.00</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.10s">
+        <td data-label="Stock">
+          <div class="sn">Mah & Mah Ltd.</div>
+          <div class="sy">M&M</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹3,489.20</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,9.2 11.7,0.0 23.3,0.1 35.0,11.5 46.7,19.8 58.3,23.1 70.0,26.0" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="DII Cash"><span class="b bd">▲ BUY</span></td>
+        <td data-label="RSI(14)" class="rn2">
+          <div class="rv up">41.2</div>
+          <div class="rb2"><div class="rf2" style="width:41%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+0.89</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>14.9</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.41</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹3,516.00</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹3,462.20</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹3,839.90</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹3,187.00</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.15s">
+        <td data-label="Stock">
+          <div class="sn">PNB Housing Fin Ltd.</div>
+          <div class="sy">PNBHOUSING</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹863.65</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,10.0 23.3,9.8 35.0,11.6 46.7,26.0 58.3,14.6 70.0,2.3" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="DII Cash"><span class="b bd">▲ BUY</span></td>
+        <td data-label="RSI(14)" class="rn2">
+          <div class="rv up">47.1</div>
+          <div class="rb2"><div class="rf2" style="width:47%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+4.09</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>25.7</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>1.0</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹872.90</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹847.70</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,015.75</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹750.30</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.20s">
+        <td data-label="Stock">
+          <div class="sn">Safari Ind (India) Ltd</div>
+          <div class="sy">SAFARI</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹1,832.60</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,0.0 11.7,1.6 23.3,12.0 35.0,20.3 46.7,24.7 58.3,26.0 70.0,20.6" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="DII Cash"><span class="b bd">▲ BUY</span></td>
+        <td data-label="RSI(14)" class="rs2">
+          <div class="rv up">37.0</div>
+          <div class="rb2"><div class="rf2" style="width:37%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="dn">-24.96</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="dn">↓ Bear</span></div>
+          <div class="im"><span class="il">ADX</span><span>22.9</span></div>
+          <div class="im"><span class="il">BB</span><span>Oversold</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.28</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹1,891.70</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,752.60</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹2,507.10</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹1,725.50</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.25s">
+        <td data-label="Stock">
+          <div class="sn">SBI Life Insurance Co Ltd</div>
+          <div class="sy">SBILIFE</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹2,039.50</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.9 11.7,26.0 23.3,17.4 35.0,21.9 46.7,8.8 58.3,0.0 70.0,3.1" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="DII Cash"><span class="b bd">▲ BUY</span></td>
+        <td data-label="RSI(14)" class="rn2">
+          <div class="rv up">52.4</div>
+          <div class="rb2"><div class="rf2" style="width:52%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+2.53</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>12.4</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.94</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹2,047.47</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹2,029.07</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹2,109.60</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹1,757.70</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.30s">
+        <td data-label="Stock">
+          <div class="sn">Happy Forgings Limited</div>
+          <div class="sy">HAPPYFORGE</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹1,267.70</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,26.0 11.7,22.8 23.3,19.8 35.0,2.0 46.7,0.0 58.3,2.8 70.0,4.9" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="DII Cash"><span class="b bd">▲ BUY</span></td>
+        <td data-label="RSI(14)" class="rn2">
+          <div class="rv dn">68.9</div>
+          <div class="rb2"><div class="rf2" style="width:69%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="up">+22.2</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>31.6</span></div>
+          <div class="im"><span class="il">BB</span><span>Overbought</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.82</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹1,294.73</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹1,245.93</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹1,339.00</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹862.05</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbuy">BUY</span></td>
+      </tr>
+      <tr style="animation-delay:0.35s">
+        <td data-label="Stock">
+          <div class="sn">Mindspace Business P REIT</div>
+          <div class="sy">MINDSPACE</div>
+        </td>
+        <td data-label="Price">
+          <div class="pv">₹487.57</div>
+          <div class="sp"><svg width="70" height="26" viewBox="0 0 70 26" xmlns="http://www.w3.org/2000/svg"><polyline points="0.0,19.0 11.7,6.4 23.3,5.7 35.0,0.0 46.7,13.7 58.3,22.0 70.0,26.0" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        </td>
+        <td data-label="FII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="DII Cash"><span class="b bx">▼ SELL</span></td>
+        <td data-label="RSI(14)" class="rn2">
+          <div class="rv up">50.0</div>
+          <div class="rb2"><div class="rf2" style="width:50%"></div></div>
+        </td>
+        <td data-label="Indicators">
+          <div class="im"><span class="il">MACD</span>
+            <span class="dn">-0.78</span></div>
+          <div class="im"><span class="il">EMA</span>
+            <span class="up">↑ Bull</span></div>
+          <div class="im"><span class="il">ADX</span><span>25.8</span></div>
+          <div class="im"><span class="il">BB</span><span>Mid</span></div>
+          <div class="im"><span class="il">StRSI</span><span>0.0</span></div>
+        </td>
+        <td data-label="Levels">
+          <div class="sr"><span class="sr-r">R1</span> ₹491.69</div>
+          <div class="sr"><span class="sr-s">S1</span> ₹484.74</div>
+          <div class="sr"><span class="sr-r">6mH</span> ₹511.68</div>
+          <div class="sr"><span class="sr-s">6mL</span> ₹406.89</div>
+        </td>
+        <td data-label="Signal"><span class="sig sbs">STRONG BUY</span></td>
+      </tr></tbody>
   </table>
 </div>
 
 <div class="leg">
-  <div class="li2"><div class="ld2" style="background:var(--sage)"></div>FII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--sand)"></div>DII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--jade)"></div>Both Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--coral)"></div>Selling</div>
-  <div class="li2"><div class="ld2" style="background:var(--sky)"></div>Bulk/Block</div>
-  <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;color:var(--mist)">
-    🌿 Jade Garden Theme · Sorted by signal strength within sectors
+  <div class="li2"><div class="ld2" style="background:var(--fi)"></div>FII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--di)"></div>DII Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--bo)"></div>Both Buying</div>
+  <div class="li2"><div class="ld2" style="background:var(--se)"></div>Selling</div>
+  <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;">
+    RSI &lt;40: Oversold · &gt;70: Overbought · MACD+: Bullish · ADX&gt;25: Strong Trend
   </div>
 </div>
 
 <footer>
-  <div>🌿 FII/DII Pulse v8 · Jade Garden · NSE Bulk Deals CSV API · yfinance · 18 Feb 2026</div>
+  <div>🤖 FII/DII Pulse v8 · NSE Bulk Deals API · yfinance · 18 Feb 2026</div>
   <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
 </footer>
 
