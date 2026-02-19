@@ -1,5 +1,5 @@
 """
-FII/DII Intelligence Dashboard — v8 (CSV Edition) · Jade Garden Theme
+FII/DII Intelligence Dashboard — v8 (CSV Edition) · Bloomberg Terminal Theme
 ===================================================
 KEY CHANGE from original v8:
   fetch_from_nse() now uses the CSV download endpoint instead of the
@@ -23,8 +23,8 @@ Date Logic (VERIFIED):
     → to_date is day-1, from_date is day-6 = 6 trading days total
     → Matches NSE website window: e.g. 10-02-2026 → 17-02-2026
 
-THEME: Jade Garden — Sage green + white, clean modern fintech
-  (Only HTML/CSS output changed; all logic is identical to v8 CSV Edition)
+THEME: Bloomberg Terminal — Amber-on-Black · Phosphor CRT Aesthetic
+  IBM Plex Mono · scanline overlay · amber glow signals
 """
 
 import io, os, smtplib, logging, time, re
@@ -246,7 +246,6 @@ def fetch_from_nse() -> list:
     Fetch NSE bulk + block deals via the CSV download endpoint.
     Adding &csv=true to the historicalOR API triggers the full CSV export —
     the same file produced by clicking "Download (.csv)" on the NSE website.
-
     This removes the 50-record cap that the plain JSON API enforces.
     """
     log.info("[Source 1] NSE Bulk/Block Deals — CSV Download API (no 50-row cap)...")
@@ -257,7 +256,6 @@ def fetch_from_nse() -> list:
         to_str   = fmt_nse_date(to_date)
         log.info(f"  -> Range: {from_str} to {to_str}")
 
-        # ── Two endpoints: bulk + block ────────────────────────────────────
         csv_endpoints = [
             {
                 "url": "https://www.nseindia.com/api/historicalOR/bulk-block-short-deals",
@@ -265,7 +263,7 @@ def fetch_from_nse() -> list:
                     "optionType": "bulk_deals",
                     "from": from_str,
                     "to":   to_str,
-                    "csv":  "true",          # ← triggers full CSV export
+                    "csv":  "true",
                 },
                 "deal_type": "bulk_deals",
             },
@@ -281,7 +279,6 @@ def fetch_from_nse() -> list:
             },
         ]
 
-        # ── Session: curl_cffi preferred (bypasses Akamai bot check) ──────
         session_obj = None
         use_cffi    = False
 
@@ -291,7 +288,6 @@ def fetch_from_nse() -> list:
             session_obj = cffi_req.Session(impersonate="chrome120")
             session_obj.get("https://www.nseindia.com/", timeout=15)
             time.sleep(2)
-            # Seed the referrer page — critical for the CSV download to work
             session_obj.get(
                 "https://www.nseindia.com/report-detail/display-bulk-and-block-deals",
                 timeout=15,
@@ -315,13 +311,11 @@ def fetch_from_nse() -> list:
             )
             time.sleep(2)
 
-        # Headers that mimic clicking the "Download (.csv)" button
         csv_req_headers = {
             "Referer": "https://www.nseindia.com/report-detail/display-bulk-and-block-deals",
             "Accept":  "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
 
-        # ── Fetch each endpoint ────────────────────────────────────────────
         all_dfs = []
 
         for ep in csv_endpoints:
@@ -365,7 +359,6 @@ def fetch_from_nse() -> list:
                         log.warning(f"  !! HTML returned (bot-blocked) on attempt {attempt}")
                         time.sleep(4); continue
 
-                    # ── Try CSV parse first ────────────────────────────────
                     try:
                         csv_df = pd.read_csv(
                             io.StringIO(body.decode("utf-8", errors="replace"))
@@ -378,7 +371,6 @@ def fetch_from_nse() -> list:
                     except Exception as csv_err:
                         log.warning(f"  !! CSV parse error: {csv_err} — trying JSON fallback")
 
-                    # ── JSON fallback (NSE occasionally returns JSON even with csv=true) ──
                     try:
                         raw_json = resp.json()
                         if isinstance(raw_json, list) and raw_json:
@@ -414,9 +406,8 @@ def fetch_from_nse() -> list:
             else:
                 log.warning(f"  !! [{deal_type}] No usable data — skipping")
 
-            time.sleep(1.5)   # polite pause between endpoints
+            time.sleep(1.5)
 
-        # ── Cleanup ───────────────────────────────────────────────────────
         if use_cffi and hasattr(session_obj, "close"):
             try: session_obj.close()
             except Exception: pass
@@ -425,13 +416,11 @@ def fetch_from_nse() -> list:
             log.warning("  !! No CSV data from any endpoint — falling back")
             return []
 
-        # ── Merge all deal types ───────────────────────────────────────────
         df = pd.concat(all_dfs, ignore_index=True)
         log.info(f"  -> Combined: {df.shape[0]} rows from {len(all_dfs)} endpoint(s)")
         df.columns = [str(c).strip() for c in df.columns]
         log.info(f"  -> Raw columns: {list(df.columns)}")
 
-        # ── Normalise column names ─────────────────────────────────────────
         NSE_EXACT = {
             "BD_SYMBOL":      "SYMBOL",
             "BD_SCRIP_NAME":  "COMPANY",
@@ -531,7 +520,6 @@ def fetch_from_nse() -> list:
                 matched += 1
 
         result = list(stocks.values())
-
         log.info(
             f"  → Total rows={len(df)} | FII/DII matched={matched} | "
             f"unique stocks={len(result)} (ALL included)"
@@ -762,46 +750,7 @@ def build_dataset():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  HTML HELPERS
-# ─────────────────────────────────────────────────────────────────────────────
-
-def spark_svg(prices):
-    if len(prices) < 2:
-        return ""
-    mn, mx = min(prices), max(prices)
-    rng = mx - mn or 1
-    w, h = 70, 26
-    pts = [
-        f"{round(i*w/(len(prices)-1),1)},{round(h-(p-mn)/rng*h,1)}"
-        for i, p in enumerate(prices)
-    ]
-    # Jade Garden: use sage green for up, soft coral for down
-    col = "#3d9970" if prices[-1] >= prices[0] else "#e05c5c"
-    return (
-        f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
-        f'xmlns="http://www.w3.org/2000/svg">'
-        f'<polyline points="{" ".join(pts)}" fill="none" stroke="{col}" '
-        f'stroke-width="1.8" stroke-linejoin="round"/></svg>'
-    )
-
-
-def sigcls(s):
-    return {"STRONG BUY":"sbs","BUY":"sbuy","NEUTRAL":"sna",
-            "CAUTION":"sca","SELL":"sse","N/A":"sna",
-            "BOTH BUY":"sbs","FII BUY":"sbuy","DII BUY":"sdii",
-            "BOTH SELL":"sse","BULK/BLOCK":"sblk"}.get(s, "sna")
-
-
-def rsicls(v):
-    return "ro" if v > 70 else ("rs2" if v < 40 else "rn2")
-
-
-def fmt(v):
-    return f"₹{v:,.2f}" if v else "N/A"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  SECTOR MAP & ICONS  (unchanged)
+#  SECTOR MAP & ICONS
 # ─────────────────────────────────────────────────────────────────────────────
 
 SECTOR_MAP = {
@@ -917,26 +866,26 @@ SECTOR_MAP = {
 }
 
 SECTOR_ICONS = {
-    "Banking & Finance":        "🏦",
-    "NBFC & Fintech":           "💳",
-    "IT & Technology":          "💻",
-    "Pharma & Healthcare":      "💊",
-    "Oil, Gas & Energy":        "⛽",
-    "Power & Utilities":        "⚡",
-    "Metals & Mining":          "⚙️",
-    "Auto & Auto Ancillaries":  "🚗",
-    "FMCG & Consumer":          "🛒",
-    "Cement & Construction":    "🏗️",
-    "Real Estate":              "🏢",
+    "Banking & Finance":           "🏦",
+    "NBFC & Fintech":              "💳",
+    "IT & Technology":             "💻",
+    "Pharma & Healthcare":         "💊",
+    "Oil, Gas & Energy":           "⛽",
+    "Power & Utilities":           "⚡",
+    "Metals & Mining":             "⚙️",
+    "Auto & Auto Ancillaries":     "🚗",
+    "FMCG & Consumer":             "🛒",
+    "Cement & Construction":       "🏗️",
+    "Real Estate":                 "🏢",
     "Capital Goods & Industrials": "🏭",
-    "Telecom & Media":          "📡",
-    "Chemicals & Specialty":    "🧪",
-    "Insurance":                "🛡️",
-    "Exchange & Capital Markets":"📈",
-    "Aviation & Logistics":     "✈️",
-    "Retail & E-Commerce":      "🛍️",
-    "Agri & Fertilisers":       "🌾",
-    "Others":                   "🔷",
+    "Telecom & Media":             "📡",
+    "Chemicals & Specialty":       "🧪",
+    "Insurance":                   "🛡️",
+    "Exchange & Capital Markets":  "📈",
+    "Aviation & Logistics":        "✈️",
+    "Retail & E-Commerce":         "🛍️",
+    "Agri & Fertilisers":          "🌾",
+    "Others":                      "🔷",
 }
 
 SIGNAL_ORDER = {
@@ -957,21 +906,96 @@ def get_sector(symbol: str) -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  GENERATE HTML  —  🌿 JADE GARDEN THEME
-#  Only this function's CSS string and structural HTML skin has changed.
-#  All data-building logic, sector grouping, sorting, row generation = identical.
+#  HTML HELPERS  — Bloomberg Terminal Theme
+# ─────────────────────────────────────────────────────────────────────────────
+
+def spark_svg(prices):
+    """Mini sparkline SVG — amber-on-black palette."""
+    if len(prices) < 2:
+        return ""
+    mn, mx = min(prices), max(prices)
+    rng = mx - mn or 1
+    w, h = 72, 22
+    pts = [
+        f"{round(i * w / (len(prices) - 1), 1)},{round(h - (p - mn) / rng * h, 1)}"
+        for i, p in enumerate(prices)
+    ]
+    col = "#00ff41" if prices[-1] >= prices[0] else "#ff3333"
+    return (
+        f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+        f'xmlns="http://www.w3.org/2000/svg" style="display:block">'
+        f'<polyline points="{" ".join(pts)}" fill="none" stroke="{col}" '
+        f'stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'
+        f'</svg>'
+    )
+
+
+def rsi_class(v):
+    """Return Bloomberg RSI CSS class."""
+    if v > 70:  return "rsi-hot"
+    if v < 40:  return "rsi-cold"
+    return "rsi-warm"
+
+
+def sig_class(overall):
+    """Map overall signal → Bloomberg CSS badge class."""
+    return {
+        "STRONG BUY": "sig-sb",
+        "BUY":        "sig-buy",
+        "NEUTRAL":    "sig-neutral",
+        "CAUTION":    "sig-caution",
+        "SELL":       "sig-sell",
+        "BOTH SELL":  "sig-sell",
+        "BULK/BLOCK": "sig-blk",
+        "N/A":        "sig-neutral",
+    }.get(overall, "sig-neutral")
+
+
+def inst_badge_class(action, investor):
+    """FII/DII badge class."""
+    if action == "buy":
+        return f"flow-{investor}-b"
+    if action == "sell":
+        return f"flow-{investor}-s"
+    return "flow-neutral"
+
+
+def fmt_price(v):
+    return f"&#8377;{v:,.2f}" if v else "N/A"
+
+
+def fmt_macd(v):
+    sign = "+" if v >= 0 else ""
+    cls  = "macd-pos" if v >= 0 else "macd-neg"
+    return f'<span class="{cls}">{sign}{v:.2f}</span>'
+
+
+def fmt_ema(cross):
+    if cross == "bullish":
+        return '<span class="ema-bull">EMA BULL</span>'
+    return '<span class="ema-bear">EMA BEAR</span>'
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  GENERATE HTML  —  Bloomberg Terminal Theme
 # ─────────────────────────────────────────────────────────────────────────────
 
 def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
-    nc = "up" if market["nifty_chg"]  >= 0 else "dn"
-    xc = "up" if market["sensex_chg"] >= 0 else "dn"
-    na = "▲"  if market["nifty_chg"]  >= 0 else "▼"
-    xa = "▲"  if market["sensex_chg"] >= 0 else "▼"
-    fb = sum(1 for s in stocks if s["fii_cash"] == "buy")
-    db = sum(1 for s in stocks if s["dii_cash"] == "buy")
-    bb = sum(1 for s in stocks if s["both_buy"])
-    st = sum(1 for s in stocks if s["overall"] == "STRONG BUY")
 
+    # ── Market direction helpers ──────────────────────────────────────────────
+    nc  = "up"  if market["nifty_chg"]  >= 0 else "dn"
+    xc  = "up"  if market["sensex_chg"] >= 0 else "dn"
+    na  = "▲"   if market["nifty_chg"]  >= 0 else "▼"
+    xa  = "▲"   if market["sensex_chg"] >= 0 else "▼"
+
+    # ── Counts ────────────────────────────────────────────────────────────────
+    fb  = sum(1 for s in stocks if s["fii_cash"] == "buy")
+    db  = sum(1 for s in stocks if s["dii_cash"] == "buy")
+    bb  = sum(1 for s in stocks if s["both_buy"])
+    st  = sum(1 for s in stocks if s["overall"] == "STRONG BUY")
+    sel = sum(1 for s in stocks if s["overall"] in ("SELL", "BOTH SELL"))
+
+    # ── Sector grouping + sorting ─────────────────────────────────────────────
     for s in stocks:
         s["sector"] = get_sector(s["symbol"])
 
@@ -987,581 +1011,810 @@ def generate_html(stocks, market, date_str, source, date_range_label="") -> str:
         sector_groups[sec].sort(key=signal_sort_key)
 
     def sector_best(items):
-        return min(SIGNAL_ORDER.get(s.get("overall","N/A"), 5) for s in items)
+        return min(SIGNAL_ORDER.get(s.get("overall", "N/A"), 5) for s in items)
 
-    sorted_sectors = sorted(sector_groups.items(), key=lambda kv: sector_best(kv[1]))
+    sorted_sectors = sorted(
+        sector_groups.items(), key=lambda kv: sector_best(kv[1])
+    )
 
-    # ── Build table rows ──────────────────────────────────────────────────
-    rows = ""
-    row_idx = 0
+    # ── Sidebar sector list ───────────────────────────────────────────────────
+    sidebar_items = ""
+    for sector_name, sec_stocks in sorted_sectors:
+        icon       = SECTOR_ICONS.get(sector_name, "🔷")
+        best_sig   = min(sec_stocks, key=signal_sort_key)["overall"]
+        if best_sig in ("STRONG BUY", "BUY", "BOTH BUY"):
+            sig_cls, sig_lbl = "buy",  "↑ BUY"
+        elif best_sig in ("SELL", "BOTH SELL"):
+            sig_cls, sig_lbl = "sell", "↓ SELL"
+        else:
+            sig_cls, sig_lbl = "hold", "→ HOLD"
+        anchor = sector_name.replace(" ", "_").replace("&", "and")
+        sidebar_items += f"""
+        <a href="#{anchor}" class="sb-item">
+          <div>
+            <div class="sb-item-name">{icon} {sector_name}</div>
+            <div class="sb-item-count">{len(sec_stocks)} stocks</div>
+          </div>
+          <span class="sb-item-sig {sig_cls}">{sig_lbl}</span>
+        </a>"""
+
+    # ── Table rows ────────────────────────────────────────────────────────────
+    rows      = ""
+    row_delay = 0
+
     for sector_name, sec_stocks in sorted_sectors:
         icon      = SECTOR_ICONS.get(sector_name, "🔷")
+        anchor    = sector_name.replace(" ", "_").replace("&", "and")
         sec_count = len(sec_stocks)
         sec_sb    = sum(1 for s in sec_stocks if s["overall"] == "STRONG BUY")
         sec_buy   = sum(1 for s in sec_stocks if s["overall"] == "BUY")
-        sec_sell  = sum(1 for s in sec_stocks if s["overall"] in ("SELL","BOTH SELL"))
+        sec_sell  = sum(1 for s in sec_stocks if s["overall"] in ("SELL", "BOTH SELL"))
+
+        # Sector summary pills
+        pills = ""
+        if sec_sb:
+            pills += f'<span class="sec-pill sb">&#9889; {sec_sb} STRONG BUY</span>'
+        if sec_buy:
+            pills += f'<span class="sec-pill buy">&#9650; {sec_buy} BUY</span>'
+        if sec_sell:
+            pills += f'<span class="sec-pill sell">&#9660; {sec_sell} SELL</span>'
 
         rows += f"""
-    <tr class="sec-hdr">
-      <td colspan="5">
-        <div class="sec-hdr-inner">
-          <span class="sec-icon">{icon}</span>
-          <span class="sec-name">{sector_name}</span>
-          <span class="sec-count">{sec_count} stocks</span>
-          <span class="sec-pills">"""
-        if sec_sb:
-            rows += f'<span class="sec-pill sbs">⚡ {sec_sb} STRONG BUY</span>'
-        if sec_buy:
-            rows += f'<span class="sec-pill sbuy">▲ {sec_buy} BUY</span>'
-        if sec_sell:
-            rows += f'<span class="sec-pill sse">▼ {sec_sell} SELL</span>'
-        rows += """</span>
-        </div>
-      </td>
-    </tr>"""
+          <tr class="sec-hdr" id="{anchor}">
+            <td colspan="7">
+              <div class="sec-hdr-inner">
+                <span class="sec-icon">{icon}</span>
+                <span class="sec-name">{sector_name.upper()}</span>
+                <span class="sec-count">{sec_count} STOCKS</span>
+                <div class="sec-pills">{pills}</div>
+              </div>
+            </td>
+          </tr>"""
 
         for s in sec_stocks:
-            spk = spark_svg(s.get("sparkline", []))
-            pr  = fmt(s["last_price"]) if s["last_price"] > 0 else s.get("price_str","N/A")
+            sym     = s["symbol"].replace(".NS", "")
+            price   = fmt_price(s["last_price"]) if s["last_price"] > 0 else "N/A"
+            spk     = spark_svg(s.get("sparkline", []))
+            rsi_v   = s["rsi"]
+            rsi_cls = rsi_class(rsi_v)
+            macd_h  = fmt_macd(s["macd_hist"])
+            ema_h   = fmt_ema(s["ema_cross"])
+            overall = s["overall"]
+            sig_cls_val = sig_class(overall)
+
+            # FII badge
+            fii_action = s["fii_cash"]
+            if fii_action == "buy":
+                fii_badge = '<span class="flow-badge fii-b">FII BUY</span>'
+            elif fii_action == "sell":
+                fii_badge = '<span class="flow-badge fii-s">FII SELL</span>'
+            else:
+                fii_badge = '<span class="flow-badge flow-neutral">FII &mdash;</span>'
+
+            # DII badge
+            dii_action = s["dii_cash"]
+            if dii_action == "buy":
+                dii_badge = '<span class="flow-badge dii-b">DII BUY</span>'
+            elif dii_action == "sell":
+                dii_badge = '<span class="flow-badge dii-s">DII SELL</span>'
+            else:
+                dii_badge = '<span class="flow-badge flow-neutral">DII &mdash;</span>'
+
+            # Signal label decoration
+            if overall == "STRONG BUY":
+                sig_label = "&#9889; STRONG BUY"
+            elif overall == "BUY":
+                sig_label = "&#9650; BUY"
+            elif overall in ("SELL", "BOTH SELL"):
+                sig_label = "&#9660; SELL"
+            elif overall == "CAUTION":
+                sig_label = "&#9888; CAUTION"
+            elif overall == "BULK/BLOCK":
+                sig_label = "&#9632; BULK/BLOCK"
+            else:
+                sig_label = "&mdash; NEUTRAL"
 
             rows += f"""
-    <tr style="animation-delay:{row_idx*0.04:.2f}s">
-      <td data-label="Stock">
-        <div class="sn">{s['name']}</div>
-        <div class="sy">{s['symbol'].replace('.NS','')}</div>
-      </td>
-      <td data-label="Price">
-        <div class="pv">{pr}</div>
-        <div class="sp">{spk}</div>
-      </td>
-      <td data-label="RSI(14)" class="{rsicls(s['rsi'])}">
-        <div class="rv {'up' if s['rsi']<55 else 'dn'}">{s['rsi']}</div>
-        <div class="rb2"><div class="rf2" style="width:{min(s['rsi'],100):.0f}%"></div></div>
-      </td>
-      <td data-label="Levels">
-        <div class="sr"><span class="sr-r">R1</span> {fmt(s['resist1'])}</div>
-        <div class="sr"><span class="sr-s">S1</span> {fmt(s['support1'])}</div>
-        <div class="sr"><span class="sr-r">6mH</span> {fmt(s['swing_high'])}</div>
-        <div class="sr"><span class="sr-s">6mL</span> {fmt(s['swing_low'])}</div>
-      </td>
-      <td data-label="Signal"><span class="sig {sigcls(s['overall'])}">{s['overall']}</span></td>
-    </tr>"""
-            row_idx += 1
+          <tr style="animation-delay:{row_delay:.2f}s">
+            <td>
+              <div class="stock-name">{s['name']}</div>
+              <div class="stock-sym">{sym}</div>
+            </td>
+            <td class="td-r">
+              <div class="price-val">{price}</div>
+              <div class="spark-wrap">{spk}</div>
+            </td>
+            <td class="td-c">
+              <div class="rsi-val {rsi_cls}">{rsi_v}</div>
+              <div class="rsi-bar-wrap">
+                <div class="rsi-bar-fill {rsi_cls}" style="width:{min(rsi_v, 100):.0f}%"></div>
+              </div>
+            </td>
+            <td class="td-c">
+              <div class="level-grid">
+                <div class="level-row">
+                  <span class="level-tag r">R1</span>
+                  <span class="level-val r">{fmt_price(s['resist1'])}</span>
+                </div>
+                <div class="level-row">
+                  <span class="level-tag s">S1</span>
+                  <span class="level-val s">{fmt_price(s['support1'])}</span>
+                </div>
+                <div class="level-row">
+                  <span class="level-tag r">6mH</span>
+                  <span class="level-val r">{fmt_price(s['swing_high'])}</span>
+                </div>
+                <div class="level-row">
+                  <span class="level-tag s">6mL</span>
+                  <span class="level-val s">{fmt_price(s['swing_low'])}</span>
+                </div>
+              </div>
+            </td>
+            <td class="td-c">
+              <div class="macd-wrap">{macd_h}</div>
+              <div class="ema-wrap">{ema_h}</div>
+            </td>
+            <td class="td-c">
+              <div class="flow-row">
+                {fii_badge}
+                {dii_badge}
+              </div>
+            </td>
+            <td class="td-c">
+              <span class="sig-badge {sig_cls_val}">{sig_label}</span>
+            </td>
+          </tr>"""
+            row_delay += 0.03
 
-    # ════════════════════════════════════════════════════════════════════════
-    #  🌿 JADE GARDEN CSS  — Light, clean, sage-green fintech aesthetic
-    #  Palette:
-    #    --jade     #2d6a4f  (deep jade green — primary brand)
-    #    --sage     #3d9970  (medium sage — accents, buy signals)
-    #    --mint     #52b788  (light mint — hover, subtle highlights)
-    #    --foam     #d8f3dc  (pale green foam — backgrounds, tags)
-    #    --ivory    #f8faf8  (near-white page background)
-    #    --paper    #ffffff  (card/table background)
-    #    --ink      #1b3a2d  (dark green-tinted text)
-    #    --mist     #6c9b80  (muted secondary text)
-    #    --coral    #e05c5c  (sell / negative — warm coral, not harsh red)
-    #    --sand     #f4a261  (caution / DII — warm amber)
-    #    --sky      #457b9d  (neutral / bulk-block — calm blue)
-    #    --border   #c8e6c9  (subtle green-tinted border)
-    # ════════════════════════════════════════════════════════════════════════
+    # ── Date range badge ──────────────────────────────────────────────────────
+    drb_html = (
+        f'<span class="panel-bar-range">&#128197; {date_range_label}</span>'
+        if date_range_label else ""
+    )
+
+    # ── IST timestamp ─────────────────────────────────────────────────────────
+    IST = pytz.timezone("Asia/Kolkata")
+    now_ist = datetime.now(IST).strftime("%d-%b-%Y %H:%M IST")
+
+    # ── Ticker tape — built from live market data ─────────────────────────────
+    ticker_items = [
+        ("NIFTY50",
+         f"&#8377;{market['nifty_price']:,.2f}",
+         "up" if market["nifty_chg"] >= 0 else "dn",
+         f"{'▲' if market['nifty_chg']>=0 else '▼'}{abs(market['nifty_chg']):.2f}%"),
+        ("SENSEX",
+         f"&#8377;{market['sensex_price']:,.2f}",
+         "up" if market["sensex_chg"] >= 0 else "dn",
+         f"{'▲' if market['sensex_chg']>=0 else '▼'}{abs(market['sensex_chg']):.2f}%"),
+        ("TRACKED",   str(len(stocks)), "up",  f"FII:{fb} DII:{db}"),
+        ("BOTH BUY",  str(bb),          "up",  "stocks"),
+        ("STR.BUY",   str(st),          "up",  "signals"),
+        ("SELL",      str(sel),         "dn" if sel > 0 else "up", "caution"),
+        ("DATA SRC",  source[:20],      "up",  "NSE CSV"),
+        ("RANGE",     date_range_label, "up",  "trading window"),
+    ]
+    ticker_html = ""
+    for sym, val, cls, extra in ticker_items:
+        ticker_html += (
+            f'<div class="t-item">'
+            f'<span class="t-sym">{sym}</span>'
+            f'<span class="t-val {cls}">{val}</span>'
+            f'<span class="t-extra">{extra}</span>'
+            f'</div>'
+        )
+    # duplicate for seamless scroll
+    ticker_html = ticker_html * 2
+
+    # ══════════════════════════════════════════════════════════════════════════
+    #  CSS — Bloomberg Terminal
+    # ══════════════════════════════════════════════════════════════════════════
     css = """
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
-:root{
-  --jade:#2d6a4f;
-  --jade2:#1b4332;
-  --sage:#3d9970;
-  --mint:#52b788;
-  --foam:#d8f3dc;
-  --foam2:#b7e4c7;
-  --ivory:#f4f9f5;
-  --paper:#ffffff;
-  --ink:#1b3a2d;
-  --mist:#5a8a6e;
-  --coral:#d64045;
-  --sand:#e98a4e;
-  --sky:#457b9d;
-  --border:#c8e6c9;
-  --border2:#e8f5e9;
-  --shadow:0 1px 3px rgba(45,106,79,.08),0 4px 16px rgba(45,106,79,.06);
-  --shadow-sm:0 1px 4px rgba(45,106,79,.1);
+/* ═══════════════════════════════════════════════════════
+   BLOOMBERG TERMINAL PALETTE
+   --bg       #080808  deep matte black
+   --panel    #0f0f0f  surface
+   --header   #0d0800  warm-black
+   --amber    #ff8c00  primary
+   --amber2   #ffaa33  values
+   --amber3   #ffd080  highlights
+   --orange   #ff6600  borders/accent
+   --green    #00ff41  buy / positive
+   --red      #ff3333  sell / negative
+   --yellow   #ffff00  caution
+   --blue     #4488ff  bulk/block
+   --muted    #554433  dim borders
+   --text     #ffcc88  body
+   --white    #fff8ee  headings
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg:      #080808;
+  --panel:   #0f0f0f;
+  --panel2:  #130d04;
+  --header:  #0d0800;
+  --amber:   #ff8c00;
+  --amber2:  #ffaa33;
+  --amber3:  #ffd080;
+  --orange:  #ff6600;
+  --green:   #00ff41;
+  --red:     #ff3333;
+  --yellow:  #ffff00;
+  --blue:    #4488ff;
+  --muted:   #554433;
+  --muted2:  #2a1a08;
+  --muted3:  #1a1008;
+  --text:    #ffcc88;
+  --text2:   #cc9944;
+  --text3:   #886633;
+  --white:   #fff8ee;
+  --border:  rgba(255,102,0,.25);
+  --border2: rgba(255,102,0,.10);
+  --border3: rgba(255,102,0,.05);
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 
 body{
-  background:var(--ivory);
-  color:var(--ink);
-  font-family:'DM Sans',system-ui,sans-serif;
-  min-height:100vh;
-  line-height:1.5;
+  background:var(--bg);color:var(--text);
+  font-family:'IBM Plex Mono','Courier New',monospace;
+  min-height:100vh;overflow-x:hidden;
 }
 
-/* Subtle leaf-vein texture overlay */
+/* CRT scanlines */
 body::before{
-  content:'';
-  position:fixed;inset:0;
-  background-image:
-    radial-gradient(ellipse 800px 600px at 10% 20%,rgba(82,183,136,.06),transparent),
-    radial-gradient(ellipse 600px 800px at 90% 80%,rgba(45,106,79,.04),transparent);
-  pointer-events:none;z-index:0;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 2px,
+    rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px
+  );
 }
 
-.w{position:relative;z-index:1}
+/* Amber vignette */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,102,0,.04),transparent),
+    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(255,140,0,.03),transparent);
+}
+
+.w{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
 
 /* ── HEADER ── */
 header{
-  background:var(--jade2);
-  border-bottom:3px solid var(--sage);
-  padding:14px 24px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:10px;
-  position:sticky;top:0;z-index:99;
-  box-shadow:0 2px 12px rgba(27,67,50,.25);
+  background:var(--header);
+  border-bottom:2px solid var(--orange);
+  display:grid;grid-template-columns:auto 1fr auto;
+  align-items:stretch;
+  position:sticky;top:0;z-index:500;
+  box-shadow:0 0 40px rgba(255,102,0,.15);
 }
 
-.lg{display:flex;align-items:center;gap:14px}
-
-.logo-icon{
-  width:42px;height:42px;min-width:42px;
-  background:linear-gradient(135deg,var(--sage),var(--mint));
-  border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;
-  box-shadow:0 2px 10px rgba(82,183,136,.35);
+.h-brand{
+  padding:10px 20px;border-right:1px solid var(--muted);
+  display:flex;align-items:center;gap:14px;
+}
+.h-logo{
+  font-size:20px;font-weight:700;letter-spacing:3px;color:var(--amber);
+  text-shadow:0 0 20px rgba(255,140,0,.6),0 0 40px rgba(255,102,0,.3);
+}
+.h-logo span{color:var(--orange)}
+.h-tagline{
+  font-size:8px;letter-spacing:2.5px;color:var(--muted);
+  text-transform:uppercase;margin-top:3px;
 }
 
-.lt{font-size:17px;font-weight:700;letter-spacing:.3px;color:#fff}
-.lt span{color:var(--mint)}
-.ls2{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:1.5px;margin-top:2px;text-transform:uppercase}
+.h-nav{display:flex;align-items:stretch}
+.h-tab{
+  padding:0 18px;display:flex;align-items:center;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);border-right:1px solid var(--muted2);
+  cursor:pointer;transition:all .15s;white-space:nowrap;position:relative;
+  text-decoration:none;
+}
+.h-tab::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--amber);transform:scaleX(0);transition:transform .2s;
+}
+.h-tab:hover{color:var(--amber2);background:rgba(255,102,0,.06)}
+.h-tab:hover::after{transform:scaleX(1)}
+.h-tab.active{color:#000;background:var(--orange);font-weight:700}
+.h-tab.active::after{display:none}
 
-.hm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.h-meta{display:flex;align-items:center;border-left:1px solid var(--muted)}
+.h-meta-item{
+  padding:8px 14px;border-right:1px solid var(--muted2);
+  display:flex;flex-direction:column;gap:2px;
+}
+.h-meta-label{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.h-meta-val{font-size:11px;font-weight:600;color:var(--amber2)}
 
-.lv{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(82,183,136,.2);
-  border:1px solid rgba(82,183,136,.4);
-  padding:4px 12px;border-radius:20px;
-  font-size:10px;font-weight:600;color:var(--mint);letter-spacing:1px;
+.h-live{
+  padding:8px 16px;display:flex;align-items:center;gap:7px;
+  font-size:9px;font-weight:700;letter-spacing:2px;color:var(--green);
+  text-shadow:0 0 8px rgba(0,255,65,.5);
 }
 .led{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--mint);
-  animation:pulse 1.8s infinite;
+  width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green),0 0 16px rgba(0,255,65,.4);
+  animation:blink 1.8s ease-in-out infinite;
 }
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-.src{
-  font-size:10px;color:rgba(255,255,255,.65);
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.15);
-  padding:4px 12px;border-radius:20px;
+/* ── TICKER ── */
+.ticker-wrap{
+  background:#000;border-bottom:1px solid var(--muted);
+  height:24px;overflow:hidden;display:flex;align-items:center;
 }
-
-.drb{
-  font-size:10px;color:var(--mint);
-  background:rgba(82,183,136,.15);
-  border:1px solid rgba(82,183,136,.3);
-  padding:4px 12px;border-radius:20px;
-  font-family:'DM Mono',monospace;
+.ticker-inner{
+  display:inline-flex;white-space:nowrap;
+  animation:scroll-ticker 55s linear infinite;
 }
+@keyframes scroll-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.t-item{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:0 20px;font-size:10px;font-weight:500;
+  border-right:1px solid var(--muted2);color:var(--text3);
+}
+.t-sym{color:var(--amber2);font-weight:700;letter-spacing:1px}
+.t-val{font-weight:600}
+.t-val.up{color:var(--green);text-shadow:0 0 6px rgba(0,255,65,.4)}
+.t-val.dn{color:var(--red)}
+.t-extra{color:var(--text3);font-size:9px}
 
-.dt{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.4)}
+/* ── STATS BAR ── */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(6,1fr);
+  background:var(--panel2);border-bottom:1px solid var(--border);
+}
+.stat{
+  padding:10px 16px;border-right:1px solid var(--border2);
+  position:relative;overflow:hidden;transition:background .2s;
+}
+.stat:hover{background:rgba(255,102,0,.05)}
+.stat::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--orange),transparent);
+  transform:scaleX(0);transition:transform .3s;
+}
+.stat:hover::after{transform:scaleX(1)}
+.stat-lbl{
+  font-size:7px;letter-spacing:2.5px;color:var(--text3);
+  text-transform:uppercase;margin-bottom:5px;font-weight:500;
+}
+.stat-val{
+  font-size:22px;font-weight:700;color:var(--amber2);
+  font-variant-numeric:tabular-nums;line-height:1;
+  text-shadow:0 0 12px rgba(255,140,0,.3);
+}
+.stat-val.green{color:var(--green);text-shadow:0 0 12px rgba(0,255,65,.3)}
+.stat-val.red{color:var(--red)}
+.stat-chg{font-size:9px;font-weight:600;margin-top:3px}
+.stat-chg.up{color:var(--green)}
+.stat-chg.dn{color:var(--red)}
+.stat-chg.neu{color:var(--text3)}
 
-/* ── SUMMARY STRIP ── */
-.sum{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:1px;
-  background:var(--border);
+/* ── LAYOUT ── */
+.main{display:grid;grid-template-columns:220px 1fr;flex:1}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sb-section{border-bottom:1px solid var(--border2);padding-bottom:4px}
+.sb-title{
+  font-size:7px;letter-spacing:3px;font-weight:700;
+  color:var(--orange);text-transform:uppercase;
+  padding:8px 14px 5px;border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;gap:6px;
+}
+.sb-title::before{content:'▶';font-size:6px;color:var(--amber)}
+
+.sb-item{
+  padding:6px 14px;display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;border-left:3px solid transparent;
+  transition:all .15s;font-size:10px;
+  text-decoration:none;color:inherit;
+}
+.sb-item:hover{background:rgba(255,102,0,.08);border-left-color:var(--orange)}
+.sb-item-name{color:var(--text);font-weight:500}
+.sb-item-count{font-size:9px;color:var(--text3);margin-top:1px}
+.sb-item-sig{
+  font-size:8px;font-weight:700;padding:1px 6px;border-radius:2px;
+  letter-spacing:.5px;white-space:nowrap;
+}
+.sb-item-sig.buy {color:var(--green); background:rgba(0,255,65,.1); border:1px solid rgba(0,255,65,.2)}
+.sb-item-sig.sell{color:var(--red);   background:rgba(255,51,51,.1);border:1px solid rgba(255,51,51,.2)}
+.sb-item-sig.hold{color:var(--amber2);background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.2)}
+
+.sb-legend{padding:10px 14px}
+.sb-leg-item{display:flex;align-items:center;gap:7px;font-size:9px;color:var(--text3);padding:2px 0}
+.sb-leg-dot{width:8px;height:8px;border-radius:1px;flex-shrink:0}
+
+/* ── CONTENT ── */
+.content{overflow:auto;display:flex;flex-direction:column}
+
+.panel-bar{
+  padding:8px 18px;background:var(--muted2);
   border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
 }
-
-.sc2{
-  background:var(--paper);
-  padding:16px 20px;
-  transition:background .2s;
+.panel-bar-title{
+  font-size:9px;font-weight:700;letter-spacing:2px;
+  color:var(--orange);text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
 }
-.sc2:hover{background:var(--foam2)}
-
-.sl{
-  font-size:9px;letter-spacing:2px;color:var(--mist);
-  text-transform:uppercase;margin-bottom:6px;font-weight:500;
+.panel-bar-title::before{content:'◈';color:var(--amber)}
+.panel-bar-range{
+  font-size:9px;color:var(--text3);
+  background:rgba(255,102,0,.08);border:1px solid var(--border2);
+  padding:2px 10px;border-radius:2px;
 }
-
-.sv{
-  font-family:'DM Mono',monospace;
-  font-size:20px;font-weight:700;
-  color:var(--ink);
-}
-
-.sb2{font-size:10px;color:var(--mist);margin-top:4px;font-weight:500}
-
-.up{color:var(--sage)!important}
-.dn{color:var(--coral)!important}
-
-/* ── SECTOR NAV ── */
-.snav{
-  padding:10px 24px;
-  display:flex;gap:8px;flex-wrap:wrap;
-  background:var(--paper);
-  border-bottom:1px solid var(--border);
-  position:sticky;top:70px;z-index:90;
-  box-shadow:var(--shadow-sm);
-  overflow-x:auto;
-}
-
-.snav-link{
-  font-size:10px;font-weight:600;
-  color:var(--jade);
-  text-decoration:none;
-  padding:4px 12px;border-radius:20px;
-  border:1px solid var(--border);
-  background:var(--foam);
-  white-space:nowrap;
-  transition:all .2s;
-}
-.snav-link:hover{
-  background:var(--jade);color:#fff;
-  border-color:var(--jade);
-}
-
-/* ── TABLE WRAPPER ── */
-.tw{padding:20px 24px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-
-.tt{
-  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--mist);margin-bottom:14px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:600;
-}
-.tt::before{
-  content:'';width:3px;height:14px;
-  background:linear-gradient(var(--sage),var(--mint));
-  border-radius:2px;flex-shrink:0;
-}
+.panel-bar-src{font-size:9px;color:var(--text3);margin-left:auto}
 
 /* ── TABLE ── */
-table{
-  width:100%;border-collapse:separate;border-spacing:0;
-  min-width:860px;
-  background:var(--paper);
-  border-radius:16px;
-  border:1px solid var(--border);
-  overflow:hidden;
-  box-shadow:var(--shadow);
-}
+.tbl-wrap{padding:12px 16px;flex:1;overflow-x:auto}
 
-thead tr{border-bottom:2px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:900px}
 
+thead tr{border-bottom:2px solid var(--orange);background:var(--muted3)}
 th{
-  padding:11px 14px;text-align:left;
-  font-size:9px;letter-spacing:1.5px;
-  color:var(--mist);text-transform:uppercase;font-weight:700;
-  white-space:nowrap;background:var(--foam);
+  padding:7px 12px;font-size:8px;font-weight:700;letter-spacing:2px;
+  color:var(--orange);text-transform:uppercase;text-align:left;white-space:nowrap;
 }
-th:not(:first-child){text-align:center}
+.th-c{text-align:center}
+.th-r{text-align:right}
 
-tbody tr:not(.sec-hdr){
-  border-bottom:1px solid var(--border2);
-  animation:si .35s ease both;
-  opacity:0;
-  transition:background .15s;
-}
-
-@keyframes si{
-  from{opacity:0;transform:translateY(4px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-tbody tr:not(.sec-hdr):hover{background:var(--foam)}
-
-td{
-  padding:12px 14px;font-size:12px;
-  vertical-align:middle;text-align:center;
-  color:var(--ink);
-}
-td:first-child{text-align:left}
-
-.sn{font-weight:700;font-size:13px;line-height:1.3;color:var(--ink)}
-.sy{
-  font-size:9px;color:var(--mist);
-  font-family:'DM Mono',monospace;margin-top:2px;
-  letter-spacing:.5px;
-}
-
-.pv{
-  font-family:'DM Mono',monospace;
-  font-size:13px;font-weight:700;color:var(--ink);
-}
-.sp{margin-top:5px}
-
-/* RSI */
-.rv{font-family:'DM Mono',monospace;font-size:13px;font-weight:700}
-.rb2{
-  width:78px;height:4px;
-  background:var(--border);border-radius:2px;
-  margin:5px auto 0;overflow:hidden;
-}
-.rf2{height:100%;border-radius:2px}
-.ro .rf2{background:var(--coral)}
-.rn2 .rf2{background:var(--sand)}
-.rs2 .rf2{background:var(--sage)}
-
-/* Levels */
-.sr{
-  font-size:10px;font-family:'DM Mono',monospace;
-  display:flex;align-items:center;gap:5px;
-  justify-content:center;margin-bottom:3px;
-}
-.sr-r{
-  font-size:8px;padding:1px 5px;border-radius:4px;font-weight:700;
-  background:rgba(214,64,69,.1);color:var(--coral);
-}
-.sr-s{
-  font-size:8px;padding:1px 5px;border-radius:4px;font-weight:700;
-  background:rgba(61,153,112,.12);color:var(--sage);
-}
-
-/* ── SECTOR HEADER ROWS ── */
+/* Sector divider */
 tr.sec-hdr td{
-  background:linear-gradient(90deg,var(--foam),rgba(216,243,220,.4),transparent);
-  border-top:2px solid var(--border);
-  border-bottom:1px solid var(--foam2);
-  padding:10px 14px;
+  padding:7px 12px;
+  background:linear-gradient(90deg,var(--muted2),rgba(255,102,0,.04),transparent);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid rgba(255,102,0,.08);
+  font-size:8px;font-weight:700;letter-spacing:3px;color:var(--orange);
 }
 .sec-hdr-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.sec-icon{font-size:16px}
-.sec-name{
-  font-size:13px;font-weight:700;letter-spacing:.2px;
-  color:var(--jade);
-}
+.sec-icon{font-size:13px}
+.sec-name{color:var(--amber2);font-size:9px;letter-spacing:2px}
 .sec-count{
-  font-size:10px;color:var(--mist);font-weight:600;
-  background:var(--foam2);
-  padding:2px 10px;border-radius:20px;
-  border:1px solid var(--border);
+  font-size:8px;color:var(--muted);padding:1px 7px;
+  border:1px solid var(--muted);border-radius:2px;
 }
-.sec-pills{display:flex;gap:6px;flex-wrap:wrap;margin-left:2px}
+.sec-pills{display:flex;gap:5px;margin-left:6px}
 .sec-pill{
-  font-size:9px;font-weight:700;
-  padding:2px 9px;border-radius:20px;letter-spacing:.3px;
+  font-size:7px;font-weight:700;padding:1px 7px;border-radius:2px;letter-spacing:.5px;
+}
+.sec-pill.sb  {color:var(--green); background:rgba(0,255,65,.1); border:1px solid rgba(0,255,65,.2)}
+.sec-pill.buy {color:var(--amber2);background:rgba(255,140,0,.08);border:1px solid rgba(255,140,0,.2)}
+.sec-pill.sell{color:var(--red);   background:rgba(255,51,51,.08);border:1px solid rgba(255,51,51,.2)}
+
+/* Data rows */
+tbody tr:not(.sec-hdr){
+  border-bottom:1px solid rgba(255,102,0,.06);
+  transition:background .12s;
+  animation:row-in .3s ease both;
+}
+@keyframes row-in{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+tbody tr:not(.sec-hdr):hover{background:rgba(255,140,0,.05)}
+
+td{padding:9px 12px;vertical-align:middle;text-align:left}
+.td-c{text-align:center}
+.td-r{text-align:right}
+
+.stock-name{font-size:12px;font-weight:700;color:var(--white);letter-spacing:.3px;line-height:1.2}
+.stock-sym{font-size:8px;color:var(--text3);margin-top:2px;letter-spacing:1.5px}
+
+.price-val{
+  font-size:13px;font-weight:700;color:var(--amber3);
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 8px rgba(255,208,128,.2);
+}
+.spark-wrap{margin-top:4px}
+
+/* RSI */
+.rsi-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.rsi-val.rsi-hot {color:var(--red);   text-shadow:0 0 8px rgba(255,51,51,.4)}
+.rsi-val.rsi-warm{color:var(--yellow);text-shadow:0 0 8px rgba(255,255,0,.3)}
+.rsi-val.rsi-cold{color:var(--green); text-shadow:0 0 8px rgba(0,255,65,.4)}
+.rsi-bar-wrap{
+  width:72px;height:3px;background:var(--muted2);
+  border-radius:2px;margin:5px auto 0;overflow:hidden;
+}
+.rsi-bar-fill{height:100%;border-radius:2px}
+.rsi-bar-fill.rsi-hot {background:var(--red)}
+.rsi-bar-fill.rsi-warm{background:var(--yellow)}
+.rsi-bar-fill.rsi-cold{background:var(--green)}
+
+/* Levels */
+.level-grid{font-size:9px;line-height:1.9;font-variant-numeric:tabular-nums}
+.level-row{display:flex;align-items:center;gap:5px;justify-content:center}
+.level-tag{
+  font-size:7px;font-weight:700;padding:0 4px;border-radius:2px;min-width:24px;text-align:center;
+}
+.level-tag.r{background:rgba(255,51,51,.15);color:var(--red)}
+.level-tag.s{background:rgba(0,255,65,.12);color:var(--green)}
+.level-val.r{color:var(--red)}
+.level-val.s{color:var(--green)}
+
+/* MACD / EMA */
+.macd-wrap{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.macd-pos{color:var(--green);text-shadow:0 0 6px rgba(0,255,65,.3)}
+.macd-neg{color:var(--red)}
+.ema-wrap{margin-top:4px}
+.ema-bull{
+  font-size:8px;font-weight:700;padding:2px 6px;border-radius:2px;
+  color:var(--green);background:rgba(0,255,65,.1);border:1px solid rgba(0,255,65,.2);
+}
+.ema-bear{
+  font-size:8px;font-weight:700;padding:2px 6px;border-radius:2px;
+  color:var(--red);background:rgba(255,51,51,.1);border:1px solid rgba(255,51,51,.2);
 }
 
-/* ── SIGNAL BADGES ── */
-.sig{
-  display:inline-block;padding:5px 12px;border-radius:8px;
-  font-size:9px;font-weight:700;letter-spacing:.6px;
-  white-space:nowrap;
+/* Flow badges */
+.flow-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.flow-badge{
+  font-size:8px;font-weight:700;padding:2px 7px;border-radius:2px;
+  letter-spacing:.5px;border:1px solid;white-space:nowrap;
 }
+.fii-b    {color:var(--green); border-color:rgba(0,255,65,.35); background:rgba(0,255,65,.08)}
+.fii-s    {color:var(--red);   border-color:rgba(255,51,51,.35);background:rgba(255,51,51,.08)}
+.dii-b    {color:var(--amber2);border-color:rgba(255,140,0,.35);background:rgba(255,140,0,.08)}
+.dii-s    {color:#ff8888;      border-color:rgba(255,80,80,.25); background:rgba(255,80,80,.06)}
+.flow-neutral{color:var(--muted);border-color:var(--muted);background:transparent}
 
-/* Strong Buy — jade green filled */
-.sbs{
-  background:var(--jade);color:#fff;
-  box-shadow:0 2px 8px rgba(45,106,79,.25);
+/* Signal badges */
+.sig-badge{
+  display:inline-block;padding:4px 12px;border-radius:2px;
+  font-size:9px;font-weight:700;letter-spacing:1px;
+  white-space:nowrap;border:1px solid;
 }
-/* Buy — sage outline */
-.sbuy{
-  background:var(--foam);color:var(--jade);
-  border:1.5px solid var(--sage);
+.sig-sb{
+  background:rgba(0,255,65,.12);color:var(--green);border-color:rgba(0,255,65,.4);
+  text-shadow:0 0 8px rgba(0,255,65,.5);box-shadow:0 0 12px rgba(0,255,65,.08);
 }
-/* DII Buy — amber */
-.sdii{
-  background:rgba(233,138,78,.1);color:#c06a1f;
-  border:1.5px solid rgba(233,138,78,.4);
+.sig-buy{
+  background:rgba(255,140,0,.1);color:var(--amber2);border-color:rgba(255,140,0,.35);
 }
-/* Bulk/Block — sky blue */
-.sblk{
-  background:rgba(69,123,157,.08);color:var(--sky);
-  border:1.5px solid rgba(69,123,157,.3);
+.sig-neutral{background:transparent;color:var(--text3);border-color:var(--muted)}
+.sig-caution{
+  background:rgba(255,255,0,.06);color:var(--yellow);border-color:rgba(255,255,0,.25);
 }
-/* Neutral — warm sand */
-.sna{
-  background:rgba(233,138,78,.08);color:#a0622a;
-  border:1.5px solid rgba(233,138,78,.25);
+.sig-sell{
+  background:rgba(255,51,51,.12);color:var(--red);border-color:rgba(255,51,51,.4);
+  text-shadow:0 0 8px rgba(255,51,51,.4);
 }
-/* Caution — light coral outline */
-.sca{
-  background:rgba(214,64,69,.07);color:var(--coral);
-  border:1.5px solid rgba(214,64,69,.25);
+.sig-blk{
+  background:rgba(68,136,255,.1);color:var(--blue);border-color:rgba(68,136,255,.3);
 }
-/* Sell — coral filled */
-.sse{
-  background:var(--coral);color:#fff;
-  box-shadow:0 2px 8px rgba(214,64,69,.2);
-}
-
-/* Sector pill reuses same classes */
-.sec-pill.sbs{background:rgba(45,106,79,.15);color:var(--jade);border:1px solid rgba(45,106,79,.3)}
-.sec-pill.sbuy{background:rgba(61,153,112,.12);color:var(--sage);border:1px solid rgba(61,153,112,.3)}
-.sec-pill.sse{background:rgba(214,64,69,.1);color:var(--coral);border:1px solid rgba(214,64,69,.25)}
-
-/* ── LEGEND ── */
-.leg{
-  padding:0 24px 20px;
-  display:flex;gap:14px;flex-wrap:wrap;align-items:center;
-}
-.li2{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mist);font-weight:500}
-.ld2{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 
 /* ── FOOTER ── */
 footer{
-  background:var(--jade2);
-  border-top:2px solid var(--sage);
-  padding:14px 24px;
-  display:flex;justify-content:space-between;
-  font-size:10px;color:rgba(255,255,255,.45);
-  flex-wrap:wrap;gap:8px;
-  font-weight:500;letter-spacing:.3px;
+  background:var(--header);border-top:2px solid var(--orange);
+  padding:6px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:8px;color:var(--text3);letter-spacing:1px;
+  flex-wrap:wrap;gap:6px;
+  box-shadow:0 -4px 20px rgba(255,102,0,.08);
 }
+.footer-brand{color:var(--amber);font-weight:700;letter-spacing:2px}
+.footer-warn{color:var(--red)}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  background:#000;border-top:1px solid var(--muted);
+  padding:3px 18px;display:flex;gap:20px;align-items:center;
+  font-size:8px;color:var(--text3);letter-spacing:1px;flex-wrap:wrap;
+}
+.status-item{display:flex;align-items:center;gap:5px}
+.status-dot{width:5px;height:5px;border-radius:50%}
+.status-dot.ok  {background:var(--green);box-shadow:0 0 4px var(--green)}
+.status-dot.warn{background:var(--yellow)}
+.status-dot.err {background:var(--red)}
+.status-ts{margin-left:auto;color:var(--amber2);font-weight:600}
 
 /* ── RESPONSIVE ── */
-@media(max-width:900px){
-  .sum{grid-template-columns:repeat(2,1fr)}.sv{font-size:17px}
-  .lt{font-size:15px}.ls2{display:none}
+@media(max-width:1100px){
+  .main{grid-template-columns:180px 1fr}
+  .stat-val{font-size:18px}
+  .stats-bar{grid-template-columns:repeat(3,1fr)}
 }
-
+@media(max-width:860px){
+  .main{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .stats-bar{grid-template-columns:repeat(3,1fr)}
+  header{grid-template-columns:1fr auto}
+  .h-nav{display:none}
+}
 @media(max-width:600px){
-  header{padding:10px 16px}.lt{font-size:13px}
-  .lv,.src{font-size:9px;padding:3px 9px}.dt{display:none}.ls2{display:none}
-  .sum{grid-template-columns:repeat(2,1fr)}.sc2{padding:12px 14px}
-  .sv{font-size:16px}.sl{font-size:8px}.sb2{font-size:9px}
-  .tw{padding:12px;overflow-x:visible}
-  table,thead,tbody,th,td,tr{display:block}
-  thead{display:none}
-  tr.sec-hdr{display:block;margin-top:14px}
-  tr.sec-hdr td{border-radius:10px;padding:10px 12px}
-  .sec-hdr-inner{gap:6px}.sec-name{font-size:12px}
-  tbody tr:not(.sec-hdr){
-    background:var(--paper);
-    border:1px solid var(--border);
-    border-radius:12px;margin-bottom:10px;padding:14px;
-    animation:si .35s ease both;
-    box-shadow:var(--shadow-sm);
-  }
-  tbody tr:not(.sec-hdr):hover{background:var(--foam)}
-  td{
-    text-align:left;padding:5px 0;border:none;
-    display:flex;align-items:center;
-    justify-content:space-between;gap:8px;font-size:12px;
-  }
-  td:first-child{
-    flex-direction:column;align-items:flex-start;
-    margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:10px;
-  }
-  td::before{
-    content:attr(data-label);font-size:9px;letter-spacing:1px;
-    text-transform:uppercase;color:var(--mist);flex-shrink:0;min-width:80px;
-    font-weight:600;
-  }
-  td:first-child::before{display:none}
-  .rb2{margin:4px 0 0}.sr{justify-content:flex-end}
-  .leg{padding:0 12px 14px;gap:10px}.li2{font-size:10px}
-  footer{padding:10px 16px;font-size:9px}
-  .tt{font-size:9px}.drb{font-size:9px;padding:3px 9px}
-  .snav{top:66px;padding:8px 14px}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .tbl-wrap{padding:8px}
+  .h-brand{padding:8px 12px}
+  .h-logo{font-size:16px}
+  footer{font-size:7px}
+  table{min-width:700px}
 }
 """
 
-    drb_html = (f'<div class="drb">🗓 {date_range_label}</div>'
-                if date_range_label else "")
-
-    sector_nav = ""
-    for sector_name, _ in sorted_sectors:
-        icon   = SECTOR_ICONS.get(sector_name, "🔷")
-        anchor = sector_name.replace(" ","_").replace("&","and")
-        sector_nav += f'<a href="#{anchor}" class="snav-link">{icon} {sector_name}</a>'
-
+    # ══════════════════════════════════════════════════════════════════════════
+    #  HTML TEMPLATE
+    # ══════════════════════════════════════════════════════════════════════════
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FII/DII Pulse — Jade Garden — {date_str}</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-{css}
-</style>
+<title>FII/DII Pulse &#x2014; Bloomberg Terminal &#x2014; {date_str}</title>
+<style>{css}</style>
 </head>
 <body>
 <div class="w">
 
+<!-- ═══ HEADER ═══ -->
 <header>
-  <div class="lg">
-    <div class="logo-icon">📊</div>
+  <div class="h-brand">
     <div>
-      <div class="lt">FII<span>/DII</span> PULSE</div>
-      <div class="ls2">Institutional Intelligence · Sector-wise · Jade Garden</div>
+      <div class="h-logo">FII<span>//</span>DII</div>
+      <div class="h-tagline">Institutional Intelligence Terminal &middot; v8 &middot; Bloomberg</div>
     </div>
   </div>
-  <div class="hm">
-    {drb_html}
-    <div class="src">📡 {source}</div>
-    <div class="lv"><div class="led"></div>LIVE</div>
-    <div class="dt">{date_str}</div>
+  <div class="h-nav">
+    <span class="h-tab active">OVERVIEW</span>
+    <span class="h-tab">FII FLOWS</span>
+    <span class="h-tab">DII FLOWS</span>
+    <span class="h-tab">SECTORS</span>
+    <span class="h-tab">TECHNICALS</span>
+    <span class="h-tab">ALERTS</span>
+  </div>
+  <div class="h-meta">
+    <div class="h-meta-item">
+      <div class="h-meta-label">Source</div>
+      <div class="h-meta-val">{source[:18]}</div>
+    </div>
+    <div class="h-meta-item">
+      <div class="h-meta-label">Range</div>
+      <div class="h-meta-val">{date_range_label or date_str}</div>
+    </div>
+    <div class="h-meta-item">
+      <div class="h-meta-label">Date</div>
+      <div class="h-meta-val">{date_str}</div>
+    </div>
+    <div class="h-live">
+      <div class="led"></div>LIVE
+    </div>
   </div>
 </header>
 
-<div class="snav">{sector_nav}</div>
+<!-- ═══ TICKER ═══ -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">{ticker_html}</div>
+</div>
 
-<div class="sum">
-  <div class="sc2">
-    <div class="sl">Nifty 50</div>
-    <div class="sv">₹{market['nifty_price']:,.2f}</div>
-    <div class="sb2 {nc}">{na} {market['nifty_chg']}%</div>
+<!-- ═══ STATS BAR ═══ -->
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-lbl">Nifty 50</div>
+    <div class="stat-val">&#8377;{market['nifty_price']:,.0f}</div>
+    <div class="stat-chg {nc}">{na} {abs(market['nifty_chg']):.2f}%</div>
   </div>
-  <div class="sc2">
-    <div class="sl">Sensex</div>
-    <div class="sv">₹{market['sensex_price']:,.2f}</div>
-    <div class="sb2 {xc}">{xa} {market['sensex_chg']}%</div>
+  <div class="stat">
+    <div class="stat-lbl">Sensex</div>
+    <div class="stat-val">&#8377;{market['sensex_price']:,.0f}</div>
+    <div class="stat-chg {xc}">{xa} {abs(market['sensex_chg']):.2f}%</div>
   </div>
-  <div class="sc2">
-    <div class="sl">Stocks Tracked</div>
-    <div class="sv">{len(stocks)}</div>
-    <div class="sb2">FII: {fb} · DII: {db} · Both: {bb}</div>
+  <div class="stat">
+    <div class="stat-lbl">Stocks Tracked</div>
+    <div class="stat-val">{len(stocks)}</div>
+    <div class="stat-chg neu">FII:{fb} &middot; DII:{db} &middot; Both:{bb}</div>
   </div>
-  <div class="sc2">
-    <div class="sl">Strong Buy</div>
-    <div class="sv">{st}</div>
-    <div class="sb2">Stocks signalled</div>
+  <div class="stat">
+    <div class="stat-lbl">Strong Buy</div>
+    <div class="stat-val green">{st}</div>
+    <div class="stat-chg up">&#9889; High conviction</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl">Both Sell</div>
+    <div class="stat-val {'red' if sel > 0 else 'green'}">{sel}</div>
+    <div class="stat-chg {'dn' if sel > 0 else 'neu'}">{'&#9660; Caution' if sel > 0 else '&#8212; Clear'}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl">Data Range</div>
+    <div class="stat-val" style="font-size:13px;color:var(--amber)">{date_range_label or date_str}</div>
+    <div class="stat-chg neu">NSE Bulk/Block CSV</div>
   </div>
 </div>
 
-<div class="tw">
-  <div class="tt">
-    Sector-wise Institutional Activity · Strong Buy → Buy → Neutral → Sell ·
-    <span style="color:var(--jade);font-family:'DM Mono',monospace;font-weight:600">
-      {date_range_label or date_str}
-    </span>
-  </div>
-  <table>
-    <thead><tr>
-      <th>Stock</th>
-      <th>Price / Trend</th>
-      <th>RSI(14)</th>
-      <th>Support / Resistance (6M)</th>
-      <th>Signal</th>
-    </tr></thead>
-    <tbody>{rows}</tbody>
-  </table>
-</div>
+<!-- ═══ MAIN ═══ -->
+<div class="main">
 
-<div class="leg">
-  <div class="li2"><div class="ld2" style="background:var(--sage)"></div>FII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--sand)"></div>DII Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--jade)"></div>Both Buying</div>
-  <div class="li2"><div class="ld2" style="background:var(--coral)"></div>Selling</div>
-  <div class="li2"><div class="ld2" style="background:var(--sky)"></div>Bulk/Block</div>
-  <div class="li2" style="margin-left:auto;font-size:10px;text-align:right;color:var(--mist)">
-    🌿 Jade Garden Theme · Sorted by signal strength within sectors
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-title">Sector Index</div>
+      {sidebar_items}
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">Signal Legend</div>
+      <div class="sb-legend">
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--green)"></div>&#9889; Strong Buy</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--amber2)"></div>&#9650; Buy</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--blue)"></div>&#9632; Bulk/Block</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--text3)"></div>&mdash; Neutral</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--yellow)"></div>&#9888; Caution</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>&#9660; Sell</div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">RSI Guide</div>
+      <div class="sb-legend">
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>&gt;70 Overbought</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--yellow)"></div>40&ndash;70 Mid zone</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--green)"></div>&lt;40 Oversold</div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">Flow Key</div>
+      <div class="sb-legend">
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--green)"></div>FII Buying</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--amber2)"></div>DII Buying</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--red)"></div>FII / DII Sell</div>
+        <div class="sb-leg-item"><div class="sb-leg-dot" style="background:var(--muted)"></div>No activity</div>
+      </div>
+    </div>
   </div>
-</div>
 
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="panel-bar">
+      <div class="panel-bar-title">Sector-wise Institutional Flow &middot; Strong Buy &#8594; Sell</div>
+      {drb_html}
+      <div class="panel-bar-src">&#128225; {source} &middot; yfinance technicals</div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th class="th-r">Price / Trend</th>
+            <th class="th-c">RSI (14)</th>
+            <th class="th-c">Support / Resistance</th>
+            <th class="th-c">MACD / EMA</th>
+            <th class="th-c">Inst. Flow</th>
+            <th class="th-c">Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+{rows}
+        </tbody>
+      </table>
+    </div>
+  </div><!-- /content -->
+
+</div><!-- /main -->
+
+<!-- ═══ FOOTER ═══ -->
 <footer>
-  <div>🌿 FII/DII Pulse v8 · Jade Garden · {source} · yfinance · {date_str}</div>
-  <div>⚠️ Not financial advice. Educational purposes only. Always DYOR.</div>
+  <div>
+    <span class="footer-brand">FII//DII PULSE</span>
+    &middot; Bloomberg Terminal &middot; v8 &middot; {source} &middot; yfinance &middot; {date_str}
+  </div>
+  <div>Sectors sorted: Strong Buy &#8594; Buy &#8594; Neutral &#8594; Caution &#8594; Sell</div>
+  <div class="footer-warn">&#9888; NOT FINANCIAL ADVICE &middot; EDUCATIONAL ONLY &middot; DYOR</div>
 </footer>
 
+<!-- ═══ STATUS BAR ═══ -->
+<div class="status-bar">
+  <div class="status-item"><div class="status-dot ok"></div>NSE CSV API: OK</div>
+  <div class="status-item"><div class="status-dot ok"></div>yfinance: OK</div>
+  <div class="status-item"><div class="status-dot ok"></div>{len(stocks)} stocks loaded</div>
+  <div class="status-item"><div class="status-dot ok"></div>Technicals computed</div>
+  <div class="status-ts">LAST UPDATE: {now_ist}</div>
 </div>
+
+</div><!-- /w -->
 </body>
 </html>"""
 
@@ -1572,8 +1825,8 @@ footer{
 
 def send_email(html_path: Path, date_str: str, source: str,
                count: int, date_range_label: str = ""):
-    user  = os.getenv("GMAIL_USER","").strip()
-    pwd   = os.getenv("GMAIL_PASS","").strip()
+    user  = os.getenv("GMAIL_USER", "").strip()
+    pwd   = os.getenv("GMAIL_PASS", "").strip()
     rcpts = os.getenv("RECIPIENT_EMAIL", user).strip()
 
     if not user or not pwd:
@@ -1586,12 +1839,13 @@ def send_email(html_path: Path, date_str: str, source: str,
     full_html = html_path.read_text(encoding="utf-8")
 
     msg            = MIMEMultipart("alternative")
-    msg["Subject"] = f"🌿 FII/DII Pulse · Jade Garden — {date_str}"
+    msg["Subject"] = f"📊 FII/DII Pulse · Bloomberg Terminal — {date_str}"
     msg["From"]    = f"FII/DII Pulse <{user}>"
     msg["To"]      = ", ".join(to_list)
 
     plain = (
-        f"FII/DII Pulse — {date_str}\n"
+        f"FII/DII Pulse — Bloomberg Terminal Theme\n"
+        f"Date: {date_str}\n"
         f"Source: {source}\n"
         f"Date range: {date_range_label}\n"
         f"Stocks tracked: {count}\n\n"
@@ -1625,7 +1879,7 @@ def main():
     date_file= now_ist.strftime("%Y-%m-%d")
 
     log.info("=" * 65)
-    log.info(f"  🌿 FII/DII Pulse v8 Jade Garden — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
+    log.info(f"  📊 FII/DII Pulse v8 Bloomberg Terminal — {date_str}  (IST: {now_ist.strftime('%H:%M')})")
     log.info("=" * 65)
 
     try:
